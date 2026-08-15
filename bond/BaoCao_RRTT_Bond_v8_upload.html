@@ -28,7 +28,14 @@ h1{font-size:23px;color:var(--wine);font-weight:700;margin-top:4px;line-height:1
 .btn.ghost{background:var(--paper);color:var(--wine)}
 .btn.ghost:hover{background:#f7eef0}
 .btn:disabled{opacity:.45;cursor:default}
-#file{display:none}
+#file{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}
+label.btn{display:inline-block}
+.drop{border:2px dashed var(--grid);border-radius:12px;padding:26px 20px;text-align:center;background:var(--paper);
+  margin-top:12px;transition:.15s;cursor:pointer}
+.drop:hover,.drop.over{border-color:var(--wine);background:#faf5f6}
+.drop .big{font-size:14px;font-weight:600;color:var(--wine)}
+.drop .small{font-size:12px;color:var(--muted);margin-top:4px}
+body.exported .drop{display:none}
 .status{border-radius:10px;padding:12px 16px;font-size:13px;border:1px solid;display:flex;gap:10px;align-items:flex-start}
 .status .dot{font-size:15px;line-height:1.2}
 .status.empty{background:#fff8e8;border-color:#e6d3a8;color:#6b5320}
@@ -92,10 +99,15 @@ body.exported .bar{display:none}
 </header>
 
 <div class="bar">
-  <input type="file" id="file" accept=".xlsx">
-  <button class="btn" id="btnLoad" data-k="btnLoad">Nạp file Key</button>
+  <input type="file" id="file" accept=".xlsx,.xlsm,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+  <label class="btn" for="file" id="btnLoad" data-k="btnLoad">Nạp file Key</label>
   <button class="btn ghost" id="btnExport" data-k="btnExport" disabled>Xuất bản gửi đi</button>
 </div>
+
+<label class="drop" for="file" id="drop">
+  <div class="big" data-k="dropBig">Bấm vào đây để chọn file Key, hoặc kéo thả file vào ô này</div>
+  <div class="small" data-k="dropSmall">Key_YYYYMMDD.xlsx — sinh từ File 02 bằng macro XuatFileKey</div>
+</label>
 
 <div class="status empty" id="status">
   <span class="dot">◆</span>
@@ -125,6 +137,8 @@ body.exported .bar{display:none}
     btnExport: 'Xuất bản gửi đi',
     stEmpty: 'Chưa nạp dữ liệu.',
     stEmptyHint: 'Chọn file Key_YYYYMMDD.xlsx sinh từ File 02. Toàn bộ xử lý chạy trên máy, không có dữ liệu nào rời khỏi trình duyệt.',
+    dropBig: 'Bấm vào đây để chọn file Key, hoặc kéo thả file vào ô này',
+    dropSmall: 'Key_YYYYMMDD.xlsx — sinh từ File 02 bằng macro XuatFileKey',
     ftDisclaimer: 'Tài liệu nội bộ phục vụ quản lý rủi ro thị trường. Số liệu chưa qua soát xét độc lập.',
     legendLight: 'XANH < 80% · HỔ PHÁCH 80–100% · ĐỎ ≥ 100%',
     colToday: 'Ngày BC', colDtd: '+/- DtD', colYest: 'Yesterday',
@@ -440,13 +454,12 @@ body.exported .bar{display:none}
       '<span><b>' + esc(title) + '</b>' + (sub ? '<span class="sub2">' + esc(sub) + '</span>' : '') + '</span>';
   }
 
-  document.getElementById('btnLoad').addEventListener('click', function () {
-    document.getElementById('file').click();
-  });
-
-  document.getElementById('file').addEventListener('change', function (ev) {
-    var f = ev.target.files && ev.target.files[0];
+  function handleFile(f) {
     if (!f) return;
+    if (!/\.xls[xm]$/i.test(f.name)) {
+      setStatus('err', 'Sai định dạng: ' + f.name, 'Cần file .xlsx sinh từ macro XuatFileKey.');
+      return;
+    }
     setStatus('empty', 'Đang đọc ' + f.name + '…', '');
     f.arrayBuffer()
       .then(readWorkbook)
@@ -469,8 +482,26 @@ body.exported .bar{display:none}
         document.getElementById('btnExport').disabled = true;
         setStatus('err', 'Không nạp được file', e && e.message ? e.message : String(e));
       });
+  }
+
+  var fileInput = document.getElementById('file');
+  fileInput.addEventListener('change', function (ev) {
+    handleFile(ev.target.files && ev.target.files[0]);
     ev.target.value = '';
   });
+
+  var drop = document.getElementById('drop');
+  ['dragenter', 'dragover'].forEach(function (t) {
+    drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.add('over'); });
+  });
+  ['dragleave', 'drop'].forEach(function (t) {
+    drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.remove('over'); });
+  });
+  drop.addEventListener('drop', function (e) {
+    handleFile(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]);
+  });
+  window.addEventListener('dragover', function (e) { e.preventDefault(); });
+  window.addEventListener('drop', function (e) { e.preventDefault(); });
 
   document.getElementById('btnExport').addEventListener('click', function () {
     if (!DATA) return;
