@@ -168,3 +168,32 @@ Excel tự cập nhật vùng khi dòng dịch.
 1. `Alt+F11` → Import `tools/XuatFileKey.bas`
 2. Chạy `TaoNameNhanDinh` — **một lần duy nhất**
 3. Mỗi kỳ: chạy `XuatFileKey` → `Key_YYYYMMDD.xlsx` nằm cùng thư mục File 02
+
+## Sửa trình bày (17/08, sau rà soát của Jak)
+
+Ba trang bị tràn ngang phải kéo touchpad — nguyên nhân chung: **thẻ nội dung là grid item
+nhưng thiếu `min-width:0`**, nên nó nở theo bề rộng bảng thay vì bó lại. 24 thẻ đã được sửa.
+Bảng rộng giờ cuộn **trong thẻ** (`min-width:max-content` + `overflow-x:auto`), kèm dòng nhắc
+"kéo ngang trong bảng" chỉ hiện khi bảng thật sự rộng hơn khung.
+
+| Chỗ | Trước | Sau |
+|---|---|---|
+| Chi tiết danh mục · Indicator | tràn 1.303px ở màn 1.280 | vừa khung |
+| Chi tiết danh mục · Lãi/lỗ | tràn 1.902px | vừa khung |
+| QTRR theo kịch bản | tràn 1.559px | vừa khung |
+
+Kiểm ở 1.280 · 1.366 · 1.440px, 5 trang × 14 tab con: `scrollWidth == clientWidth` toàn bộ.
+
+**Chart dẹt như đường thẳng** — trục giá trị ECharts mặc định kéo về mốc 0, nên dải yield
+4.18–4.42% bị vẽ trên thang 0–5. Thêm `scale:true` cho `ch_vira4`, `ch_yield`, `ch_yieldTs`,
+`ch_spread`, `ch_repoTs`; các chart cột vẫn giữ mốc 0. Bốn chart dạng đường được bó
+`max-width:880px` và tăng chiều cao để bớt bè ngang.
+
+**Tiêu đề cột dài** (`KB1: GIỮ DM ĐẾN KHI ĐÁO HẠN REPO`, `DỰ BÁO BÌNH QUÂN CỦA CÁC MARKET
+MAKER`) giờ xuống dòng thay vì kéo bảng ra ngoài màn hình. Bảng VIRA nhờ vậy hiện đủ 4 kịch bản.
+
+**Dòng "Giả định biến động yield"** đổi thành dải chân bảng — nền xám nhạt, chữ nhỏ in hoa,
+gộp 3 cột đầu — thay vì một dòng dữ liệu trống hai ô.
+
+**Màu ô chú giải lệch màu đường kẻ.** Series dạng đường chỉ đặt `lineStyle.color`, ECharts lấy
+màu mặc định cho chú giải. `mk()` giờ tự gán `itemStyle` theo `lineStyle` cho mọi chart.
