@@ -76,3 +76,32 @@ cho các khối 3.x/4/6.x sẽ tăng ~940KB — vẫn còn dư địa lớn.
 - Khối 3.x · 4 · 6.x · 7.x (đọc từ sheet `Linked`, cần ECharts)
 - 19 chuỗi time-series từ `Chart data`
 - Block "Bình luận / Nhận định" chuẩn `mkCmt*`
+
+## Tab "Quản trị dữ liệu"
+
+Toàn bộ phần nạp/xuất chuyển sang tab riêng, tab "Báo cáo" chỉ còn nội dung gửi đi.
+Số trên chip cạnh tên tab = số mục cần xem.
+
+| Mục | Nội dung |
+|---|---|
+| A · Nạp dữ liệu | Vùng kéo thả, nút xuất bản, nút xoá dữ liệu |
+| B · Trạng thái | Ngày chốt · số chỉ tiêu · số cảnh báo · file nguồn · giờ sinh file |
+| C · Kiểm tra trước khi gửi | Tuổi dữ liệu · ô trống · đối chiếu tổng vs dòng con · chỉ tiêu chạm hạn mức |
+| D · Nhật ký nạp | Mỗi lần nạp ghi một dòng, đi theo file khi xuất bản |
+| E · Môi trường | Trình duyệt có đọc được .xlsx không — dùng khi test máy mới |
+
+### Vòng đời dữ liệu
+
+Mở file → hiện dữ liệu kỳ trước đã nhúng sẵn, kèm cảnh báo tuổi nếu quá 3 ngày.
+Nạp file mới → thay toàn bộ. Nạp lỗi → giữ nguyên dữ liệu cũ, báo đỏ.
+Xoá dữ liệu → báo cáo trống, ghi một dòng vào nhật ký.
+
+### Kiểm tra nhất quán đang chạy
+
+Đối chiếu tổng với các dòng con, ngay khi nạp:
+
+- Trading nội bộ: Face Value = AFS + HTM · ItD = AFS + HTM
+- Banking nội bộ: Face Value = DCM tự fund + fund từ Pool · ItD = tương tự
+
+Với file 13/08, hai dòng Banking báo đỏ: Face Value lệch **6,101 tỷ**, ItD lệch **716 tỷ**.
+Đúng vấn đề đã nêu ở `Linked (1)` — tổng lấy SUMIFS còn hai dòng con là số hardcode.

@@ -16,37 +16,38 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--f-body);background:var(--shell);color:var(--ink);font-size:14px;line-height:1.55}
 .wrap{max-width:1180px;margin:0 auto;padding:22px 20px 60px}
-header{background:var(--paper);border:1px solid var(--grid);border-radius:12px;padding:20px 24px;margin-bottom:14px}
+header{background:var(--paper);border:1px solid var(--grid);border-radius:12px;padding:20px 24px}
 .eyebrow{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);font-weight:700}
 h1{font-size:23px;color:var(--wine);font-weight:700;margin-top:4px;line-height:1.2}
 .sub{color:var(--muted);font-size:13.5px;margin-top:3px}
 .unit{color:var(--faint);font-size:11.5px;margin-top:9px}
-.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}
-.btn{font-family:inherit;font-size:13px;font-weight:600;border:1px solid var(--wine);background:var(--wine);color:#fff;
-  border-radius:9px;padding:10px 18px;cursor:pointer;transition:.15s}
-.btn:hover{background:var(--wine-d);border-color:var(--wine-d)}
-.btn.ghost{background:var(--paper);color:var(--wine)}
-.btn.ghost:hover{background:#f7eef0}
-.btn:disabled{opacity:.45;cursor:default}
-#file{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}
-label.btn{display:inline-block}
-.drop{border:2px dashed var(--grid);border-radius:12px;padding:26px 20px;text-align:center;background:var(--paper);
-  margin-top:12px;transition:.15s;cursor:pointer}
-.drop:hover,.drop.over{border-color:var(--wine);background:#faf5f6}
-.drop .big{font-size:14px;font-weight:600;color:var(--wine)}
-.drop .small{font-size:12px;color:var(--muted);margin-top:4px}
-body.exported .drop{display:none}
-.status{border-radius:10px;padding:12px 16px;font-size:13px;border:1px solid;display:flex;gap:10px;align-items:flex-start}
+
+nav{display:flex;gap:6px;margin:14px 0 0;flex-wrap:wrap}
+.nv{font-family:inherit;font-size:13px;font-weight:600;border:1px solid var(--grid);background:var(--paper);
+  color:var(--muted);border-radius:9px 9px 0 0;padding:10px 20px;cursor:pointer;border-bottom:none;transition:.15s}
+.nv:hover{color:var(--wine);background:#faf5f6}
+.nv[data-active]{background:var(--wine);border-color:var(--wine);color:#fff}
+.nv .pip{display:inline-block;margin-left:7px;background:rgba(255,255,255,.24);border-radius:9px;
+  padding:1px 7px;font-size:10.5px}
+.nv:not([data-active]) .pip{background:#f0e5e7;color:var(--wine)}
+.page{display:none}
+.page[data-active]{display:block}
+
+.status{border-radius:10px;padding:12px 16px;font-size:13px;border:1px solid;display:flex;gap:10px;align-items:flex-start;margin-top:14px}
 .status .dot{font-size:15px;line-height:1.2}
 .status.empty{background:#fff8e8;border-color:#e6d3a8;color:#6b5320}
 .status.ok{background:#f2f8f3;border-color:#cfe3d4;color:#255c3a}
+.status.warn{background:#fff8e8;border-color:#e6d3a8;color:#6b5320}
 .status.err{background:#fdf2f2;border-color:#e8c9c9;color:var(--red)}
 .status b{font-weight:700}
-.status .sub2{display:block;font-size:11.5px;opacity:.8;margin-top:2px}
+.status .sub2{display:block;font-size:11.5px;opacity:.85;margin-top:2px}
+
 section{background:var(--paper);border:1px solid var(--grid);border-radius:12px;margin-top:14px;overflow:hidden}
 .sh{background:#faf7f4;border-bottom:1px solid var(--grid);padding:11px 20px;display:flex;align-items:baseline;gap:11px}
 .sh .code{font-size:11px;font-weight:700;color:#fff;background:var(--wine);border-radius:5px;padding:2px 8px;letter-spacing:.04em}
 .sh h2{font-size:14.5px;color:var(--wine);font-weight:700;letter-spacing:.02em}
+.bd{padding:16px 20px}
+
 .tw{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);
@@ -68,6 +69,7 @@ tr.sub td{color:var(--muted)}
 .g i{background:var(--green)}.g{color:var(--green)}
 .a i{background:var(--amber)}.a{color:var(--amber)}
 .r i{background:var(--red)}.r{color:var(--red)}
+
 .notes{padding:14px 20px 16px}
 .note{border-left:3px solid var(--wine);background:#faf7f4;border-radius:0 8px 8px 0;padding:11px 15px;margin-bottom:10px;
   font-size:13px;line-height:1.62;white-space:pre-line;color:#33312e}
@@ -76,14 +78,53 @@ tr.sub td{color:var(--muted)}
 .note.g2{border-left-color:var(--gold)}
 .note.g2 .nh{color:var(--gold)}
 .legend{font-size:11.5px;color:var(--faint);padding:10px 20px 14px}
+
+.btn{font-family:inherit;font-size:13px;font-weight:600;border:1px solid var(--wine);background:var(--wine);color:#fff;
+  border-radius:9px;padding:10px 18px;cursor:pointer;transition:.15s;display:inline-block}
+.btn:hover{background:var(--wine-d);border-color:var(--wine-d)}
+.btn.ghost{background:var(--paper);color:var(--wine)}
+.btn.ghost:hover{background:#f7eef0}
+.btn.danger{background:var(--paper);color:var(--red);border-color:#e8c9c9}
+.btn.danger:hover{background:#fdf2f2}
+.btn:disabled{opacity:.45;cursor:default}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+
+#file{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}
+.drop{display:block;border:2px dashed var(--grid);border-radius:12px;padding:30px 20px;text-align:center;
+  background:#faf8f6;transition:.15s;cursor:pointer}
+.drop:hover,.drop.over{border-color:var(--wine);background:#faf5f6}
+.drop .big{font-size:14.5px;font-weight:600;color:var(--wine)}
+.drop .small{font-size:12px;color:var(--muted);margin-top:5px}
+
+.kvs{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.kvc{background:#faf8f6;border:1px solid var(--grid);border-radius:9px;padding:11px 14px}
+.kvc .k{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.kvc .v{font-size:16px;font-weight:600;margin-top:3px;font-variant-numeric:tabular-nums}
+.kvc .v.sm{font-size:13px;font-weight:500}
+.kvc.bad .v{color:var(--red)}
+.kvc.warn .v{color:var(--amber)}
+.kvc.good .v{color:var(--green)}
+
+.chk{list-style:none;font-size:13px}
+.chk li{padding:8px 0;border-bottom:1px solid rgba(32,31,29,.06);display:flex;gap:10px;align-items:flex-start}
+.chk li:last-child{border-bottom:none}
+.chk .ic{flex:none;font-weight:700;width:16px}
+.chk .ok2{color:var(--green)}
+.chk .no{color:var(--red)}
+.chk .wn{color:var(--amber)}
+.chk .d{color:var(--muted);font-size:12px;display:block;margin-top:2px;font-variant-numeric:tabular-nums}
+.help{font-size:12.5px;color:var(--muted);line-height:1.75}
+.help b{color:var(--ink)}
+.log{font-size:12px;width:100%}
+.log td,.log th{white-space:nowrap}
+.empty2{color:var(--faint);font-size:12.5px;font-style:italic}
 footer{margin-top:18px;font-size:11.5px;color:var(--faint);text-align:center;line-height:1.7}
-body.exported .bar{display:none}
+
 @media print{
   body{background:#fff}
-  .bar,.legend{display:none}
+  nav,.btnrow,.drop,.legend,#pg-admin{display:none!important}
   .wrap{max-width:none;padding:0}
   section{break-inside:avoid;border-color:#ccc}
-  header,section{box-shadow:none}
   .status{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
@@ -98,24 +139,65 @@ body.exported .bar{display:none}
   <div class="unit" data-k="unitNote">Đơn vị: tỷ VND, trừ khi ghi khác. Giá trị âm là lỗ.</div>
 </header>
 
-<div class="bar">
-  <input type="file" id="file" accept=".xlsx,.xlsm,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-  <label class="btn" for="file" id="btnLoad" data-k="btnLoad">Nạp file Key</label>
-  <button class="btn ghost" id="btnExport" data-k="btnExport" disabled>Xuất bản gửi đi</button>
+<nav>
+  <button class="nv" data-nav="rpt" data-active data-k="navRpt">Báo cáo</button>
+  <button class="nv" data-nav="admin"><span data-k="navAdmin">Quản trị dữ liệu</span><span class="pip" id="pipIssue"></span></button>
+</nav>
+
+<div class="page" data-page="rpt" data-active>
+  <div id="body"></div>
 </div>
 
-<label class="drop" for="file" id="drop">
-  <div class="big" data-k="dropBig">Bấm vào đây để chọn file Key, hoặc kéo thả file vào ô này</div>
-  <div class="small" data-k="dropSmall">Key_YYYYMMDD.xlsx — sinh từ File 02 bằng macro XuatFileKey</div>
-</label>
+<div class="page" data-page="admin" id="pg-admin">
 
-<div class="status empty" id="status">
-  <span class="dot">◆</span>
-  <span><b data-k="stEmpty">Chưa nạp dữ liệu.</b>
-  <span class="sub2" data-k="stEmptyHint">Chọn file Key_YYYYMMDD.xlsx sinh từ File 02. Toàn bộ xử lý chạy trên máy, không có dữ liệu nào rời khỏi trình duyệt.</span></span>
+  <div class="status empty" id="status">
+    <span class="dot">◆</span>
+    <span><b data-k="stEmpty">Chưa nạp dữ liệu.</b>
+    <span class="sub2" data-k="stEmptyHint">Chọn file Key_YYYYMMDD.xlsx sinh từ File 02. Toàn bộ xử lý chạy trên máy, không có dữ liệu nào rời khỏi trình duyệt.</span></span>
+  </div>
+
+  <section>
+    <div class="sh"><span class="code">A</span><h2>Nạp dữ liệu kỳ mới</h2></div>
+    <div class="bd">
+      <input type="file" id="file" accept=".xlsx,.xlsm">
+      <label class="drop" for="file" id="drop">
+        <div class="big" data-k="dropBig">Bấm vào đây để chọn file Key, hoặc kéo thả file vào ô này</div>
+        <div class="small" data-k="dropSmall">Key_YYYYMMDD.xlsx — sinh từ File 02 bằng macro XuatFileKey</div>
+      </label>
+      <div class="btnrow">
+        <button class="btn ghost" id="btnExport" data-k="btnExport" disabled>Xuất bản gửi đi</button>
+        <button class="btn danger" id="btnClear" data-k="btnClear" disabled>Xoá dữ liệu hiện tại</button>
+      </div>
+      <p class="help" style="margin-top:10px" data-k="loadHelp">Nạp file mới sẽ <b>thay toàn bộ</b> dữ liệu đang hiển thị. Bản đang mở giữ dữ liệu kỳ trước cho tới khi anh nạp file mới.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sh"><span class="code">B</span><h2>Trạng thái dữ liệu</h2></div>
+    <div class="bd"><div class="kvs" id="kvs"></div></div>
+  </section>
+
+  <section>
+    <div class="sh"><span class="code">C</span><h2>Kiểm tra trước khi gửi</h2></div>
+    <div class="bd"><ul class="chk" id="checks"></ul></div>
+  </section>
+
+  <section>
+    <div class="sh"><span class="code">D</span><h2>Nhật ký nạp file</h2></div>
+    <div class="bd"><div class="tw" id="logbox"></div></div>
+  </section>
+
+  <section>
+    <div class="sh"><span class="code">E</span><h2>Môi trường &amp; hướng dẫn</h2></div>
+    <div class="bd">
+      <div class="kvs" id="envs" style="margin-bottom:14px"></div>
+      <p class="help" data-k="envHelp">Quy trình mỗi kỳ: mở File 02 → chạy macro <b>XuatFileKey</b> → file <b>Key_YYYYMMDD.xlsx</b> nằm cùng thư mục → nạp vào đây → kiểm mục C → bấm <b>Xuất bản gửi đi</b>.
+Muốn sửa một câu nhận định hay một con số: sửa thẳng trong file Key rồi nạp lại, không cần mở File 02.
+Toàn bộ xử lý chạy trong trình duyệt trên máy anh — không có kết nối mạng nào được tạo ra.</p>
+    </div>
+  </section>
+
 </div>
-
-<div id="body"></div>
 
 <footer>
   <span data-k="ftDisclaimer">Tài liệu nội bộ phục vụ quản lý rủi ro thị trường. Số liệu chưa qua soát xét độc lập.</span>
@@ -133,8 +215,8 @@ body.exported .bar{display:none}
     rptSubtitle: 'Báo cáo Desk Bond',
     lblDate: 'Ngày báo cáo',
     unitNote: 'Đơn vị: tỷ VND, trừ khi ghi khác. Giá trị âm là lỗ.',
-    btnLoad: 'Nạp file Key',
-    btnExport: 'Xuất bản gửi đi',
+    navRpt: 'Báo cáo', navAdmin: 'Quản trị dữ liệu',
+    btnExport: 'Xuất bản gửi đi', btnClear: 'Xoá dữ liệu hiện tại',
     stEmpty: 'Chưa nạp dữ liệu.',
     stEmptyHint: 'Chọn file Key_YYYYMMDD.xlsx sinh từ File 02. Toàn bộ xử lý chạy trên máy, không có dữ liệu nào rời khỏi trình duyệt.',
     dropBig: 'Bấm vào đây để chọn file Key, hoặc kéo thả file vào ô này',
@@ -144,7 +226,7 @@ body.exported .bar{display:none}
     colToday: 'Ngày BC', colDtd: '+/- DtD', colYest: 'Yesterday',
     colLm: 'Last month', colLq: 'Last Quarter', colLy: 'Last Year',
     colLimit: 'Hạn mức', colUsed: 'Sử dụng',
-    thrWarn: 0.8, thrBreach: 1,
+    thrWarn: 0.8, thrBreach: 1, thrStaleDays: 3, thrJump: 0.25,
     missMark: '—'
   };
 
@@ -182,7 +264,7 @@ body.exported .bar{display:none}
   window.RRTT_setKeys = function (obj) {
     window.RRTT_KEYS = obj || {};
     applyDataKeys();
-    render();
+    renderAll();
   };
 
   function u16(d, p) { return d[p] | (d[p + 1] << 8); }
@@ -197,12 +279,11 @@ body.exported .bar{display:none}
     var n = u16(d, eocd + 10), off = u32(d, eocd + 16), out = {}, p = off;
     for (var k = 0; k < n; k++) {
       if (u32(d, p) !== 0x02014b50) throw new Error('Central directory hỏng ở entry ' + k + '.');
-      var method = u16(d, p + 10), csize = u32(d, p + 20), usize = u32(d, p + 24),
-          nlen = u16(d, p + 28), elen = u16(d, p + 30), clen = u16(d, p + 32),
-          lho = u32(d, p + 42),
+      var csize = u32(d, p + 20), nlen = u16(d, p + 28), elen = u16(d, p + 30),
+          clen = u16(d, p + 32), method = u16(d, p + 10), lho = u32(d, p + 42),
           name = new TextDecoder().decode(d.subarray(p + 46, p + 46 + nlen));
       var lnlen = u16(d, lho + 26), lelen = u16(d, lho + 28), start = lho + 30 + lnlen + lelen;
-      out[name] = { method: method, data: d.subarray(start, start + csize), usize: usize };
+      out[name] = { method: method, data: d.subarray(start, start + csize) };
       p += 46 + nlen + elen + clen;
     }
     return out;
@@ -216,11 +297,7 @@ body.exported .bar{display:none}
     var s = new Blob([e.data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
     return new Response(s).arrayBuffer().then(function (b) { return new Uint8Array(b); });
   }
-
-  function text(e) {
-    return inflate(e).then(function (u) { return new TextDecoder('utf-8').decode(u); });
-  }
-
+  function text(e) { return inflate(e).then(function (u) { return new TextDecoder('utf-8').decode(u); }); }
   function xml(s) { return new DOMParser().parseFromString(s, 'application/xml'); }
 
   function colOf(ref) {
@@ -237,10 +314,8 @@ body.exported .bar{display:none}
       var arr = [];
       r.querySelectorAll('c').forEach(function (c) {
         var t = c.getAttribute('t'), v = c.querySelector('v'), val = null;
-        if (t === 'inlineStr') {
-          var is = c.querySelector('is');
-          val = is ? is.textContent : null;
-        } else if (v) {
+        if (t === 'inlineStr') { var is = c.querySelector('is'); val = is ? is.textContent : null; }
+        else if (v) {
           if (t === 's') val = shared[parseInt(v.textContent, 10)];
           else if (t === 'str' || t === 'e') val = v.textContent;
           else { var f = parseFloat(v.textContent); val = isNaN(f) ? v.textContent : f; }
@@ -253,15 +328,16 @@ body.exported .bar{display:none}
   }
 
   function readWorkbook(buf) {
-    var z = zipEntries(buf), need = ['xl/workbook.xml', 'xl/_rels/workbook.xml.rels'];
-    need.forEach(function (n) { if (!z[n]) throw new Error('File không phải .xlsx hợp lệ (thiếu ' + n + ').'); });
+    var z = zipEntries(buf);
+    ['xl/workbook.xml', 'xl/_rels/workbook.xml.rels'].forEach(function (n) {
+      if (!z[n]) throw new Error('File không phải .xlsx hợp lệ (thiếu ' + n + ').');
+    });
     var shared = [];
     var pShared = z['xl/sharedStrings.xml']
       ? text(z['xl/sharedStrings.xml']).then(function (s) {
           xml(s).querySelectorAll('si').forEach(function (si) {
-            var parts = si.querySelectorAll('t');
             var out = '';
-            parts.forEach(function (t) { out += t.textContent; });
+            si.querySelectorAll('t').forEach(function (t) { out += t.textContent; });
             shared.push(out);
           });
         })
@@ -276,11 +352,11 @@ body.exported .bar{display:none}
         });
         var jobs = [], names = [];
         wbx.querySelectorAll('sheets > sheet').forEach(function (s) {
-          var rid = s.getAttribute('r:id') || s.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id');
-          var target = map[rid];
-          if (!target) return;
+          var rid = s.getAttribute('r:id') ||
+            s.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id');
+          if (!map[rid]) return;
           names.push(s.getAttribute('name'));
-          jobs.push(text(z['xl/' + target]));
+          jobs.push(text(z['xl/' + map[rid]]));
         });
         return Promise.all(jobs).then(function (docs) {
           var out = {};
@@ -290,7 +366,7 @@ body.exported .bar{display:none}
       });
   }
 
-  var DATA = null, PROBLEMS = [];
+  var DATA = null, PROBLEMS = [], LOG = [];
 
   function toMap(rows) {
     var head = rows[0] || [], idx = {}, out = [];
@@ -306,29 +382,30 @@ body.exported .bar{display:none}
   }
 
   function ingest(sheets) {
-    var problems = [];
-    ['META', 'DATA_S2', 'TEXT'].forEach(function (s) {
-      if (!sheets[s]) problems.push('Thiếu sheet ' + s);
-    });
-    if (problems.length) throw new Error(problems.join(' · '));
+    var problems = [], missing = [];
+    ['META', 'DATA_S2', 'TEXT'].forEach(function (s) { if (!sheets[s]) missing.push(s); });
+    if (missing.length) throw new Error('Thiếu sheet: ' + missing.join(', '));
 
     var meta = {};
     toMap(sheets.META).forEach(function (r) { if (r.Key != null) meta[String(r.Key).trim()] = r.Value; });
     if (String(meta.schema || '') !== 'bond.key.v1') {
-      problems.push('schema lạ: ' + (meta.schema || '(trống)') + ' — cấu trúc file có thể đã đổi');
+      problems.push('schema lạ: ' + (meta.schema || '(trống)'));
     }
 
     var texts = {};
     toMap(sheets.TEXT).forEach(function (r) { if (r.KeyID != null) texts[String(r.KeyID).trim()] = r.Value; });
 
-    var rows = toMap(sheets.DATA_S2).filter(function (r) { return r.KeyID != null && String(r.KeyID).trim() !== ''; });
+    var rows = toMap(sheets.DATA_S2).filter(function (r) {
+      return r.KeyID != null && String(r.KeyID).trim() !== '';
+    });
     if (!rows.length) problems.push('DATA_S2 không có dòng nào');
 
-    var seen = {};
+    var seen = {}, byKey = {};
     rows.forEach(function (r) {
       var k = String(r.KeyID).trim();
       if (seen[k]) problems.push('KeyID trùng: ' + k);
       seen[k] = 1;
+      byKey[k] = r;
     });
 
     var books = [], order = {};
@@ -338,8 +415,7 @@ body.exported .bar{display:none}
       order[b].rows.push(r);
     });
 
-    DATA = { meta: meta, texts: texts, books: books, count: rows.length };
-    PROBLEMS = problems;
+    return { meta: meta, texts: texts, books: books, byKey: byKey, count: rows.length, problems: problems };
   }
 
   var PCT = /YTM|Coupon rate|Repo rate|Concentration|Tỷ lệ|Cơ cấu/i;
@@ -353,56 +429,44 @@ body.exported .bar{display:none}
     if (PCT.test(label)) return (v * 100).toFixed(2).replace(/\.00$/, '') + '%';
     if (PRICE.test(label)) return Math.round(v).toLocaleString('en-US');
     if (COUNT.test(label)) return v.toLocaleString('en-US', { maximumFractionDigits: 2 });
-    var abs = Math.abs(v);
-    var dp = abs >= 1000 ? 0 : (abs >= 10 ? 1 : 2);
+    var abs = Math.abs(v), dp = abs >= 1000 ? 0 : (abs >= 10 ? 1 : 2);
     return v.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
   }
+  function num(v) { return (typeof v === 'number' && isFinite(v)) ? v : null; }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
   function cell(v, label) {
     var s = fmt(v, label);
     if (s === null) return '<td><span class="miss">' + kv('missMark') + '</span></td>';
-    var neg = (typeof v === 'number' && v < 0) ? ' class="neg"' : '';
-    return '<td' + neg + '>' + esc(s) + '</td>';
+    return '<td' + ((typeof v === 'number' && v < 0) ? ' class="neg"' : '') + '>' + esc(s) + '</td>';
   }
-
   function lightCell(used) {
     if (used === null || used === undefined || used === '') return '<td></td>';
     var u = parseFloat(used);
     if (isNaN(u)) return '<td>' + esc(String(used)) + '</td>';
-    var w = kvNum('thrWarn'), b = kvNum('thrBreach');
-    var cls = u >= b ? 'r' : (u >= w ? 'a' : 'g');
+    var cls = u >= kvNum('thrBreach') ? 'r' : (u >= kvNum('thrWarn') ? 'a' : 'g');
     return '<td><span class="light ' + cls + '"><i></i>' + (u * 100).toFixed(1) + '%</span></td>';
   }
 
-  function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
-
   function tableFor(book) {
-    var h = '<div class="tw"><table><thead><tr>' +
-      '<th class="l">' + esc(kv('colToday', 'Chỉ tiêu')) + '</th>' +
-      '<th>' + esc(DATA.meta.asOf || kv('colToday')) + '</th>' +
-      '<th>' + esc(kv('colDtd')) + '</th>' +
-      '<th>' + esc(DATA.meta.dateYest || kv('colYest')) + '</th>' +
-      '<th>' + esc(DATA.meta.dateLastMonth || kv('colLm')) + '</th>' +
-      '<th>' + esc(DATA.meta.dateLastQuarter || kv('colLq')) + '</th>' +
-      '<th>' + esc(DATA.meta.dateLastYear || kv('colLy')) + '</th>' +
-      '<th>' + esc(kv('colLimit')) + '</th>' +
-      '<th>' + esc(kv('colUsed')) + '</th>' +
-      '</tr></thead><tbody>';
+    var m = DATA.meta;
+    var h = '<div class="tw"><table><thead><tr><th class="l">Chỉ tiêu</th>' +
+      ['<th>' + esc(m.asOf || kv('colToday')) + '</th>',
+       '<th>' + esc(kv('colDtd')) + '</th>',
+       '<th>' + esc(m.dateYest || kv('colYest')) + '</th>',
+       '<th>' + esc(m.dateLastMonth || kv('colLm')) + '</th>',
+       '<th>' + esc(m.dateLastQuarter || kv('colLq')) + '</th>',
+       '<th>' + esc(m.dateLastYear || kv('colLy')) + '</th>',
+       '<th>' + esc(kv('colLimit')) + '</th>',
+       '<th>' + esc(kv('colUsed')) + '</th>'].join('') + '</tr></thead><tbody>';
 
     book.rows.forEach(function (r) {
       var label = String(r.ChiTieu == null ? '' : r.ChiTieu).replace(/\s+/g, ' ').trim();
-      var sub = String(r.Sub) === '1';
-      h += '<tr' + (sub ? ' class="sub"' : '') + '>';
+      h += '<tr' + (String(r.Sub) === '1' ? ' class="sub"' : '') + '>';
       h += '<td class="l">' + (r.Nhom ? '<span class="cat">' + esc(r.Nhom) + ' · </span>' : '') +
            '<span class="lbl">' + esc(label) + '</span></td>';
-      h += cell(r.Today, label);
-      h += cell(r.DtD, label);
-      h += cell(r.Yesterday, label);
-      h += cell(r.LastMonth, label);
-      h += cell(r.LastQuarter, label);
-      h += cell(r.LastYear, label);
+      h += cell(r.Today, label) + cell(r.DtD, label) + cell(r.Yesterday, label) +
+           cell(r.LastMonth, label) + cell(r.LastQuarter, label) + cell(r.LastYear, label);
       h += '<td class="lim">' + (r.Limit == null ? '' : esc(String(r.Limit))) + '</td>';
       h += lightCell(r.Used);
       h += '</tr>';
@@ -413,46 +477,198 @@ body.exported .bar{display:none}
   function noteBlock(id, title, cls) {
     var v = DATA.texts[id];
     if (v == null || String(v).trim() === '') return '';
-    return '<div class="note' + (cls ? ' ' + cls : '') + '"><div class="nh">' + esc(title) + '</div>' + esc(String(v).trim()) + '</div>';
+    return '<div class="note' + (cls ? ' ' + cls : '') + '"><div class="nh">' + esc(title) + '</div>' +
+      esc(String(v).trim()) + '</div>';
   }
 
-  function render() {
+  function renderReport() {
     var body = document.getElementById('body');
-    if (!DATA) { body.innerHTML = ''; return; }
-
+    if (!DATA) {
+      body.innerHTML = '<section><div class="bd"><p class="empty2">Chưa có dữ liệu. Sang tab ' +
+        '<b>' + esc(kv('navAdmin')) + '</b> để nạp file Key.</p></div></section>';
+      return;
+    }
     document.getElementById('asOf').textContent = DATA.meta.asOf || kv('missMark');
     ['rptTitle', 'rptSubtitle', 'unitNote'].forEach(function (k) {
       if (DATA.meta[k] != null && String(DATA.meta[k]).trim() !== '') window.RRTT_KEYS[k] = DATA.meta[k];
     });
     applyDataKeys();
 
-    var h = '';
-    h += '<section><div class="sh"><span class="code">1</span><h2>Thông tin thị trường &amp; đánh giá</h2></div><div class="notes">';
+    var h = '<section><div class="sh"><span class="code">1</span><h2>Thông tin thị trường &amp; đánh giá</h2></div><div class="notes">';
     h += noteBlock('txt.market', 'Thông tin thị trường');
     h += noteBlock('txt.assessment', 'Tuân thủ hạn mức & đánh giá rủi ro', 'g2');
     h += '</div></section>';
 
     DATA.books.forEach(function (b) {
-      h += '<section><div class="sh"><span class="code">' + esc(b.code || '') + '</span><h2>' + esc(b.section || b.key) + '</h2></div>';
-      h += tableFor(b);
+      h += '<section><div class="sh"><span class="code">' + esc(b.code || '') + '</span><h2>' +
+        esc(b.section || b.key) + '</h2></div>' + tableFor(b);
       var extra = '';
       if (b.key === 'TB_MSB') extra += noteBlock('txt.noteTB', 'Ghi chú');
       if (b.key === 'OTHER') extra += noteBlock('txt.noteTPCP', 'Ghi chú');
       if (b.key === 'FIBOND') extra += noteBlock('txt.noteFI', 'Ghi chú');
       if (extra) h += '<div class="notes">' + extra + '</div>';
-      h += '<div class="legend" data-k="legendLight">' + esc(kv('legendLight')) + '</div>';
-      h += '</section>';
+      h += '<div class="legend">' + esc(kv('legendLight')) + '</div></section>';
     });
-
     body.innerHTML = h;
   }
+
+  function parseVn(d) {
+    var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(String(d || ''));
+    return m ? new Date(+m[3], +m[2] - 1, +m[1]) : null;
+  }
+  function ageDays(d) {
+    var t = parseVn(d);
+    if (!t) return null;
+    return Math.floor((new Date().setHours(0, 0, 0, 0) - t.getTime()) / 86400000);
+  }
+
+  var SUMS = [
+    ['S2.TB_MSB.faceValue', ['S2.TB_MSB.aBookAfs', 'S2.TB_MSB.bBookHtm'], 'Trading nội bộ · Face Value = AFS + HTM'],
+    ['S2.TB_MSB.itdUnrealizedMtmPnl', ['S2.TB_MSB.aBookAfs2', 'S2.TB_MSB.bBookHtm2'], 'Trading nội bộ · ItD = AFS + HTM'],
+    ['S2.BB_MSB.faceValue', ['S2.BB_MSB.aBookDcmTuFund', 'S2.BB_MSB.bBookFundTuPool'], 'Banking nội bộ · Face Value = DCM tự fund + fund từ Pool'],
+    ['S2.BB_MSB.itdUnrealizedMtmPnl', ['S2.BB_MSB.aBookDcmTuFund2', 'S2.BB_MSB.bBookFundTuPool2'], 'Banking nội bộ · ItD = DCM tự fund + fund từ Pool']
+  ];
+
+  function checks() {
+    var out = [];
+    if (!DATA) return out;
+
+    (DATA.problems || []).forEach(function (p) {
+      out.push({ lv: 'no', t: 'Cấu trúc file', d: p });
+    });
+
+    var age = ageDays(DATA.meta.asOf);
+    if (age === null) {
+      out.push({ lv: 'no', t: 'Không đọc được ngày chốt dữ liệu', d: 'META!asOf = ' + (DATA.meta.asOf || '(trống)') });
+    } else if (age > kvNum('thrStaleDays')) {
+      out.push({ lv: 'wn', t: 'Dữ liệu đã cũ ' + age + ' ngày', d: 'Ngày chốt ' + DATA.meta.asOf + '. Kiểm tra xem đã nạp đúng file kỳ mới chưa.' });
+    } else {
+      out.push({ lv: 'ok2', t: 'Ngày chốt ' + DATA.meta.asOf, d: age <= 0 ? 'Dữ liệu của hôm nay.' : 'Cách hôm nay ' + age + ' ngày.' });
+    }
+
+    var miss = 0, tot = 0;
+    DATA.books.forEach(function (b) {
+      b.rows.forEach(function (r) {
+        ['Today', 'Yesterday', 'LastMonth', 'LastQuarter', 'LastYear'].forEach(function (c) {
+          tot++;
+          if (r[c] === null || r[c] === undefined || r[c] === '') miss++;
+        });
+      });
+    });
+    out.push({ lv: miss ? 'wn' : 'ok2', t: 'Ô trống: ' + miss + '/' + tot,
+      d: miss ? 'Hiện dấu — trên báo cáo, không lấy số kỳ trước.' : 'Không có ô trống.' });
+
+    SUMS.forEach(function (s) {
+      var tot2 = DATA.byKey[s[0]], parts = s[1].map(function (k) { return DATA.byKey[k]; });
+      if (!tot2 || parts.some(function (p) { return !p; })) return;
+      var a = num(tot2.Today), b = 0, ok = true;
+      parts.forEach(function (p) { var v = num(p.Today); if (v === null) ok = false; else b += v; });
+      if (a === null || !ok) return;
+      var diff = a - b;
+      out.push({ lv: Math.abs(diff) < 0.5 ? 'ok2' : 'no', t: s[2],
+        d: fmt(a, '') + ' vs ' + fmt(b, '') + (Math.abs(diff) < 0.5 ? '' : ' · lệch ' + fmt(diff, '')) });
+    });
+
+    var breach = [];
+    DATA.books.forEach(function (b) {
+      b.rows.forEach(function (r) {
+        var u = parseFloat(r.Used);
+        if (!isNaN(u) && u >= kvNum('thrWarn')) {
+          breach.push({ n: String(r.ChiTieu || '').trim(), s: b.section || b.key, u: u });
+        }
+      });
+    });
+    breach.sort(function (x, y) { return y.u - x.u; });
+    if (breach.length) {
+      breach.forEach(function (x) {
+        out.push({ lv: x.u >= kvNum('thrBreach') ? 'no' : 'wn',
+          t: (x.u >= kvNum('thrBreach') ? 'Vượt hạn mức' : 'Sát hạn mức') + ': ' + x.n,
+          d: x.s + ' · mức sử dụng ' + (x.u * 100).toFixed(1) + '%' });
+      });
+    } else {
+      out.push({ lv: 'ok2', t: 'Không có chỉ tiêu nào chạm ngưỡng cảnh báo', d: kv('legendLight') });
+    }
+    return out;
+  }
+
+  function renderAdmin() {
+    var kvs = document.getElementById('kvs'), ck = document.getElementById('checks'),
+        lg = document.getElementById('logbox'), env = document.getElementById('envs');
+
+    var deco = typeof DecompressionStream !== 'undefined';
+    env.innerHTML =
+      card('Đọc file .xlsx', deco ? 'Hỗ trợ' : 'KHÔNG hỗ trợ', deco ? 'good' : 'bad', true) +
+      card('Trình duyệt', (navigator.userAgentData && navigator.userAgentData.brands
+        ? navigator.userAgentData.brands.map(function (b) { return b.brand; }).filter(function (b) {
+            return !/Not.*Brand/i.test(b); }).join(', ')
+        : (/Edg\//.test(navigator.userAgent) ? 'Edge' : /Chrome\//.test(navigator.userAgent) ? 'Chrome' : 'Khác')),
+        '', true) +
+      card('Hôm nay', new Date().toLocaleDateString('en-GB'), '', true);
+
+    if (!DATA) {
+      kvs.innerHTML = '<p class="empty2">Chưa có dữ liệu.</p>';
+      ck.innerHTML = '<li><span class="ic">·</span><span class="empty2">Nạp file Key để chạy kiểm tra.</span></li>';
+    } else {
+      var age = ageDays(DATA.meta.asOf);
+      var issues = checks().filter(function (c) { return c.lv !== 'ok2'; });
+      kvs.innerHTML =
+        card('Ngày chốt dữ liệu', DATA.meta.asOf || '—', age === null || age > kvNum('thrStaleDays') ? 'warn' : 'good') +
+        card('Số chỉ tiêu', String(DATA.count), '') +
+        card('Cảnh báo', String(issues.length), issues.length ? 'bad' : 'good') +
+        card('File nguồn', DATA.meta.sourceFile || '—', '', true) +
+        card('Sinh lúc', DATA.meta.generatedAt || '—', '', true);
+
+      ck.innerHTML = checks().map(function (c) {
+        var ic = c.lv === 'ok2' ? '✓' : c.lv === 'wn' ? '!' : '✕';
+        return '<li><span class="ic ' + c.lv + '">' + ic + '</span><span>' + esc(c.t) +
+          '<span class="d">' + esc(c.d) + '</span></span></li>';
+      }).join('');
+    }
+
+    var pip = document.getElementById('pipIssue');
+    var nIssue = DATA ? checks().filter(function (c) { return c.lv !== 'ok2'; }).length : 0;
+    pip.textContent = nIssue ? String(nIssue) : '';
+    pip.style.display = nIssue ? '' : 'none';
+
+    if (!LOG.length) {
+      lg.innerHTML = '<p class="empty2">Chưa có lần nạp nào trong file này.</p>';
+    } else {
+      lg.innerHTML = '<table class="log"><thead><tr><th class="l">Lúc</th><th class="l">File</th>' +
+        '<th>Ngày chốt</th><th>Chỉ tiêu</th><th>Cảnh báo</th></tr></thead><tbody>' +
+        LOG.slice().reverse().map(function (r) {
+          return '<tr><td class="l">' + esc(r.at) + '</td><td class="l">' + esc(r.file) + '</td>' +
+            '<td>' + esc(r.asOf) + '</td><td>' + r.n + '</td><td' + (r.w ? ' class="neg"' : '') + '>' + r.w + '</td></tr>';
+        }).join('') + '</tbody></table>';
+    }
+  }
+
+  function card(k, v, cls, small) {
+    return '<div class="kvc' + (cls ? ' ' + cls : '') + '"><div class="k">' + esc(k) + '</div>' +
+      '<div class="v' + (small ? ' sm' : '') + '">' + esc(v) + '</div></div>';
+  }
+
+  function renderAll() { renderReport(); renderAdmin(); }
 
   function setStatus(kind, title, sub) {
     var el = document.getElementById('status');
     el.className = 'status ' + kind;
-    el.innerHTML = '<span class="dot">' + (kind === 'ok' ? '●' : kind === 'err' ? '▲' : '◆') + '</span>' +
+    el.innerHTML = '<span class="dot">' +
+      (kind === 'ok' ? '●' : kind === 'err' ? '▲' : kind === 'warn' ? '!' : '◆') + '</span>' +
       '<span><b>' + esc(title) + '</b>' + (sub ? '<span class="sub2">' + esc(sub) + '</span>' : '') + '</span>';
   }
+
+  function goPage(id) {
+    document.querySelectorAll('[data-page]').forEach(function (p) {
+      if (p.dataset.page === id) p.setAttribute('data-active', ''); else p.removeAttribute('data-active');
+    });
+    document.querySelectorAll('[data-nav]').forEach(function (b) {
+      if (b.dataset.nav === id) b.setAttribute('data-active', ''); else b.removeAttribute('data-active');
+    });
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll('[data-nav]').forEach(function (b) {
+    b.addEventListener('click', function () { goPage(b.dataset.nav); });
+  });
 
   function handleFile(f) {
     if (!f) return;
@@ -464,23 +680,31 @@ body.exported .bar{display:none}
     f.arrayBuffer()
       .then(readWorkbook)
       .then(function (sheets) {
-        ingest(sheets);
-        render();
+        var next = ingest(sheets);
+        next.meta.sourceFile = f.name;
+        DATA = next;
+        PROBLEMS = next.problems;
+        LOG.push({
+          at: new Date().toLocaleString('en-GB', { hour12: false }).replace(',', ''),
+          file: f.name, asOf: String(next.meta.asOf || '—'), n: next.count,
+          w: checks().filter(function (c) { return c.lv !== 'ok2'; }).length
+        });
+        renderAll();
         document.getElementById('btnExport').disabled = false;
-        var n = DATA.count;
-        if (PROBLEMS.length) {
-          setStatus('err', 'Đã nạp ' + n + ' chỉ tiêu — có ' + PROBLEMS.length + ' cảnh báo',
-            PROBLEMS.join(' · ') + ' · Ngày chốt: ' + (DATA.meta.asOf || 'KHÔNG RÕ'));
+        document.getElementById('btnClear').disabled = false;
+        var nIssue = checks().filter(function (c) { return c.lv !== 'ok2'; }).length;
+        if (nIssue) {
+          setStatus('warn', 'Đã nạp ' + next.count + ' chỉ tiêu — ' + nIssue + ' mục cần xem',
+            'Ngày chốt ' + (next.meta.asOf || 'KHÔNG RÕ') + ' · xem mục C bên dưới trước khi gửi.');
         } else {
-          setStatus('ok', 'Dữ liệu chốt ngày ' + (DATA.meta.asOf || 'KHÔNG RÕ'),
-            n + ' chỉ tiêu · nguồn: ' + f.name + ' · sinh lúc ' + (DATA.meta.generatedAt || 'không rõ'));
+          setStatus('ok', 'Dữ liệu chốt ngày ' + (next.meta.asOf || 'KHÔNG RÕ'),
+            next.count + ' chỉ tiêu · nguồn ' + f.name + ' · sinh lúc ' + (next.meta.generatedAt || 'không rõ'));
         }
       })
       .catch(function (e) {
-        DATA = null;
-        render();
-        document.getElementById('btnExport').disabled = true;
-        setStatus('err', 'Không nạp được file', e && e.message ? e.message : String(e));
+        setStatus('err', 'Không nạp được file — dữ liệu cũ được giữ nguyên',
+          (e && e.message ? e.message : String(e)));
+        renderAdmin();
       });
   }
 
@@ -503,15 +727,28 @@ body.exported .bar{display:none}
   window.addEventListener('dragover', function (e) { e.preventDefault(); });
   window.addEventListener('drop', function (e) { e.preventDefault(); });
 
+  document.getElementById('btnClear').addEventListener('click', function () {
+    if (!DATA) return;
+    if (!confirm('Xoá toàn bộ dữ liệu đang hiển thị? Báo cáo sẽ trống cho tới khi nạp file Key mới.')) return;
+    DATA = null; PROBLEMS = [];
+    LOG.push({ at: new Date().toLocaleString('en-GB', { hour12: false }).replace(',', ''),
+      file: '(xoá dữ liệu)', asOf: '—', n: 0, w: 0 });
+    document.getElementById('asOf').textContent = '—';
+    document.getElementById('btnExport').disabled = true;
+    document.getElementById('btnClear').disabled = true;
+    renderAll();
+    setStatus('empty', 'Đã xoá dữ liệu.', 'Nạp file Key mới để dựng lại báo cáo.');
+  });
+
   document.getElementById('btnExport').addEventListener('click', function () {
     if (!DATA) return;
+    goPage('rpt');
     var clone = document.documentElement.cloneNode(true);
-    clone.querySelector('body').classList.add('exported');
     var inject = document.createElement('script');
-    inject.textContent = 'window.RRTT_SNAPSHOT = ' + JSON.stringify(DATA).replace(/</g, '\\u003c') + ';';
+    inject.textContent = 'window.RRTT_SNAPSHOT = ' +
+      JSON.stringify({ data: DATA, log: LOG }).replace(/</g, '\\u003c') + ';';
     clone.querySelector('head').appendChild(inject);
-    var html = '<!DOCTYPE html>\n' + clone.outerHTML;
-    var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    var blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html;charset=utf-8' });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'BaoCao_RRTT_Bond_' + String(DATA.meta.asOf || '').replace(/\//g, '') + '.html';
@@ -522,16 +759,29 @@ body.exported .bar{display:none}
   applyDataKeys();
 
   if (window.RRTT_SNAPSHOT) {
-    DATA = window.RRTT_SNAPSHOT;
-    PROBLEMS = [];
-    render();
-    setStatus('ok', 'Dữ liệu chốt ngày ' + (DATA.meta.asOf || 'KHÔNG RÕ'), 'Bản đã xuất — chỉ đọc');
+    DATA = window.RRTT_SNAPSHOT.data || null;
+    LOG = window.RRTT_SNAPSHOT.log || [];
+    PROBLEMS = (DATA && DATA.problems) || [];
+    if (DATA) {
+      document.getElementById('btnExport').disabled = false;
+      document.getElementById('btnClear').disabled = false;
+      var a2 = ageDays(DATA.meta.asOf);
+      if (a2 !== null && a2 > kvNum('thrStaleDays')) {
+        setStatus('warn', 'Đang hiển thị dữ liệu kỳ trước — chốt ngày ' + DATA.meta.asOf,
+          'Đã cũ ' + a2 + ' ngày. Nạp file Key mới để cập nhật.');
+      } else {
+        setStatus('ok', 'Dữ liệu chốt ngày ' + (DATA.meta.asOf || 'KHÔNG RÕ'),
+          DATA.count + ' chỉ tiêu · nguồn ' + (DATA.meta.sourceFile || 'không rõ'));
+      }
+    }
   }
 
+  renderAll();
+
   window.RRTT = {
-    render: render,
+    goPage: goPage, render: renderAll, checks: checks,
     data: function () { return DATA; },
-    problems: function () { return PROBLEMS; },
+    log: function () { return LOG; },
     keys: function () { return Object.assign({}, KEY_DEF, window.RRTT_KEYS || {}); }
   };
 })();
