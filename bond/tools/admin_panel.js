@@ -183,12 +183,13 @@
         g = toMap(sheets.GRID), scen = toMap(sheets.SCEN),
         vira = sheets.VIRA ? toMap(sheets.VIRA) : [],
         rating = sheets.RATING ? toMap(sheets.RATING) : [],
-        vol = sheets.VOL ? toMap(sheets.VOL) : [];
+        vol = sheets.VOL ? toMap(sheets.VOL) : [],
+        vira4 = sheets.VIRA4 ? toMap(sheets.VIRA4) : [];
 
     return {
       meta: meta, texts: texts, problems: problems,
       s2: s2, byKey: byKey, pos: pos, curve: curve, grid: g, scen: scen,
-      vira: vira, rating: rating, vol: vol, ts: ts,
+      vira: vira, vira4: vira4, rating: rating, vol: vol, ts: ts,
       counts: {
         'Khối 2': s2.length, 'Position': pos.length, 'Đường cong': curve.length,
         'Khối 3.x/7.x': g.length, 'Kịch bản': scen.length, 'VIRA': vira.length,
@@ -501,6 +502,17 @@
       }
     }
 
+    if (K.vira4 && K.vira4.length && R.vira4) {
+      R.vira4 = {
+        months: K.vira4.map(function (r) { return String(r.Month || ''); }),
+        VIRA: K.vira4.map(function (r) { return num(r.VIRA); }),
+        Big4: K.vira4.map(function (r) { return num(r.Big4); }),
+        MarketMaker: K.vira4.map(function (r) { return num(r.MarketMaker); }),
+        Top3: K.vira4.map(function (r) { return num(r.Top3); }),
+        Actual: K.vira4.map(function (r) { return num(r.Actual); })
+      };
+    }
+
     if (K.rating.length) {
       var body2 = K.rating.filter(function (r) { return !/Total/i.test(String(r.Issuer)); });
       R.fiRating = body2.map(function (r) {
@@ -585,24 +597,7 @@
   }
 
   function badge() {
-    var d = (window.RPT && window.RPT.asOf) || '—';
-    var age = ageDays(d), stale = age === null || age > 3;
-    PAGES.forEach(function (p) {
-      var sec = document.querySelector('[data-page="' + p + '"]');
-      if (!sec) return;
-      var b = sec.querySelector('[data-asof-badge]');
-      if (!b) {
-        b = document.createElement('div');
-        b.setAttribute('data-asof-badge', '');
-        b.style.cssText = 'display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;' +
-          'padding:3px 10px;border-radius:11px;margin-bottom:12px;';
-        sec.insertBefore(b, sec.firstChild);
-      }
-      b.textContent = 'Dữ liệu chốt ' + d + (stale && age !== null ? ' · đã cũ ' + age + ' ngày' : '');
-      b.style.background = stale ? '#fdf3e3' : '#f2f8f3';
-      b.style.color = stale ? '#8a6228' : '#276749';
-      b.style.border = '1px solid ' + (stale ? '#e6d3a8' : '#cfe3d4');
-    });
+    document.querySelectorAll('[data-asof-badge]').forEach(function (b) { b.remove(); });
   }
 
   function lockNav(btn) {
@@ -759,9 +754,9 @@
 
   function toggleEdit(on) {
     editMode = on;
+    var bar = ensureFloatBar();
     setEditable(on);
-    var bar = document.getElementById('rrttEditBar');
-    if (bar) bar.style.display = on ? 'flex' : 'none';
+    bar.style.display = on ? 'flex' : 'none';
     var hint = document.getElementById('rrttEditHint');
     if (hint) hint.style.display = on ? 'block' : 'none';
     var btn = document.getElementById('rrttEditBtn');
@@ -781,37 +776,46 @@
     if (!editMode || !(e.ctrlKey || e.metaKey)) return;
     var k = String(e.key || '').toLowerCase();
     if (k === 'b') { e.preventDefault(); exec('bold'); }
-    if (k === 'i') { e.preventDefault(); exec('italic'); }
+    else if (k === 'i') { e.preventDefault(); exec('italic'); }
+    else if (k === 'z' && !e.shiftKey) { e.preventDefault(); exec('undo'); }
+    else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); exec('redo'); }
   }, true);
 
   var EBTN = 'font-family:inherit;font-size:12.5px;font-weight:600;border:1px solid #e6e2db;' +
     'background:#fff;color:#33312e;border-radius:8px;padding:7px 12px;cursor:pointer;';
 
-  function editBarHTML() {
-    return '<div id="rrttEditBar" style="display:none;gap:8px;flex-wrap:wrap;align-items:center;' +
-      'margin-top:12px;padding:10px 12px;background:#faf8f6;border:1px solid #e6e2db;border-radius:10px;">' +
-      '<span style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8d877c;">Dinh dang</span>' +
-      '<button type="button" data-cmd="bold" style="' + EBTN + 'font-weight:800;">B</button>' +
-      '<button type="button" data-cmd="italic" style="' + EBTN + 'font-style:italic;">I</button>' +
+  function editBarHTML() { return ''; }
+
+  function ensureFloatBar() {
+    var bar = document.getElementById('rrttEditBar');
+    if (bar) return bar;
+    bar = document.createElement('div');
+    bar.id = 'rrttEditBar';
+    bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:9999;' +
+      'display:none;gap:7px;flex-wrap:wrap;align-items:center;padding:9px 12px;background:#fdfcfa;' +
+      'border:1px solid #e6e2db;border-radius:12px;box-shadow:0 6px 24px rgba(32,31,29,.18);' +
+      'font-family:inherit;';
+    bar.innerHTML =
+      '<span style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8d877c;margin-right:2px;">Sua</span>' +
+      '<button type="button" data-cmd="bold" style="' + EBTN + 'font-weight:800;min-width:34px;">B</button>' +
+      '<button type="button" data-cmd="italic" style="' + EBTN + 'font-style:italic;min-width:34px;">I</button>' +
       '<button type="button" data-cmd="hilite" style="' + EBTN + 'background:#ffe27a;">Boi vang</button>' +
       '<button type="button" data-cmd="hiliteOff" style="' + EBTN + '">Bo boi</button>' +
       '<button type="button" data-cmd="black" style="' + EBTN + 'color:#201f1d;">Chu den</button>' +
       '<button type="button" data-cmd="red" style="' + EBTN + 'color:#9B2C2C;">Chu do</button>' +
-      '<span style="flex:1"></span>' +
-      '<span style="font-size:11.5px;color:#6b665e;">Da sua: <b id="rrttEditCount">0</b> o</span>' +
+      '<span style="width:1px;height:22px;background:#e6e2db;margin:0 3px;"></span>' +
+      '<button type="button" data-cmd="undo" title="Ctrl+Z" style="' + EBTN + 'min-width:34px;">&#8630;</button>' +
+      '<button type="button" data-cmd="redo" title="Ctrl+Y" style="' + EBTN + 'min-width:34px;">&#8631;</button>' +
+      '<span style="width:1px;height:22px;background:#e6e2db;margin:0 3px;"></span>' +
+      '<span style="font-size:11.5px;color:#6b665e;white-space:nowrap;">Da sua <b id="rrttEditCount">0</b> o</span>' +
       '<button type="button" data-cmd="reset" style="' + EBTN + 'color:#9B2C2C;">Hoan tac tat ca</button>' +
-      '</div>' +
-      '<p id="rrttEditHint" style="display:none;font-size:12.5px;color:#6b665e;margin-top:10px;line-height:1.7;">' +
-      'Bam thang vao so hoac cau chu tren 5 trang bao cao de sua. Boi den phan chu roi bam nut dinh dang, ' +
-      'hoac dung Ctrl+B / Ctrl+I. Sua xong tat che do sua roi bam Xuat ban gui di.<br>' +
-      'Luu y: nap file key ky moi se ve lai so tu Excel, nhung cac o da sua van duoc ap de len. ' +
-      'Sau khi nap ky moi nen ra soat lai hoac bam Hoan tac tat ca.</p>';
+      '<button type="button" data-cmd="off" style="' + EBTN + 'background:#7B2D3B;color:#fff;border-color:#7B2D3B;">Tat sua</button>';
+    document.body.appendChild(bar);
+    bindBar(bar);
+    return bar;
   }
 
-  function wireEdit() {
-    var bar = document.getElementById('rrttEditBar');
-    var btn = document.getElementById('rrttEditBtn');
-    if (!bar || !btn) return;
+  function bindBar(bar) {
     bar.addEventListener('mousedown', function (e) {
       if (e.target && e.target.tagName === 'BUTTON') e.preventDefault();
     });
@@ -825,15 +829,24 @@
       else if (c === 'hiliteOff') exec('hiliteColor', 'transparent');
       else if (c === 'black') exec('foreColor', '#201f1d');
       else if (c === 'red') exec('foreColor', '#9B2C2C');
+      else if (c === 'undo') exec('undo');
+      else if (c === 'redo') exec('redo');
+      else if (c === 'off') toggleEdit(false);
       else if (c === 'reset') {
         if (!window.confirm('Bo toan bo sua doi thu cong, tra ve dung so lieu tu file key?')) return;
         EDITS = {}; ORIG = {};
         var n = document.getElementById('rrttEditCount');
         if (n) n.textContent = '0';
         if (window.RRTT && window.RRTT.rerender) window.RRTT.rerender();
-        setTimeout(function () { if (editMode) setEditable(true); }, 50);
+        setTimeout(function () { if (editMode) setEditable(true); }, 60);
       }
     });
+  }
+
+  function wireEdit() {
+    var btn = document.getElementById('rrttEditBtn');
+    if (!btn || btn.getAttribute('data-wired')) return;
+    btn.setAttribute('data-wired', '1');
     btn.addEventListener('click', function () { toggleEdit(!editMode); });
   }
 
@@ -893,7 +906,9 @@
 
     var d = (window.RPT && window.RPT.asOf) || '—', age = ageDays(d);
     st.innerHTML = '<div style="' + box + '">' +
-      cell('Ngày chốt dữ liệu', d, age === null || age > 3 ? '#a56a1b' : '#276749') +
+      cell('Ngày chốt dữ liệu', d + ' · ' + (age === null ? 'khong ro' :
+        (age <= 0 ? 'du lieu hom nay' : 'da cu ' + age + ' ngay')),
+        age === null || age > 3 ? '#a56a1b' : '#276749') +
       cell('Nguồn', SRC ? SRC.file : 'dữ liệu nhúng sẵn') +
       cell('Sinh lúc', SRC ? (SRC.generatedAt || '—') : '—') +
       '</div>' +

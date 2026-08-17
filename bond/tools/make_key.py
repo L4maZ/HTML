@@ -270,6 +270,18 @@ def build(src, outdir, sanitize=False):
                 n += 1
     counts["SCEN"] = n
 
+    v4 = out.create_sheet("VIRA4")
+    v4.append(["Month", "VIRA", "Big4", "MarketMaker", "Top3", "Actual"])
+    vs = wb["VIRA scenarios"]
+    n = 0
+    for r in range(2, 30):
+        m, b1 = vs.cell(r, 1).value, vs.cell(r, 2).value
+        if m in (None, "") or b1 in (None, ""):
+            continue
+        v4.append([vndate(m)] + [vs.cell(r, c).value for c in range(2, 7)])
+        n += 1
+    counts["VIRA4"] = n
+
     vsh = out.create_sheet("VIRA")
     vsh.append(["KeyID", "Scope", "Label", "PV01", "Itd", "Scenario", "YieldBps", "ItdAfter"])
     names = [clean(lk.cell(151, VIRA_C0 + 3 + i * 2).value) for i in range(4)]
@@ -347,9 +359,10 @@ def build(src, outdir, sanitize=False):
     style(tsh, [20, 34, 14, 95], 4, wrap=True)
     style(xsh, [16, 14, 13, 14])
     style(vsh, [34, 10, 16, 10, 11, 30, 11, 12])
+    style(v4, [13, 10, 10, 13, 10, 10])
     style(rsh, [22, 14, 12, 9, 13, 9, 9, 9, 9, 9])
     style(osh, [13] + [9] * VOL_TENORS)
-    for sh in (dsh, psh, csh, gsh, ssh, xsh, vsh, rsh, osh):
+    for sh in (dsh, psh, csh, gsh, ssh, xsh, vsh, rsh, osh, v4):
         sh.freeze_panes = "B2"
 
     if sanitize:

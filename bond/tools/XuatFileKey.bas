@@ -1,19 +1,77 @@
 Attribute VB_Name = "z_XuatFileKey"
 Option Explicit
 
-Private Const SHEET_SRC As String = "Linked (1)"
-Private Const SHEET_RPT As String = "Report"
-Private Const COL_KEYID As Long = 14
-Private Const SCHEMA As String = "bond.key.v1"
+' Sinh Key_YYYYMMDD.xlsx tu File 02, cung cau truc voi ban Python.
+' Chay mot lan:  TaoNameNhanDinh   (dat Named Range cho 17 o nhan dinh)
+' Chay moi ky:   XuatFileKey
+
+Private Const SCHEMA As String = "bond.key.v3"
+Private Const SH_S2 As String = "Linked (1)"
+Private Const SH_LK As String = "Linked"
+Private Const SH_CD As String = "Chart data"
+Private Const SH_RP As String = "Report"
+Private Const SH_RT As String = "Run Tool"
+Private Const SH_VS As String = "VIRA scenarios"
+Private Const SH_VOL As String = "Volatility"
+Private Const VOL_ROWS As Long = 800
+
+Private Const NM_PREFIX As String = "HTML_"
+
+' ---------- tien ich ----------
+
+Private Function Txt(v As Variant) As String
+    If IsError(v) Then
+        Txt = ""
+    ElseIf IsNull(v) Or IsEmpty(v) Then
+        Txt = ""
+    Else
+        Txt = Trim$(CStr(v))
+    End If
+End Function
+
+Private Function OneLine(v As Variant) As String
+    Dim s As String
+    s = Txt(v)
+    s = Replace$(s, vbCrLf, " ")
+    s = Replace$(s, vbLf, " ")
+    s = Replace$(s, vbCr, " ")
+    Do While InStr(s, "  ") > 0
+        s = Replace$(s, "  ", " ")
+    Loop
+    OneLine = Trim$(s)
+End Function
+
+Private Function KeepLines(v As Variant) As String
+    Dim s As String, parts As Variant, i As Long, out As String
+    s = Txt(v)
+    s = Replace$(s, vbCrLf, vbLf)
+    s = Replace$(s, vbCr, vbLf)
+    parts = Split(s, vbLf)
+    For i = LBound(parts) To UBound(parts)
+        Dim ln As String
+        ln = parts(i)
+        Do While InStr(ln, "  ") > 0
+            ln = Replace$(ln, "  ", " ")
+        Loop
+        parts(i) = Trim$(ln)
+    Next i
+    out = Join(parts, vbLf)
+    Do While Left$(out, 1) = vbLf
+        out = Mid$(out, 2)
+    Loop
+    Do While Right$(out, 1) = vbLf
+        out = Left$(out, Len(out) - 1)
+    Loop
+    KeepLines = out
+End Function
 
 Private Function Fold(ByVal s As String) As String
-    Dim src As Variant, dst As Variant, i As Long
+    Dim src As Variant, dst As Variant, i As Long, j As Long
     src = Array("àáạảãâầấậẩẫăằắặẳẵ", "èéẹẻẽêềếệểễ", "ìíịỉĩ", _
                 "òóọỏõôồốộổỗơờớợởỡ", "ùúụủũưừứựửữ", "ỳýỵỷỹ", "đ")
     dst = Array("a", "e", "i", "o", "u", "y", "d")
     s = LCase$(s)
     For i = LBound(src) To UBound(src)
-        Dim j As Long
         For j = 1 To Len(src(i))
             s = Replace$(s, Mid$(src(i), j, 1), dst(i))
         Next j
@@ -40,144 +98,478 @@ Private Function Slug(ByVal s As String) As String
     Slug = out
 End Function
 
-Private Function BookAt(ByVal r As Long) As String
-    Select Case True
-        Case r >= 5 And r <= 30:  BookAt = "TB_MSB"
-        Case r >= 32 And r <= 53: BookAt = "BB_MSB"
-        Case r >= 55 And r <= 60: BookAt = "TB_SBV"
-        Case r >= 62 And r <= 67: BookAt = "BB_SBV"
-        Case r = 69:              BookAt = "OTHER"
-        Case r >= 71 And r <= 74: BookAt = "FIBOND"
-        Case Else:                BookAt = ""
-    End Select
+Private Function VnDate(v As Variant) As String
+    If IsDate(v) Then VnDate = Format$(v, "dd/mm/yyyy") Else VnDate = Txt(v)
 End Function
 
-Private Function CodeOf(ByVal book As String) As String
-    Select Case book
-        Case "TB_MSB": CodeOf = "2.1."
-        Case "BB_MSB": CodeOf = "2.2."
-        Case "TB_SBV": CodeOf = "2.3."
-        Case "BB_SBV": CodeOf = "2.4."
-        Case "OTHER":  CodeOf = "2.5."
-        Case "FIBOND": CodeOf = "2.6."
-    End Select
-End Function
-
-Private Function SectionOf(ByVal book As String) As String
-    Select Case book
-        Case "TB_MSB": SectionOf = "TRADING BOOK NOI BO"
-        Case "BB_MSB": SectionOf = "BANKING BOOK NOI BO"
-        Case "TB_SBV": SectionOf = "TRADING BOOK SBV"
-        Case "BB_SBV": SectionOf = "BANKING BOOK SBV"
-        Case "OTHER":  SectionOf = "KHAC"
-        Case "FIBOND": SectionOf = "FI Bond & CD"
-    End Select
-End Function
-
-Public Sub TaoCotKeyID()
-    Dim ws As Worksheet, r As Long, book As String, lab As String, base As String
-    Dim seen As Object, n As Long
-    Set ws = ThisWorkbook.Sheets(SHEET_SRC)
-    Set seen = CreateObject("Scripting.Dictionary")
-
-    ws.Cells(2, COL_KEYID).Value = "KeyID"
-    For r = 4 To 80
-        book = BookAt(r)
-        lab = Trim$(CStr(ws.Cells(r, 3).Value))
-        If book <> "" And lab <> "" Then
-            base = Slug(lab)
-            If seen.Exists(book & "|" & base) Then
-                n = seen(book & "|" & base) + 1
-                seen(book & "|" & base) = n
-                base = base & CStr(n)
-            Else
-                seen.Add book & "|" & base, 1
-            End If
-            ws.Cells(r, COL_KEYID).Value = "S2." & book & "." & base
+' Tim dong chua nhan trong mot cot, trong pham vi r1..r2
+Private Function FindRow(ws As Worksheet, col As Long, ByVal label As String, _
+                         ByVal r1 As Long, ByVal r2 As Long) As Long
+    Dim r As Long, want As String
+    want = Fold(Trim$(label))
+    For r = r1 To r2
+        If Fold(Txt(ws.Cells(r, col).Value)) = want Then
+            FindRow = r
+            Exit Function
         End If
     Next r
-    MsgBox "Da ghi cot KeyID vao " & SHEET_SRC & " cot N.", vbInformation
+    FindRow = 0
+End Function
+
+' ---------- dat Named Range cho o nhan dinh ----------
+
+Public Sub TaoNameNhanDinh()
+    Dim rp As Worksheet, i As Long, n As Long
+    Dim keys As Variant, addrs As Variant
+    keys = Array("market", "assessment", "noteTB", "noteTPCP", "noteFI", "noteFV", _
+                 "itdTB", "itdBB", "note10d", "noteVar", "noteBB10d", "noteBBVar", _
+                 "noteRealized", "noteScenario", "noteSign", "noteRating", "noteVira")
+    addrs = Array("B4", "H4", "Q10", "Q59", "Q66", "B110", _
+                  "B84", "L84", "B166", "B184", "B203", "B221", _
+                  "M95", "M110", "B120", "B254", "N223")
+    Set rp = ThisWorkbook.Sheets(SH_RP)
+    For i = LBound(keys) To UBound(keys)
+        On Error Resume Next
+        ThisWorkbook.Names(NM_PREFIX & keys(i)).Delete
+        On Error GoTo 0
+        ThisWorkbook.Names.Add Name:=NM_PREFIX & keys(i), _
+                               RefersTo:="='" & SH_RP & "'!" & rp.Range(addrs(i)).Address
+        n = n + 1
+    Next i
+    MsgBox "Da dat " & n & " Named Range cho o nhan dinh." & vbCrLf & _
+           "Tu gio o co dich len xuong thi Excel tu cap nhat, macro van doc dung.", vbInformation
 End Sub
 
+Private Function NameVal(ByVal k As String) As String
+    Dim r As Range
+    On Error Resume Next
+    Set r = ThisWorkbook.Names(NM_PREFIX & k).RefersToRange
+    On Error GoTo 0
+    If r Is Nothing Then
+        NameVal = ""
+    Else
+        NameVal = KeepLines(r.Cells(1, 1).Value)
+    End If
+End Function
+
+' ---------- xuat file key ----------
+
 Public Sub XuatFileKey()
-    Dim src As Worksheet, rpt As Worksheet, rt As Worksheet
-    Dim wb As Workbook, mt As Worksheet, dt As Worksheet, tx As Worksheet
-    Dim r As Long, i As Long, book As String, keyid As String
-    Dim stamp As String, dest As String
+    Dim s2 As Worksheet, lk As Worksheet, cd As Worksheet, rt As Worksheet
+    Dim wb As Workbook, sh As Worksheet
+    Dim i As Long, r As Long, c As Long, n As Long
+    Dim dest As String, t0 As Single
 
-    Set src = ThisWorkbook.Sheets(SHEET_SRC)
-    Set rpt = ThisWorkbook.Sheets(SHEET_RPT)
-    Set rt = ThisWorkbook.Sheets("Run Tool")
+    t0 = Timer
+    Set s2 = ThisWorkbook.Sheets(SH_S2)
+    Set lk = ThisWorkbook.Sheets(SH_LK)
+    Set cd = ThisWorkbook.Sheets(SH_CD)
+    Set rt = ThisWorkbook.Sheets(SH_RT)
 
-    If Trim$(CStr(src.Cells(2, COL_KEYID).Value)) <> "KeyID" Then
-        MsgBox "Chua co cot KeyID. Chay TaoCotKeyID truoc.", vbExclamation
-        Exit Sub
+    If ThisWorkbook.Names.Count = 0 Or NameVal("market") = "" Then
+        If MsgBox("Chua thay Named Range nhan dinh. Chay TaoNameNhanDinh truoc?" & vbCrLf & _
+                  "Chon No de van xuat (phan nhan dinh se rong).", vbYesNo + vbQuestion) = vbYes Then
+            Exit Sub
+        End If
     End If
 
     Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
     Set wb = Workbooks.Add(xlWBATWorksheet)
 
-    Set mt = wb.Sheets(1): mt.Name = "META"
-    mt.Range("A1:C1").Value = Array("Key", "Value", "Ghi chu")
-    mt.Range("A2:B2").Value = Array("schema", SCHEMA)
-    mt.Range("A3:B3").Value = Array("asOf", Format$(rt.Range("B2").Value, "dd/mm/yyyy"))
-    mt.Range("A4:B4").Value = Array("dateYest", Format$(rt.Range("B3").Value, "dd/mm/yyyy"))
-    mt.Range("A5:B5").Value = Array("dateLastMonth", Format$(rt.Range("B4").Value, "dd/mm/yyyy"))
-    mt.Range("A6:B6").Value = Array("dateLastQuarter", Format$(src.Range("H3").Value, "dd/mm/yyyy"))
-    mt.Range("A7:B7").Value = Array("dateLastYear", Format$(rt.Range("B7").Value, "dd/mm/yyyy"))
-    mt.Range("A8:B8").Value = Array("rptTitle", "Bao cao rui ro thi truong")
-    mt.Range("A9:B9").Value = Array("rptSubtitle", "Bao cao Desk Bond")
-    mt.Range("A10:B10").Value = Array("generatedAt", Format$(Now, "dd/mm/yyyy hh:nn"))
+    ' --- META ---
+    Set sh = wb.Sheets(1): sh.Name = "META"
+    sh.Range("A1:C1").Value = Array("Key", "Value", "Ghi chu")
+    Dim mk As Variant, mv As Variant
+    mk = Array("schema", "asOf", "dateYest", "dateLastMonth", "dateLastQuarter", _
+               "dateLastYear", "rptTitle", "rptSubtitle", "unitNote", "generatedAt")
+    mv = Array(SCHEMA, VnDate(rt.Range("B2").Value), VnDate(rt.Range("B3").Value), _
+               VnDate(rt.Range("B4").Value), VnDate(s2.Range("H3").Value), _
+               VnDate(rt.Range("B7").Value), "Báo cáo rủi ro thị trường", _
+               "Báo cáo Desk Bond", "Đơn vị: tỷ VND, trừ khi ghi khác. Giá trị âm là lỗ.", _
+               Format$(Now, "dd/mm/yyyy hh:nn"))
+    For i = LBound(mk) To UBound(mk)
+        sh.Cells(i + 2, 1).Value = mk(i)
+        sh.Cells(i + 2, 2).Value = mv(i)
+    Next i
 
-    Set dt = wb.Sheets.Add(After:=mt): dt.Name = "DATA_S2"
-    dt.Range("A1:Q1").Value = Array("KeyID", "Book", "Code", "Section", "STT", "Nhom", _
+    ' --- DATA_S2: do theo nhan khoi ---
+    Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count)): sh.Name = "DATA_S2"
+    sh.Range("A1:Q1").Value = Array("KeyID", "Book", "Code", "Section", "STT", "Nhom", _
         "ChiTieu", "Sub", "Today", "DtD", "Yesterday", "LastMonth", "LastQuarter", _
         "LastYear", "Limit", "Used", "Light")
+    Dim bcode As Variant, blab As Variant, bkey As Variant
+    bkey = Array("TB_INT", "BB_INT", "TB_SBV", "BB_SBV", "OTHER", "FIBOND")
+    bcode = Array("2.1.", "2.2.", "2.3.", "2.4.", "2.5.", "2.6.")
+    blab = Array("TRADING BOOK NỘI BỘ", "BANKING BOOK NỘI BỘ", "TRADING BOOK SBV", _
+                 "BANKING BOOK SBV", "KHÁC", "FI Bond & CD")
 
-    i = 2
-    For r = 4 To 80
-        book = BookAt(r)
-        keyid = Trim$(CStr(src.Cells(r, COL_KEYID).Value))
-        If book <> "" And keyid <> "" Then
-            dt.Cells(i, 1).Value = keyid
-            dt.Cells(i, 2).Value = book
-            dt.Cells(i, 3).Value = CodeOf(book)
-            dt.Cells(i, 4).Value = SectionOf(book)
-            dt.Cells(i, 5).Value = src.Cells(r, 1).Value
-            dt.Cells(i, 6).Value = src.Cells(r, 2).Value
-            dt.Cells(i, 7).Value = Replace$(CStr(src.Cells(r, 3).Value), vbLf, " ")
-            dt.Cells(i, 8).Value = IIf(Left$(Trim$(CStr(src.Cells(r, 3).Value)), 2) = "a)" _
-                                    Or Left$(Trim$(CStr(src.Cells(r, 3).Value)), 2) = "b)", 1, 0)
-            dt.Cells(i, 9).Value = src.Cells(r, 4).Value
-            dt.Cells(i, 10).Value = src.Cells(r, 5).Value
-            dt.Cells(i, 11).Value = src.Cells(r, 6).Value
-            dt.Cells(i, 12).Value = src.Cells(r, 7).Value
-            dt.Cells(i, 13).Value = src.Cells(r, 8).Value
-            dt.Cells(i, 14).Value = src.Cells(r, 9).Value
-            dt.Cells(i, 15).Value = src.Cells(r, 10).Value
-            dt.Cells(i, 16).Value = src.Cells(r, 11).Value
-            dt.Cells(i, 17).Value = src.Cells(r, 12).Value
-            i = i + 1
+    Dim starts(0 To 5) As Long, ends(0 To 5) As Long
+    For i = 0 To 5
+        starts(i) = FindRow(s2, 2, CStr(blab(i)), 1, 120)
+        If starts(i) = 0 Then
+            Application.ScreenUpdating = True
+            Application.DisplayAlerts = True
+            wb.Close False
+            MsgBox "Khong tim thay nhan khoi: " & blab(i) & vbCrLf & _
+                   "Kiem tra lai chu trong cot B cua sheet " & SH_S2 & ".", vbCritical
+            Exit Sub
+        End If
+    Next i
+    For i = 0 To 5
+        If i < 5 Then ends(i) = starts(i + 1) - 1 Else ends(i) = starts(i) + 30
+    Next i
+
+    Dim dict As Object
+    Set dict = CreateObject("Scripting.Dictionary")
+    n = 2
+    For i = 0 To 5
+        For r = starts(i) + 1 To ends(i)
+            Dim lab As String
+            lab = OneLine(s2.Cells(r, 3).Value)
+            If lab <> "" Then
+                Dim base As String, kk As String
+                base = Slug(lab)
+                kk = bkey(i) & "|" & base
+                If dict.Exists(kk) Then
+                    dict(kk) = dict(kk) + 1
+                    base = base & CStr(dict(kk))
+                Else
+                    dict.Add kk, 1
+                End If
+                sh.Cells(n, 1).Value = "S2." & bkey(i) & "." & base
+                sh.Cells(n, 2).Value = bkey(i)
+                sh.Cells(n, 3).Value = bcode(i)
+                sh.Cells(n, 4).Value = blab(i)
+                sh.Cells(n, 5).Value = s2.Cells(r, 1).Value
+                sh.Cells(n, 6).Value = OneLine(s2.Cells(r, 2).Value)
+                sh.Cells(n, 7).Value = lab
+                sh.Cells(n, 8).Value = IIf(Left$(lab, 2) = "a)" Or Left$(lab, 2) = "b)", 1, 0)
+                For c = 4 To 12
+                    sh.Cells(n, 5 + c).Value = s2.Cells(r, c).Value
+                Next c
+                n = n + 1
+            End If
+        Next r
+    Next i
+
+    ' --- POS ---
+    Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count)): sh.Name = "POS"
+    sh.Range("A1:O1").Value = Array("KeyID", "Book", "Tenor", "Face", "FaceYest", "FaceLM", _
+        "DtD", "MtD", "PV01", "Itd", "ItdYest", "ItdLM", "ItdMtD", "ItdYtD", "Daily")
+    n = 2
+    n = DumpGrid(lk, sh, n, "POS.TB.", "TB", 14, 65, 75, 13)
+    n = DumpGrid(lk, sh, n, "POS.BB.", "BB", 28, 80, 90, 13)
+
+    ' --- CURVE ---
+    Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count)): sh.Name = "CURVE"
+    sh.Range("A1:J1").Value = Array("KeyID", "Type", "Tenor", "V1", "V2", "V3", "V4", _
+        "DtD", "MtD", "YtD")
+    n = 2
+    n = DumpCurve(lk, sh, n, "YIELD", 41, 80, 89)
+    n = DumpCurve(lk, sh, n, "REPO", 95, 171, 178)
+
+    ' --- GRID ---
+    Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count)): sh.Name = "GRID"
+    sh.Range("A1:R1").Value = Array("KeyID", "Block", "BlockName", "Label", _
+        "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12", "C13", "C14")
+    n = 2
+    n = DumpBlock(lk, sh, n, "MIX", "3.3 Cơ cấu theo tổ chức phát hành", 147, 238, 249, 7)
+    n = DumpBlock(lk, sh, n, "HOLD", "3.4 Cơ cấu theo thời gian nắm giữ", 164, 274, 284, 5)
+    n = DumpBlock(lk, sh, n, "PNL", "3.5 Unrealized & Realized PnL", 154, 253, 259, 4)
+    n = DumpBlock(lk, sh, n, "CAPITAL", "3.8 Mức độ sử dụng vốn", 158, 262, 270, 6)
+    n = DumpBlock(lk, sh, n, "BS", "3.6 Ghi nhận PnL theo lớp bảng cân đối", 103, 184, 189, 14)
+    n = DumpBlock(lk, sh, n, "FIONBS", "7.1 FI Bond trên bảng cân đối", 169, 288, 294, 5)
+    n = DumpBlock(lk, sh, n, "PNLSCEN", "3.7 Phân tích kịch bản PnL", 140, 230, 234, 7)
+
+    ' --- SCEN ---
+    Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count)): sh.Name = "SCEN"
+    sh.Range("A1:J1").Value = Array("KeyID", "Book", "Kind", "Scenario", "Sub", "Tenor", _
+        "PV01", "Itd", "YieldBps", "ItdChange")
+    n = 2
+    n = DumpScen(lk, sh, n, "TB", "recent", 51, 95, 105, 92)
+    n = DumpScen(lk, sh, n, "TB", "var", 51, 110, 120, 107)
+    n = DumpScen(lk, sh, n, "BB", "recent", 51, 140, 150, 137)
+    n = DumpScen(lk, sh, n, "BB", "var", 51, 125, 135, 122)
+
+    ' --- VIRA4 ---
+    Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count)): sh.Name = "VIRA4"
+    sh.Range("A1:F1").Value = Array("Month", "VIRA", "Big4", "MarketMaker", "Top3", "Actual")
+    Dim vs As Worksheet
+    Set vs = ThisWorkbook.Sheets(SH_VS)
+    n = 2
+    For r = 2 To 30
+        If Txt(vs.Cells(r, 1).Value) <> "" And Txt(vs.Cells(r, 2).Value) <> "" Then
+            sh.Cells(n, 1).Value = VnDate(vs.Cells(r, 1).Value)
+            For c = 2 To 6
+                sh.Cells(n, c).Value = vs.Cells(r, c).Value
+            Next c
+            n = n + 1
         End If
     Next r
 
-    Set tx = wb.Sheets.Add(After:=dt): tx.Name = "TEXT"
-    tx.Range("A1:D1").Value = Array("KeyID", "Mo ta", "Nguon", "Value")
-    tx.Range("A2:D2").Value = Array("txt.market", "Thong tin thi truong", "Report!B4", rpt.Range("B4").Value)
-    tx.Range("A3:D3").Value = Array("txt.assessment", "Tuan thu han muc & danh gia", "Report!H4", rpt.Range("H4").Value)
-    tx.Range("A4:D4").Value = Array("txt.noteTB", "Ghi chu Trading Book", "Report!Q10", rpt.Range("Q10").Value)
-    tx.Range("A5:D5").Value = Array("txt.noteTPCP", "Ghi chu ty le TPCP", "Report!Q59", rpt.Range("Q59").Value)
-    tx.Range("A6:D6").Value = Array("txt.noteFI", "Ghi chu co cau FI Bond", "Report!Q66", rpt.Range("Q66").Value)
-    tx.Range("A7:D7").Value = Array("txt.noteFV", "Ghi chu Fair value", "Report!B110", rpt.Range("B110").Value)
+    ' --- VIRA ---
+    Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count)): sh.Name = "VIRA"
+    sh.Range("A1:H1").Value = Array("KeyID", "Scope", "Label", "PV01", "Itd", _
+        "Scenario", "YieldBps", "ItdAfter")
+    n = 2
+    n = DumpVira(lk, sh, n, "BOOK", 66, 154, 155, 151)
+    n = DumpVira(lk, sh, n, "BB_TENOR", 78, 154, 164, 151)
 
-    stamp = Format$(rt.Range("B2").Value, "yyyymmdd")
-    dest = ThisWorkbook.Path & Application.PathSeparator & "Key_" & stamp & ".xlsx"
+    ' --- RATING ---
+    Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count)): sh.Name = "RATING"
+    sh.Range("A1:J1").Value = Array("KeyID", "Issuer", "Amount", "Rating", "ReviewDate", _
+        "Pct", "CumPct", "Fitch", "Moody", "SP")
+    n = 2
+    For r = 203 To 223
+        Dim iss As String
+        iss = OneLine(lk.Cells(r, 131).Value)
+        If iss <> "" Then
+            sh.Cells(n, 1).Value = "RATING." & Slug(iss)
+            sh.Cells(n, 2).Value = iss
+            For c = 1 To 8
+                If c = 3 Then
+                    sh.Cells(n, 2 + c).Value = VnDate(lk.Cells(r, 131 + c).Value)
+                Else
+                    sh.Cells(n, 2 + c).Value = lk.Cells(r, 131 + c).Value
+                End If
+            Next c
+            n = n + 1
+        End If
+    Next r
 
-    Application.DisplayAlerts = False
+    ' --- VOL ---
+    Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count)): sh.Name = "VOL"
+    Dim vo As Worksheet
+    Set vo = ThisWorkbook.Sheets(SH_VOL)
+    sh.Cells(1, 1).Value = "Date"
+    For c = 1 To 10
+        sh.Cells(1, c + 1).Value = OneLine(vo.Cells(1, c + 1).Value)
+    Next c
+    n = 2
+    For r = 2 To VOL_ROWS + 1
+        If Txt(vo.Cells(r, 1).Value) = "" Then Exit For
+        sh.Cells(n, 1).Value = VnDate(vo.Cells(r, 1).Value)
+        For c = 1 To 10
+            sh.Cells(n, c + 1).Value = vo.Cells(r, c + 1).Value
+        Next c
+        n = n + 1
+    Next r
+
+    ' --- TEXT (doc qua Named Range) ---
+    Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count)): sh.Name = "TEXT"
+    sh.Range("A1:D1").Value = Array("KeyID", "Mo ta", "Nguon", "Value")
+    Dim tk As Variant, td As Variant
+    tk = Array("market", "assessment", "noteTB", "noteTPCP", "noteFI", "noteFV", _
+               "itdTB", "itdBB", "note10d", "noteVar", "noteBB10d", "noteBBVar", _
+               "noteRealized", "noteScenario", "noteSign", "noteRating", "noteVira")
+    td = Array("Thong tin thi truong", "Tuan thu han muc & danh gia", "Ghi chu Trading Book", _
+               "Ghi chu ty le TPCP", "Ghi chu co cau FI Bond", "Ghi chu Fair value", _
+               "Lo MtM Trading theo ky han", "Lo MtM Banking theo ky han", _
+               "Kich ban 10 ngay Trading", "Kich ban VaR Trading", _
+               "Kich ban 1 thang Banking", "Kich ban VaR Banking", _
+               "Ghi chu Realized PnL", "Ghi chu kich ban PnL", "Quy uoc dau", _
+               "Ghi chu xep hang FI Bond", "Ghi chu VIRA")
+    For i = LBound(tk) To UBound(tk)
+        sh.Cells(i + 2, 1).Value = "txt." & tk(i)
+        sh.Cells(i + 2, 2).Value = td(i)
+        sh.Cells(i + 2, 3).Value = NM_PREFIX & tk(i)
+        sh.Cells(i + 2, 4).Value = NameVal(CStr(tk(i)))
+    Next i
+    sh.Columns(4).WrapText = True
+
+    ' --- TS: ghi mot lan bang mang ---
+    Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count)): sh.Name = "TS"
+    sh.Range("A1:D1").Value = Array("Series", "Field", "Date", "Value")
+    Call DumpTS(cd, sh)
+
+    ' --- luu ---
+    dest = ThisWorkbook.Path & Application.PathSeparator & _
+           "Key_" & Format$(rt.Range("B2").Value, "yyyymmdd") & ".xlsx"
     wb.SaveAs Filename:=dest, FileFormat:=xlOpenXMLWorkbook
-    Application.DisplayAlerts = True
     wb.Close SaveChanges:=False
 
+    Application.DisplayAlerts = True
     Application.ScreenUpdating = True
-    MsgBox "Da xuat " & (i - 2) & " chi tieu:" & vbCrLf & dest, vbInformation
+    MsgBox "Da xuat file key trong " & Format$(Timer - t0, "0.0") & " giay:" & vbCrLf & dest, vbInformation
+End Sub
+
+' ---------- cac ham do khoi ----------
+
+Private Function DumpGrid(lk As Worksheet, sh As Worksheet, ByVal n As Long, _
+    ByVal pfx As String, ByVal book As String, ByVal c0 As Long, _
+    ByVal r0 As Long, ByVal r1 As Long, ByVal w As Long) As Long
+    Dim r As Long, c As Long, t As String
+    For r = r0 To r1
+        t = OneLine(lk.Cells(r, c0).Value)
+        If t <> "" Then
+            sh.Cells(n, 1).Value = pfx & Slug(t)
+            sh.Cells(n, 2).Value = book
+            sh.Cells(n, 3).Value = t
+            For c = 1 To w - 1
+                sh.Cells(n, 3 + c).Value = lk.Cells(r, c0 + c).Value
+            Next c
+            n = n + 1
+        End If
+    Next r
+    DumpGrid = n
+End Function
+
+Private Function DumpCurve(lk As Worksheet, sh As Worksheet, ByVal n As Long, _
+    ByVal nm As String, ByVal c0 As Long, ByVal r0 As Long, ByVal r1 As Long) As Long
+    Dim r As Long, t As String
+    For r = r0 To r1
+        t = OneLine(lk.Cells(r, c0).Value)
+        If t <> "" Then
+            sh.Cells(n, 1).Value = "CURVE." & nm & "." & Slug(t)
+            sh.Cells(n, 2).Value = nm
+            sh.Cells(n, 3).Value = t
+            sh.Cells(n, 4).Value = lk.Cells(r, c0 + 1).Value
+            sh.Cells(n, 5).Value = lk.Cells(r, c0 + 2).Value
+            sh.Cells(n, 6).Value = lk.Cells(r, c0 + 3).Value
+            sh.Cells(n, 7).Value = lk.Cells(r, c0 + 4).Value
+            sh.Cells(n, 8).Value = lk.Cells(r, c0 + 6).Value
+            sh.Cells(n, 9).Value = lk.Cells(r, c0 + 7).Value
+            sh.Cells(n, 10).Value = lk.Cells(r, c0 + 8).Value
+            n = n + 1
+        End If
+    Next r
+    DumpCurve = n
+End Function
+
+Private Function DumpBlock(lk As Worksheet, sh As Worksheet, ByVal n As Long, _
+    ByVal nm As String, ByVal title As String, ByVal c0 As Long, _
+    ByVal r0 As Long, ByVal r1 As Long, ByVal w As Long) As Long
+    Dim r As Long, c As Long, t As String
+    For r = r0 To r1
+        t = OneLine(lk.Cells(r, c0).Value)
+        If t <> "" Then
+            sh.Cells(n, 1).Value = "GRID." & nm & "." & Slug(t)
+            sh.Cells(n, 2).Value = nm
+            sh.Cells(n, 3).Value = title
+            sh.Cells(n, 4).Value = t
+            For c = 1 To w - 1
+                sh.Cells(n, 4 + c).Value = lk.Cells(r, c0 + c).Value
+            Next c
+            n = n + 1
+        End If
+    Next r
+    DumpBlock = n
+End Function
+
+Private Function DumpScen(lk As Worksheet, sh As Worksheet, ByVal n As Long, _
+    ByVal book As String, ByVal kind As String, ByVal c0 As Long, _
+    ByVal r0 As Long, ByVal r1 As Long, ByVal hdr As Long) As Long
+    Dim r As Long, i As Long, tenor As String
+    Dim nm(0 To 5) As String, sb(0 To 5) As String
+    For i = 0 To 5
+        nm(i) = OneLine(lk.Cells(hdr, c0 + 3 + i * 2).Value)
+        sb(i) = OneLine(lk.Cells(hdr + 2, c0 + 3 + i * 2).Value)
+        If nm(i) = "" Then nm(i) = "KB" & CStr(i + 1)
+    Next i
+    For r = r0 To r1
+        tenor = OneLine(lk.Cells(r, c0).Value)
+        If tenor <> "" Then
+            For i = 0 To 5
+                sh.Cells(n, 1).Value = "SCEN." & book & "." & kind & "." & Slug(nm(i)) & "." & Slug(tenor)
+                sh.Cells(n, 2).Value = book
+                sh.Cells(n, 3).Value = kind
+                sh.Cells(n, 4).Value = nm(i)
+                sh.Cells(n, 5).Value = sb(i)
+                sh.Cells(n, 6).Value = tenor
+                sh.Cells(n, 7).Value = lk.Cells(r, c0 + 1).Value
+                sh.Cells(n, 8).Value = lk.Cells(r, c0 + 2).Value
+                sh.Cells(n, 9).Value = lk.Cells(r, c0 + 3 + i * 2).Value
+                sh.Cells(n, 10).Value = lk.Cells(r, c0 + 4 + i * 2).Value
+                n = n + 1
+            Next i
+        End If
+    Next r
+    DumpScen = n
+End Function
+
+Private Function DumpVira(lk As Worksheet, sh As Worksheet, ByVal n As Long, _
+    ByVal scope As String, ByVal c0 As Long, ByVal r0 As Long, _
+    ByVal r1 As Long, ByVal hdr As Long) As Long
+    Dim r As Long, i As Long, lab As String
+    Dim nm(0 To 3) As String
+    For i = 0 To 3
+        nm(i) = OneLine(lk.Cells(hdr, c0 + 3 + i * 2).Value)
+        If nm(i) = "" Then nm(i) = "VIRA" & CStr(i + 1)
+    Next i
+    For r = r0 To r1
+        lab = OneLine(lk.Cells(r, c0).Value)
+        If lab <> "" Then
+            For i = 0 To 3
+                sh.Cells(n, 1).Value = "VIRA." & LCase$(scope) & "." & Slug(lab) & "." & Slug(nm(i))
+                sh.Cells(n, 2).Value = scope
+                sh.Cells(n, 3).Value = lab
+                sh.Cells(n, 4).Value = lk.Cells(r, c0 + 1).Value
+                sh.Cells(n, 5).Value = lk.Cells(r, c0 + 2).Value
+                sh.Cells(n, 6).Value = nm(i)
+                sh.Cells(n, 7).Value = lk.Cells(r, c0 + 3 + i * 2).Value
+                sh.Cells(n, 8).Value = lk.Cells(r, c0 + 4 + i * 2).Value
+                n = n + 1
+            Next i
+        End If
+    Next r
+    DumpVira = n
+End Function
+
+' TS: gom vao mang roi ghi mot lan. Header nam ca o hang 1 cua Chart data.
+Private Sub DumpTS(cd As Worksheet, sh As Worksheet)
+    Dim maxc As Long, c As Long, i As Long, r As Long
+    Dim heads() As String, isAxis() As Boolean
+    Dim arr() As Variant, n As Long, cap As Long
+
+    maxc = cd.Cells(1, cd.Columns.Count).End(xlToLeft).Column
+    ReDim heads(1 To maxc)
+    ReDim isAxis(1 To maxc)
+    For c = 1 To maxc
+        heads(c) = OneLine(cd.Cells(1, c).Value)
+        Select Case heads(c)
+            Case "Date", "Ngày", "Tháng", "Kỳ hạn", "STT": isAxis(c) = True
+        End Select
+    Next c
+
+    cap = 20000
+    ReDim arr(1 To cap, 1 To 4)
+    n = 0
+
+    For c = 1 To maxc - 1
+        If heads(c) <> "" And Not isAxis(c) And isAxis(c + 1) Then
+            Dim series As String, axisCol As Long, endCol As Long
+            series = Slug(heads(c))
+            axisCol = c + 1
+            endCol = maxc
+            For i = c + 2 To maxc - 1
+                If heads(i) <> "" And isAxis(i + 1) Then
+                    endCol = i - 1
+                    Exit For
+                End If
+            Next i
+            For r = 2 To cd.Rows.Count
+                If Txt(cd.Cells(r, axisCol).Value) = "" Then Exit For
+                Dim dtxt As String
+                dtxt = VnDate(cd.Cells(r, axisCol).Value)
+                For i = axisCol + 1 To endCol
+                    If heads(i) <> "" And Not isAxis(i) Then
+                        If Txt(cd.Cells(r, i).Value) <> "" Then
+                            n = n + 1
+                            If n > cap Then
+                                cap = cap * 2
+                                ReDim Preserve arr(1 To cap, 1 To 4)
+                            End If
+                            arr(n, 1) = series
+                            arr(n, 2) = heads(i)
+                            arr(n, 3) = dtxt
+                            arr(n, 4) = cd.Cells(r, i).Value
+                        End If
+                    End If
+                Next i
+            Next r
+        End If
+    Next c
+
+    If n > 0 Then sh.Range("A2").Resize(n, 4).Value = arr
 End Sub

@@ -143,3 +143,28 @@ Mật khẩu nằm trong mã nguồn nên **chỉ chặn bấm nhầm, không ph
   yield 10Y mid 4.423 · scen recent 6 / VaR 6 · rating 20 issuer · `TS.yieldTs` 195 điểm.
 - Mật khẩu sai → không mở được tab.
 - Xuất bản: 1.92MB (trần 5MB), mở lại giữ đúng 13/08, chart vẫn vẽ.
+
+## v8 — bản giao kèm VBA (17/08)
+
+- Thanh công cụ sửa **nổi cố định dưới màn hình**, theo anh qua cả 5 trang; có Ctrl+Z / Ctrl+Y.
+- Bỏ badge ngày chốt khỏi p1–p5; ngày chốt + "đã cũ n ngày" chuyển vào tab Quản trị.
+- Thêm `VIRA4` (5 dòng, từ `VIRA scenarios!A4:F8`) → biểu đồ dự báo VIRA vs thực tế.
+- `tools/XuatFileKey.bas` sinh đủ 12 sheet, cùng cấu trúc bản Python.
+
+### Macro — hai điểm thiết kế
+
+**Dò theo nhãn, không theo toạ độ.** `DATA_S2` tìm dòng chứa `"TRADING BOOK NỘI BỘ"`,
+`"BANKING BOOK NỘI BỘ"`… rồi đọc tới nhãn kế tiếp. Chèn/xoá dòng trong `Linked (1)` không
+làm lệch. Không thấy nhãn thì macro dừng và báo tên nhãn thiếu, không xuất file sai.
+
+**Named Range cho ô nhận định.** Ô trong `Report` dịch lên xuống theo độ dài bảng, nên đọc
+theo địa chỉ cứng sẽ lấy nhầm ô. Chạy `TaoNameNhanDinh` một lần để đặt 17 name `HTML_*`;
+Excel tự cập nhật vùng khi dòng dịch.
+
+**`TS` ghi bằng mảng một lần** (`Range.Resize(n,4).Value = arr`) thay vì gán từng ô.
+
+### Cài đặt
+
+1. `Alt+F11` → Import `tools/XuatFileKey.bas`
+2. Chạy `TaoNameNhanDinh` — **một lần duy nhất**
+3. Mỗi kỳ: chạy `XuatFileKey` → `Key_YYYYMMDD.xlsx` nằm cùng thư mục File 02
