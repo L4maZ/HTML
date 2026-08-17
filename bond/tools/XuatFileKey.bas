@@ -2,8 +2,9 @@ Attribute VB_Name = "z_XuatFileKey"
 Option Explicit
 
 ' Sinh Key_YYYYMMDD.xlsx tu File 02, cung cau truc voi ban Python.
-' Chay mot lan:  TaoNameNhanDinh   (dat Named Range cho 17 o nhan dinh)
-' Chay moi ky:   XuatFileKey
+' Chi can assign 1 macro:  XuatFileKey
+' Lan dau chay, macro tu dat 17 Named Range cho o nhan dinh.
+' TaoNameNhanDinh chi dung khi muon dat lai thu cong.
 
 Private Const SCHEMA As String = "bond.key.v3"
 Private Const SH_S2 As String = "Linked (1)"
@@ -138,6 +139,10 @@ End Function
 ' ---------- dat Named Range cho o nhan dinh ----------
 
 Public Sub TaoNameNhanDinh()
+    DatName False
+End Sub
+
+Private Sub DatName(ByVal quiet As Boolean)
     Dim rp As Worksheet, i As Long, n As Long
     Dim keys As Variant, addrs As Variant
     keys = Array("market", "assessment", "noteTB", "noteTPCP", "noteFI", "noteFV", _
@@ -155,54 +160,56 @@ Public Sub TaoNameNhanDinh()
                                RefersTo:="='" & SH_RP & "'!" & rp.Range(addrs(i)).Address
         n = n + 1
     Next i
-    MsgBox "Da dat " & n & " Named Range cho o nhan dinh." & vbCrLf & _
-           "Tu gio o co dich len xuong thi Excel tu cap nhat, macro van doc dung.", vbInformation
+    If Not quiet Then
+        MsgBox "Da dat " & n & " Named Range cho o nhan dinh." & vbCrLf & _
+               "Tu gio o co dich len xuong thi Excel tu cap nhat, macro van doc dung.", vbInformation
+    End If
 End Sub
 
-' Doc rich text runs cua mot o -> danh dau [b] [i] [r] [h]
+' Doc rich text runs -> danh dau [b] [i] [r] [h]
+' Quet bang chia doi: doan nao dong nhat thi lay ca doan, khong quet tung ky tu.
 Private Function RichMarkup(rg As Range) As String
-    Dim s As String, i As Long, n As Long
-    Dim curB As Boolean, curI As Boolean, curR As Boolean
-    Dim nB As Boolean, nI As Boolean, nR As Boolean
-    Dim out As String, mixed As Boolean
-
-    s = Txt(rg.Value)
+    Dim s As String
+    s = Txt(rg.Value2)
     If s = "" Then RichMarkup = "": Exit Function
-    n = Len(s)
+    RichMarkup = AddFill(rg, Emit(rg, 1, Len(s), s))
+End Function
 
-    mixed = IsNull(rg.Font.Bold) Or IsNull(rg.Font.Italic) Or IsNull(rg.Font.Color)
-    If Not mixed Then
-        out = s
-        If rg.Font.Color <> 0 And Not IsNull(rg.Font.Color) Then out = "[r]" & out & "[/r]"
-        If rg.Font.Bold = True Then out = "[b]" & out & "[/b]"
-        If rg.Font.Italic = True Then out = "[i]" & out & "[/i]"
-        RichMarkup = AddFill(rg, out)
+Private Function Uniform(rg As Range, ByVal st As Long, ByVal ln As Long, _
+                         ByRef bb As Boolean, ByRef ii As Boolean, ByRef rr As Boolean) As Boolean
+    Dim f As Object
+    Set f = rg.Characters(st, ln).Font
+    If IsNull(f.Bold) Or IsNull(f.Italic) Or IsNull(f.Color) Then
+        Uniform = False
+    Else
+        bb = (f.Bold = True)
+        ii = (f.Italic = True)
+        rr = (f.Color <> 0)
+        Uniform = True
+    End If
+End Function
+
+Private Function Wrap(ByVal t As String, ByVal bb As Boolean, ByVal ii As Boolean, _
+                      ByVal rr As Boolean) As String
+    If rr Then t = "[r]" & t & "[/r]"
+    If bb Then t = "[b]" & t & "[/b]"
+    If ii Then t = "[i]" & t & "[/i]"
+    Wrap = t
+End Function
+
+Private Function Emit(rg As Range, ByVal st As Long, ByVal ln As Long, ByRef s As String) As String
+    Dim bb As Boolean, ii As Boolean, rr As Boolean, half As Long
+    If ln <= 0 Then Emit = "": Exit Function
+    If Uniform(rg, st, ln, bb, ii, rr) Then
+        Emit = Wrap(Mid$(s, st, ln), bb, ii, rr)
         Exit Function
     End If
-
-    curB = False: curI = False: curR = False
-    For i = 1 To n
-        With rg.Characters(i, 1).Font
-            nB = (.Bold = True)
-            nI = (.Italic = True)
-            nR = (.Color <> 0)
-        End With
-        If nB <> curB Or nI <> curI Or nR <> curR Then
-            If curI Then out = out & "[/i]"
-            If curB Then out = out & "[/b]"
-            If curR Then out = out & "[/r]"
-            If nR Then out = out & "[r]"
-            If nB Then out = out & "[b]"
-            If nI Then out = out & "[i]"
-            curB = nB: curI = nI: curR = nR
-        End If
-        out = out & Mid$(s, i, 1)
-    Next i
-    If curI Then out = out & "[/i]"
-    If curB Then out = out & "[/b]"
-    If curR Then out = out & "[/r]"
-
-    RichMarkup = AddFill(rg, out)
+    If ln = 1 Then
+        Emit = Mid$(s, st, 1)
+        Exit Function
+    End If
+    half = ln \ 2
+    Emit = Emit(rg, st, half, s) & Emit(rg, st + half, ln - half, s)
 End Function
 
 Private Function AddFill(rg As Range, ByVal s As String) As String
@@ -240,15 +247,17 @@ Public Sub XuatFileKey()
     Set cd = ThisWorkbook.Sheets(SH_CD)
     Set rt = ThisWorkbook.Sheets(SH_RT)
 
-    If ThisWorkbook.Names.Count = 0 Or NameVal("market") = "" Then
-        If MsgBox("Chua thay Named Range nhan dinh. Chay TaoNameNhanDinh truoc?" & vbCrLf & _
-                  "Chon No de van xuat (phan nhan dinh se rong).", vbYesNo + vbQuestion) = vbYes Then
-            Exit Sub
-        End If
-    End If
+    If NameVal("market") = "" Then DatName True
 
+    Dim oCalc As Long, oEvt As Boolean, oUpd As Boolean
+    oCalc = Application.Calculation
+    oEvt = Application.EnableEvents
+    oUpd = Application.ScreenUpdating
+    Application.Calculation = xlCalculationManual
+    Application.EnableEvents = False
     Application.ScreenUpdating = False
     Application.DisplayAlerts = False
+    Application.StatusBar = "Xuat file key: dang doc du lieu..."
     Set wb = Workbooks.Add(xlWBATWorksheet)
 
     ' --- META ---
@@ -412,21 +421,25 @@ Public Sub XuatFileKey()
 
     ' --- VOL ---
     Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count)): sh.Name = "VOL"
-    Dim vo As Worksheet
+    Application.StatusBar = "Xuat file key: dang doc Volatility..."
+    Dim vo As Worksheet, va As Variant, vout() As Variant, vn As Long
     Set vo = ThisWorkbook.Sheets(SH_VOL)
-    sh.Cells(1, 1).Value = "Date"
+    va = vo.Range(vo.Cells(1, 1), vo.Cells(VOL_ROWS + 1, 11)).Value2
+    ReDim vout(1 To VOL_ROWS + 1, 1 To 11)
+    vout(1, 1) = "Date"
     For c = 1 To 10
-        sh.Cells(1, c + 1).Value = OneLine(vo.Cells(1, c + 1).Value)
+        vout(1, c + 1) = OneLine(va(1, c + 1))
     Next c
-    n = 2
-    For r = 2 To VOL_ROWS + 1
-        If Txt(vo.Cells(r, 1).Value) = "" Then Exit For
-        sh.Cells(n, 1).Value = VnDate(vo.Cells(r, 1).Value)
+    vn = 1
+    For r = 2 To UBound(va, 1)
+        If Txt(va(r, 1)) = "" Then Exit For
+        vn = vn + 1
+        vout(vn, 1) = VnDate(CDate(va(r, 1)))
         For c = 1 To 10
-            sh.Cells(n, c + 1).Value = vo.Cells(r, c + 1).Value
+            vout(vn, c + 1) = va(r, c + 1)
         Next c
-        n = n + 1
     Next r
+    sh.Range("A1").Resize(vn, 11).Value = vout
 
     ' --- TEXT (doc qua Named Range) ---
     Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count)): sh.Name = "TEXT"
@@ -462,7 +475,10 @@ Public Sub XuatFileKey()
     wb.Close SaveChanges:=False
 
     Application.DisplayAlerts = True
-    Application.ScreenUpdating = True
+    Application.Calculation = oCalc
+    Application.EnableEvents = oEvt
+    Application.ScreenUpdating = oUpd
+    Application.StatusBar = False
     MsgBox "Da xuat file key trong " & Format$(Timer - t0, "0.0") & " giay:" & vbCrLf & dest, vbInformation
 End Sub
 
@@ -594,11 +610,15 @@ Private Sub DumpTS(cd As Worksheet, sh As Worksheet)
     Dim heads() As String, isAxis() As Boolean
     Dim arr() As Variant, n As Long, cap As Long
 
+    Dim src As Variant, maxr As Long
     maxc = cd.Cells(1, cd.Columns.Count).End(xlToLeft).Column
+    maxr = cd.Cells(cd.Rows.Count, 2).End(xlUp).Row
+    If maxr < 2 Then maxr = 2
+    src = cd.Range(cd.Cells(1, 1), cd.Cells(maxr, maxc)).Value2
     ReDim heads(1 To maxc)
     ReDim isAxis(1 To maxc)
     For c = 1 To maxc
-        heads(c) = OneLine(cd.Cells(1, c).Value)
+        heads(c) = OneLine(src(1, c))
         Select Case Fold(heads(c))
             Case "date", "ngay", "thang", "ky han", "stt": isAxis(c) = True
         End Select
@@ -620,13 +640,17 @@ Private Sub DumpTS(cd As Worksheet, sh As Worksheet)
                     Exit For
                 End If
             Next i
-            For r = 2 To cd.Rows.Count
-                If Txt(cd.Cells(r, axisCol).Value) = "" Then Exit For
+            For r = 2 To maxr
+                If Txt(src(r, axisCol)) = "" Then Exit For
                 Dim dtxt As String
-                dtxt = VnDate(cd.Cells(r, axisCol).Value)
+                If IsNumeric(src(r, axisCol)) Then
+                    dtxt = VnDate(CDate(src(r, axisCol)))
+                Else
+                    dtxt = Txt(src(r, axisCol))
+                End If
                 For i = axisCol + 1 To endCol
                     If heads(i) <> "" And Not isAxis(i) Then
-                        If Txt(cd.Cells(r, i).Value) <> "" Then
+                        If Txt(src(r, i)) <> "" Then
                             n = n + 1
                             If n > cap Then
                                 cap = cap * 2
@@ -635,7 +659,7 @@ Private Sub DumpTS(cd As Worksheet, sh As Worksheet)
                             arr(n, 1) = series
                             arr(n, 2) = heads(i)
                             arr(n, 3) = dtxt
-                            arr(n, 4) = cd.Cells(r, i).Value
+                            arr(n, 4) = src(r, i)
                         End If
                     End If
                 Next i
