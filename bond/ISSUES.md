@@ -34,6 +34,27 @@ Cập nhật 17/08/2026.
 |---|---|
 | E1 | `NotReadableError` chỉ với file key tải từ chat, trên máy nhà của Jak. Đã chứng minh **không phải lỗi code**: một `.xlsx` khác nạp vào cùng HTML thì đọc và giải nén thành công (dừng ở bước kiểm cấu trúc, báo thiếu sheet). File key có kích thước đúng 201,732 byte, cả 3 đường đọc đều `NotReadableError` → Windows cho đọc metadata nhưng chặn nội dung. Nguyên nhân khả dĩ theo thứ tự: file đang mở trong Excel · Downloads đồng bộ OneDrive nên file mới còn là placeholder · phần mềm bảo mật khoá file tải từ Internet. Cách xử lý: đóng Excel · "Always keep on this device" · copy sang `C:\Temp` rồi nạp từ đó. **Sẽ tự hết khi vận hành thật** vì file key do macro sinh tại chỗ, không qua tải mạng |
 
+## Đã kiểm định trước khi viết VBA (17/08)
+
+Chạy bộ trích xuất trên 3 bản File 02: **12/08 · 13/08 · 14/08**.
+
+- Nhãn khối trong `Linked (1)` nằm **đúng cùng một dòng** ở cả ba kỳ
+  (Trading nội bộ r4 · Banking nội bộ r31 · TB SBV r54 · BB SBV r61 · Khác r68 · FI Bond r70).
+- `Linked` và `Linked (1)` cùng kích thước `A1:GH311` / `A1:N89` ở cả ba.
+- File key sinh ra **giống hệt cấu trúc**: 65 · 22 · 18 · 54 · 264 · 52 · 21 · 800 · 17 · 5,990 dòng.
+- `asOf` chạy đúng 12 → 13 → 14/08; điểm cuối chuỗi `yield 10Y` cũng tiến theo ngày.
+- 6 đoạn nhận định đổi mỗi ngày (`txt.market`, `txt.assessment`, `txt.noteFV`, `txt.itdTB`,
+  `txt.note10d`, `txt.noteBB10d`); 10 đoạn còn lại là ghi chú phương pháp luận nên đứng yên —
+  đúng như mong đợi.
+
+### Phát hiện
+
+| # | Nội dung |
+|---|---|
+| E2 | `Report!B254` (`txt.noteRating`) **rỗng ở bản 12/08**, có nội dung ở 13 và 14. Macro phải chịu được ô trống, không được lỗi runtime |
+| E3 | `txt.itdBB` (nhận định lỗ MtM Banking) giống hệt cả ba ngày trong khi `txt.itdTB` đổi mỗi ngày. Không phải lỗi công cụ — cần Jak xác nhận có phải quên cập nhật không |
+| E4 | Chưa test được **file thưa**. Ba bản này đều đủ dữ liệu. Bản 13/02 mà briefing nhắc (2 deal, cột AK rỗng, từng gây VBA runtime error) vẫn nên chạy thử trước khi chốt macro |
+
 ## Đã đóng
 
 | # | Nội dung | Cách xử lý |
