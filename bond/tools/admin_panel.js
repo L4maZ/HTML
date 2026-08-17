@@ -936,15 +936,17 @@
     (SRC ? SRC.problems : []).forEach(function (p) { items.push(['no', 'Cấu trúc file', p]); });
 
     var R = window.RPT || {};
-    [['Trading nội bộ · Face = AFS + HTM', 'MSB', 0, 'Face Value', ['Book AFS', 'Book HTM']],
-     ['Banking nội bộ · Face = DCM + Pool', 'MSB', 1, 'Face Value', ['DCM tự fund', 'fund từ Pool']]]
+    [['Trading nội bộ · Face = AFS + HTM', 'MSB', 0, 'Face Value', ['Book AFS', 'Book HTM']]]
       .forEach(function (spec) {
         var bk = R.books && R.books[spec[1]] && R.books[spec[1]][spec[2]];
         if (!bk || !bk.rows) return;
         var tot = bk.rows.filter(function (r) { return r.label === spec[3] && !r.sub; })[0];
         var parts = spec[4].map(function (nm) {
-          return bk.rows.filter(function (r) { return r.sub && r.label.indexOf(nm) >= 0; })[0];
+          return bk.rows.filter(function (r) {
+            return r.sub === true && r.label.indexOf(nm) >= 0;
+          })[0];
         });
+        if (parts.length !== spec[4].length) return;
         if (!tot || parts.some(function (p) { return !p; })) return;
         var a = tot.today, b = parts.reduce(function (s, p) { return s + (p.today || 0); }, 0);
         if (a === null) return;

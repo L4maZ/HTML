@@ -28,12 +28,12 @@ HDR_FONT = Font(color="FFFFFF", bold=True, size=10)
 EDIT_FONT = Font(color="0070C0")
 
 BOOKS = [
-    ("TB_INT", "2.1.", "TRADING BOOK NỘI BỘ", 5, 30),
-    ("BB_INT", "2.2.", "BANKING BOOK NỘI BỘ", 32, 53),
-    ("TB_SBV", "2.3.", "TRADING BOOK SBV", 55, 60),
-    ("BB_SBV", "2.4.", "BANKING BOOK SBV", 62, 67),
-    ("OTHER", "2.5.", "KHÁC", 69, 69),
-    ("FIBOND", "2.6.", "FI Bond & CD", 71, 74),
+    ("TB_INT", "2.1.", "TRADING BOOK NỘI BỘ"),
+    ("BB_INT", "2.2.", "BANKING BOOK NỘI BỘ"),
+    ("TB_SBV", "2.3.", "TRADING BOOK SBV"),
+    ("BB_SBV", "2.4.", "BANKING BOOK SBV"),
+    ("OTHER", "2.5.", "KHÁC"),
+    ("FIBOND", "2.6.", "FI Bond & CD"),
 ]
 S2COL = dict(stt=1, cat=2, label=3, today=4, dtd=5, yest=6, lm=7, lq=8, ly=9,
              limit=10, used=11, light=12)
@@ -187,6 +187,15 @@ def rich_markup(cell):
     return s
 
 
+def find_label(ws, col, label, r1, r2):
+    want = re.sub(r"\s+", " ", str(label)).strip().lower()
+    for r in range(r1, r2 + 1):
+        v = ws.cell(r, col).value
+        if isinstance(v, str) and re.sub(r"\s+", " ", v).strip().lower() == want:
+            return r
+    return None
+
+
 def rowvals(ws, r, c0, n):
     return [clean(ws.cell(r, c0 + i).value) for i in range(n)]
 
@@ -241,9 +250,20 @@ def build(src, outdir, sanitize=False):
     dsh.append(["KeyID", "Book", "Code", "Section", "STT", "Nhom", "ChiTieu", "Sub",
                 "Today", "DtD", "Yesterday", "LastMonth", "LastQuarter", "LastYear",
                 "Limit", "Used", "Light"])
+    marks = []
+    for key, code, title in BOOKS:
+        row = find_label(s2, 2, title, 1, 130)
+        if row is None:
+            raise SystemExit("Khong tim thay nhan khoi trong 'Linked (1)' cot B: " + title)
+        marks.append((key, code, title, row))
+    blocks = []
+    for i, (key, code, title, row) in enumerate(marks):
+        end = marks[i + 1][3] - 1 if i + 1 < len(marks) else row + 30
+        blocks.append((key, code, title, row + 1, end))
+
     seen = {}
     n = 0
-    for key, code, title, r0, r1 in BOOKS:
+    for key, code, title, r0, r1 in blocks:
         for r in range(r0, r1 + 1):
             label = clean(s2.cell(r, S2COL["label"]).value)
             if not label:
