@@ -65,7 +65,16 @@ GRIDS = [
       "Out_MtM", "Out_Face", "Out_PTCK", "Out_Diff", "Extra"]),
     ("FIONBS", 169, 288, 294, 5, "7.1 FI Bond trên bảng cân đối",
      ["Label", "OnBS", "OffBS", "OutBS", "Total"]),
+    ("PNLSCEN", 140, 230, 234, 7, "3.7 Phân tích kịch bản PnL",
+     ["Label", "KB1", "KB2", "KB3", "KB4", "KB5", "KB6"]),
 ]
+
+VIRA_BOOK_ROWS = (154, 155)
+VIRA_C0 = 66
+VIRA_TENOR = (78, 154, 164)
+RATING = (131, 203, 223)
+VOL_TENORS = 10
+VOL_ROWS = 800
 
 SCENS = [
     ("TB", "recent", 51, 95, 105, 92),
@@ -138,7 +147,7 @@ def build(src, outdir):
     meta.title = "META"
     meta.append(["Key", "Value", "Ghi chu"])
     for row in [
-        ["schema", "bond.key.v2", "Phien ban cau truc file key"],
+        ["schema", "bond.key.v3", "Phien ban cau truc file key"],
         ["asOf", dates["today"], "Ngay bao cao"],
         ["dateYest", dates["yest"], "Cot Yesterday"],
         ["dateLastMonth", dates["lm"], "Cot Last month"],
@@ -236,6 +245,64 @@ def build(src, outdir):
                 n += 1
     counts["SCEN"] = n
 
+    vsh = out.create_sheet("VIRA")
+    vsh.append(["KeyID", "Scope", "Label", "PV01", "Itd", "Scenario", "YieldBps", "ItdAfter"])
+    names = [clean(lk.cell(151, VIRA_C0 + 3 + i * 2).value) for i in range(4)]
+    n = 0
+    for r in VIRA_BOOK_ROWS:
+        label = clean(lk.cell(r, VIRA_C0).value)
+        if not label:
+            continue
+        pv01 = clean(lk.cell(r, VIRA_C0 + 1).value)
+        itd = clean(lk.cell(r, VIRA_C0 + 2).value)
+        for i in range(4):
+            nm = names[i] or ("VIRA%d" % (i + 1))
+            vsh.append(["VIRA.book.%s.%s" % (slug(label), slug(nm)), "BOOK", label, pv01, itd, nm,
+                        clean(lk.cell(r, VIRA_C0 + 3 + i * 2).value),
+                        clean(lk.cell(r, VIRA_C0 + 4 + i * 2).value)])
+            n += 1
+    c0, r0, r1 = VIRA_TENOR
+    tnames = [clean(lk.cell(151, c0 + 3 + i * 2).value) for i in range(4)]
+    for r in range(r0, r1 + 1):
+        tenor = clean(lk.cell(r, c0).value)
+        if not tenor:
+            continue
+        pv01 = clean(lk.cell(r, c0 + 1).value)
+        itd = clean(lk.cell(r, c0 + 2).value)
+        for i in range(4):
+            nm = tnames[i] or names[i] or ("VIRA%d" % (i + 1))
+            vsh.append(["VIRA.bb.%s.%s" % (slug(tenor), slug(nm)), "BB_TENOR", tenor, pv01, itd, nm,
+                        clean(lk.cell(r, c0 + 3 + i * 2).value),
+                        clean(lk.cell(r, c0 + 4 + i * 2).value)])
+            n += 1
+    counts["VIRA"] = n
+
+    rsh = out.create_sheet("RATING")
+    rsh.append(["KeyID", "Issuer", "Amount", "Rating", "ReviewDate", "Pct", "CumPct",
+                "Fitch", "Moody", "SP"])
+    c0, r0, r1 = RATING
+    n = 0
+    for r in range(r0, r1 + 1):
+        issuer = clean(lk.cell(r, c0).value)
+        if not issuer:
+            continue
+        rsh.append(["RATING." + slug(issuer), issuer] +
+                   [clean(lk.cell(r, c0 + i).value) for i in range(1, 9)])
+        n += 1
+    counts["RATING"] = n
+
+    osh = out.create_sheet("VOL")
+    vol = wb["Volatility"]
+    osh.append(["Date"] + [clean(vol.cell(1, 2 + i).value) for i in range(VOL_TENORS)])
+    n = 0
+    for r in range(2, 2 + VOL_ROWS):
+        d = vol.cell(r, 1).value
+        if d in (None, ""):
+            break
+        osh.append([clean(d)] + [vol.cell(r, 2 + i).value for i in range(VOL_TENORS)])
+        n += 1
+    counts["VOL"] = n
+
     tsh = out.create_sheet("TEXT")
     tsh.append(["KeyID", "Mo ta", "Nguon", "Value"])
     for keyid, cell, desc in TEXTS:
@@ -254,7 +321,10 @@ def build(src, outdir):
     style(ssh, [44, 7, 8, 26, 22, 8] + [11] * 4)
     style(tsh, [20, 34, 14, 95], 4, wrap=True)
     style(xsh, [16, 14, 13, 14])
-    for sh in (dsh, psh, csh, gsh, ssh, xsh):
+    style(vsh, [34, 10, 16, 10, 11, 30, 11, 12])
+    style(rsh, [22, 14, 12, 9, 13, 9, 9, 9, 9, 9])
+    style(osh, [13] + [9] * VOL_TENORS)
+    for sh in (dsh, psh, csh, gsh, ssh, xsh, vsh, rsh, osh):
         sh.freeze_panes = "B2"
 
     stamp = re.sub(r"[^0-9]", "", str(dates["today"]))

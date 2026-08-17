@@ -105,3 +105,41 @@ Xoá dữ liệu → báo cáo trống, ghi một dòng vào nhật ký.
 
 Với file 13/08, hai dòng Banking báo đỏ: Face Value lệch **6,101 tỷ**, ItD lệch **716 tỷ**.
 Đúng vấn đề đã nêu ở `Linked (1)` — tổng lấy SUMIFS còn hai dòng con là số hardcode.
+
+## v8 — ghép tab Quản trị vào chính file v7
+
+`BaoCao_RRTT_Bond_v8.html` = v7 nguyên vẹn + một khối script chèn cuối `<body>`.
+Không sửa ruột file gốc: tab và panel được dựng bằng DOM sau khi `RRTT.mount()` chạy xong.
+
+- Rail trái thêm mục **Quản trị dữ liệu** (`p6`), khoá bằng mật khẩu.
+- Nạp file key → ánh xạ vào `window.RPT` + `window.TS` → `RRTT.rerender()`.
+- Mỗi trang p1–p5 gắn badge ngày chốt, quá 3 ngày thì badge vàng.
+- Bản xuất giữ nguyên tab quản trị (vẫn khoá) để kỳ sau nạp tiếp.
+
+Mật khẩu nằm trong mã nguồn nên **chỉ chặn bấm nhầm, không phải bảo mật**.
+
+### Ánh xạ file key → window.RPT
+
+| Sheet | Nhánh RPT |
+|---|---|
+| `META` | `asOf`, `dates`, `colDates` |
+| `DATA_S2` | `books.MSB[]`, `books.SBV[]`, `other[]`, `fibond[]` |
+| `POS` | `posTrading[]`, `posBanking[]`, hai `*Total` |
+| `CURVE` | `yieldCurve[]`, `repoCurve[]` |
+| `GRID` | `issuerMix`, `holdTime`, `pnlBreakdown`, `capital`, `bsBook`/`bsLayers`, `fiOnBS`, `pnlScenario` |
+| `SCEN` | `scenTB.recent[]` / `.varScen[]` (và `scenBB` nếu có) |
+| `VIRA` | `vira.scenarios[]`, `vira.books[]` |
+| `RATING` | `fiRating[]`, `fiRatingTotal` |
+| `VOL` | `volatility` — tính SMA 252/504/756 + EWMA λ=0.98, annualize ×√252 |
+| `TEXT` | `highlight.*`, `reportMarket`, `fvNote`, `fiNote`, `note10d`, `noteVar` |
+| `TS` | 17 chuỗi trong `window.TS` |
+
+`VOL` chở delta yield thô 800 ngày, HTML tự tính độ biến động — nhờ vậy λ và cửa sổ
+252/504/756 thành tham số Tier 2, sửa được mà không phải đụng Excel.
+
+### Đã kiểm (Chromium, `file://`, ngắt mạng)
+
+- Nạp key 13/08: `asOf` 24/07 → 13/08 · Face TB 17,513 · posTrading 10 kỳ hạn ·
+  yield 10Y mid 4.423 · scen recent 6 / VaR 6 · rating 20 issuer · `TS.yieldTs` 195 điểm.
+- Mật khẩu sai → không mở được tab.
+- Xuất bản: 1.92MB (trần 5MB), mở lại giữ đúng 13/08, chart vẫn vẽ.
