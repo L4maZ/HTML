@@ -786,14 +786,43 @@
     return n;
   }
 
-  function handleFile(f) {
-    if (!f) return;
+  function viaReader(f) {
+    return new Promise(function (res, rej) {
+      var fr = new FileReader();
+      fr.onload = function () { res(fr.result); };
+      fr.onerror = function () { rej(fr.error || new Error('FileReader thất bại')); };
+      fr.readAsArrayBuffer(f);
+    });
+  }
+
+  function readBytes(f) {
+    var attempt = f.arrayBuffer ? f.arrayBuffer() : Promise.reject(new Error('no arrayBuffer'));
+    return attempt.catch(function () { return viaReader(f); })
+      .then(function (buf) {
+        if (!buf || !buf.byteLength) throw new Error('File đọc ra rỗng (0 byte).');
+        return buf;
+      })
+      .catch(function (e) {
+        var msg = String((e && e.name) || '') + ' ' + String((e && e.message) || e);
+        if (/NotReadable|NotFound|permission|could not be read/i.test(msg)) {
+          throw new Error('Trình duyệt không mở được nội dung file. Thường do: file kéo thẳng từ ' +
+            'thanh tải xuống hoặc từ thư mục nén .zip · file nằm trên OneDrive/ổ mạng chưa tải về máy · ' +
+            'file đang mở trong Excel. Cách xử lý: lưu file ra Desktop rồi bấm nút chọn file thay vì kéo thả.');
+        }
+        throw e;
+      });
+  }
+
+  function handleFile(f, done) {
+    done = done || function () {};
+    if (!f) { done(); return; }
     if (!/\.xls[xm]$/i.test(f.name)) {
       setStatus('err', 'Sai định dạng: ' + f.name, 'Cần file .xlsx sinh từ macro XuatFileKey.');
+      done();
       return;
     }
     setStatus('warn', 'Đang đọc ' + f.name + '…', '');
-    f.arrayBuffer().then(readWorkbook).then(function (sheets) {
+    readBytes(f).then(readWorkbook).then(function (sheets) {
       var K = build(sheets);
       apply(K);
       SRC = { file: f.name, generatedAt: K.meta.generatedAt, counts: K.counts, problems: K.problems };
@@ -806,8 +835,10 @@
       renderPanel();
       if (n) setStatus('warn', 'Đã nạp — ' + n + ' mục cần xem', 'Ngày chốt ' + (K.meta.asOf || 'KHÔNG RÕ'));
       else setStatus('ok', 'Đã nạp dữ liệu chốt ngày ' + (K.meta.asOf || 'KHÔNG RÕ'), 'nguồn ' + f.name);
+      done();
     }).catch(function (e) {
       setStatus('err', 'Không nạp được — dữ liệu cũ giữ nguyên', e && e.message ? e.message : String(e));
+      done();
     });
   }
 
@@ -815,8 +846,8 @@
     var inp = $('#rrttFile'), drop = $('#rrttDrop');
     if (!inp) return;
     inp.addEventListener('change', function (e) {
-      handleFile(e.target.files && e.target.files[0]);
-      e.target.value = '';
+      var f = e.target.files && e.target.files[0];
+      handleFile(f, function () { try { inp.value = ''; } catch (x) {} });
     });
     ['dragenter', 'dragover'].forEach(function (t) {
       drop.addEventListener(t, function (e) { e.preventDefault(); drop.style.borderColor = '#7B2D3B'; });
