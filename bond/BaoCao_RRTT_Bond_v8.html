@@ -2209,22 +2209,43 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
     });
   }
 
+  function describe(f) {
+    var d = f.lastModified ? new Date(f.lastModified).toLocaleString('en-GB', { hour12: false }) : '?';
+    return f.name + ' · ' + (f.size != null ? f.size.toLocaleString('en-US') + ' byte' : 'không rõ cỡ') +
+      ' · sửa lần cuối ' + d;
+  }
+
   function readBytes(f) {
-    var attempt = f.arrayBuffer ? f.arrayBuffer() : Promise.reject(new Error('no arrayBuffer'));
-    return attempt.catch(function () { return viaReader(f); })
-      .then(function (buf) {
-        if (!buf || !buf.byteLength) throw new Error('File đọc ra rỗng (0 byte).');
-        return buf;
-      })
-      .catch(function (e) {
-        var msg = String((e && e.name) || '') + ' ' + String((e && e.message) || e);
-        if (/NotReadable|NotFound|permission|could not be read/i.test(msg)) {
-          throw new Error('Trình duyệt không mở được nội dung file. Thường do: file kéo thẳng từ ' +
-            'thanh tải xuống hoặc từ thư mục nén .zip · file nằm trên OneDrive/ổ mạng chưa tải về máy · ' +
-            'file đang mở trong Excel. Cách xử lý: lưu file ra Desktop rồi bấm nút chọn file thay vì kéo thả.');
-        }
-        throw e;
-      });
+    var tried = [];
+    var step = function (label, fn) {
+      return function () {
+        return Promise.resolve().then(fn).then(function (buf) {
+          if (!buf || !buf.byteLength) throw new Error('đọc ra 0 byte');
+          return buf;
+        }).catch(function (e) {
+          tried.push(label + ': ' + ((e && e.name ? e.name + ' — ' : '') + ((e && e.message) || e)));
+          throw e;
+        });
+      };
+    };
+    var a = step('arrayBuffer', function () {
+      if (!f.arrayBuffer) throw new Error('trình duyệt không có File.arrayBuffer');
+      return f.arrayBuffer();
+    });
+    var b = step('FileReader', function () { return viaReader(f); });
+    var c = step('slice+arrayBuffer', function () {
+      var s = f.slice(0, f.size);
+      if (s.arrayBuffer) return s.arrayBuffer();
+      return viaReader(s);
+    });
+
+    return a().catch(b).catch(c).catch(function () {
+      var hint = (f.size === 0)
+        ? 'File có kích thước 0 byte — bản tải về bị hỏng hoặc chưa tải xong. Tải lại file.'
+        : 'Thường do: file đang mở trong Excel · file nằm trên OneDrive/ổ mạng chưa tải hẳn về máy · ' +
+          'file đã bị di chuyển/xoá sau khi chọn · phần mềm bảo mật khoá file.';
+      throw new Error(hint + ' | ' + describe(f) + ' | Chi tiết: ' + tried.join(' ; '));
+    });
   }
 
   function handleFile(f, done) {
