@@ -28,6 +28,12 @@ Cập nhật 17/08/2026.
 | B1 | `DecompressionStream` trên Edge ở bank. Xem mục **Môi trường** trong tab Quản trị: "Đọc file .xlsx: Hỗ trợ" là xanh thì chạy được. Đỏ → đổi sang nhúng SheetJS, file tăng ~900KB, vẫn dưới trần 5MB |
 | B2 | Kéo thả file trên máy bank. Nếu lại `NotReadableError` thì dùng nút chọn file |
 
+## Đang xử lý
+
+| # | Nội dung |
+|---|---|
+| E1 | `NotReadableError` chỉ với file key tải từ chat, trên máy nhà của Jak. Đã chứng minh **không phải lỗi code**: một `.xlsx` khác nạp vào cùng HTML thì đọc và giải nén thành công (dừng ở bước kiểm cấu trúc, báo thiếu sheet). File key có kích thước đúng 201,732 byte, cả 3 đường đọc đều `NotReadableError` → Windows cho đọc metadata nhưng chặn nội dung. Nguyên nhân khả dĩ theo thứ tự: file đang mở trong Excel · Downloads đồng bộ OneDrive nên file mới còn là placeholder · phần mềm bảo mật khoá file tải từ Internet. Cách xử lý: đóng Excel · "Always keep on this device" · copy sang `C:\Temp` rồi nạp từ đó. **Sẽ tự hết khi vận hành thật** vì file key do macro sinh tại chỗ, không qua tải mạng |
+
 ## Đã đóng
 
 | # | Nội dung | Cách xử lý |
