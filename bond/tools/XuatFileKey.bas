@@ -65,18 +65,37 @@ Private Function KeepLines(v As Variant) As String
     KeepLines = out
 End Function
 
-Private Function Fold(ByVal s As String) As String
-    Dim src As Variant, dst As Variant, i As Long, j As Long
-    src = Array("àáạảãâầấậẩẫăằắặẳẵ", "èéẹẻẽêềếệểễ", "ìíịỉĩ", _
-                "òóọỏõôồốộổỗơờớợởỡ", "ùúụủũưừứựửữ", "ỳýỵỷỹ", "đ")
-    dst = Array("a", "e", "i", "o", "u", "y", "d")
-    s = LCase$(s)
-    For i = LBound(src) To UBound(src)
-        For j = 1 To Len(src(i))
-            s = Replace$(s, Mid$(src(i), j, 1), dst(i))
-        Next j
+Private Sub AddMap(m As Object, ByVal base As String, codes As Variant)
+    Dim i As Long
+    For i = LBound(codes) To UBound(codes)
+        m(ChrW$(CLng(codes(i)))) = base
     Next i
-    Fold = s
+End Sub
+
+Private Function FoldMap() As Object
+    Static m As Object
+    If m Is Nothing Then
+        Set m = CreateObject("Scripting.Dictionary")
+    AddMap m, "a", Array(224, 225, 7841, 7843, 227, 226, 7847, 7845, 7853, 7849, 7851, 259, 7857, 7855, 7863, 7859, 7861)
+    AddMap m, "e", Array(232, 233, 7865, 7867, 7869, 234, 7873, 7871, 7879, 7875, 7877)
+    AddMap m, "i", Array(236, 237, 7883, 7881, 297)
+    AddMap m, "o", Array(242, 243, 7885, 7887, 245, 244, 7891, 7889, 7897, 7893, 7895, 417, 7901, 7899, 7907, 7903, 7905)
+    AddMap m, "u", Array(249, 250, 7909, 7911, 361, 432, 7915, 7913, 7921, 7917, 7919)
+    AddMap m, "y", Array(7923, 253, 7925, 7927, 7929)
+    AddMap m, "d", Array(273)
+    End If
+    Set FoldMap = m
+End Function
+
+Private Function Fold(ByVal s As String) As String
+    Dim i As Long, ch As String, m As Object, out As String
+    Set m = FoldMap()
+    s = LCase$(s)
+    For i = 1 To Len(s)
+        ch = Mid$(s, i, 1)
+        If m.Exists(ch) Then out = out & m(ch) Else out = out & ch
+    Next i
+    Fold = out
 End Function
 
 Private Function Slug(ByVal s As String) As String
@@ -237,12 +256,10 @@ Public Sub XuatFileKey()
     sh.Range("A1:C1").Value = Array("Key", "Value", "Ghi chu")
     Dim mk As Variant, mv As Variant
     mk = Array("schema", "asOf", "dateYest", "dateLastMonth", "dateLastQuarter", _
-               "dateLastYear", "rptTitle", "rptSubtitle", "unitNote", "generatedAt")
+               "dateLastYear", "generatedAt")
     mv = Array(SCHEMA, VnDate(rt.Range("B2").Value), VnDate(rt.Range("B3").Value), _
                VnDate(rt.Range("B4").Value), VnDate(s2.Range("H3").Value), _
-               VnDate(rt.Range("B7").Value), "Báo cáo rủi ro thị trường", _
-               "Báo cáo Desk Bond", "Đơn vị: tỷ VND, trừ khi ghi khác. Giá trị âm là lỗ.", _
-               Format$(Now, "dd/mm/yyyy hh:nn"))
+               VnDate(rt.Range("B7").Value), Format$(Now, "dd/mm/yyyy hh:nn"))
     For i = LBound(mk) To UBound(mk)
         sh.Cells(i + 2, 1).Value = mk(i)
         sh.Cells(i + 2, 2).Value = mv(i)
@@ -256,8 +273,8 @@ Public Sub XuatFileKey()
     Dim bcode As Variant, blab As Variant, bkey As Variant
     bkey = Array("TB_INT", "BB_INT", "TB_SBV", "BB_SBV", "OTHER", "FIBOND")
     bcode = Array("2.1.", "2.2.", "2.3.", "2.4.", "2.5.", "2.6.")
-    blab = Array("TRADING BOOK NỘI BỘ", "BANKING BOOK NỘI BỘ", "TRADING BOOK SBV", _
-                 "BANKING BOOK SBV", "KHÁC", "FI Bond & CD")
+    blab = Array("trading book noi bo", "banking book noi bo", "trading book sbv", _
+                 "banking book sbv", "khac", "fi bond & cd")
 
     Dim starts(0 To 5) As Long, ends(0 To 5) As Long
     For i = 0 To 5
@@ -295,7 +312,7 @@ Public Sub XuatFileKey()
                 sh.Cells(n, 1).Value = "S2." & bkey(i) & "." & base
                 sh.Cells(n, 2).Value = bkey(i)
                 sh.Cells(n, 3).Value = bcode(i)
-                sh.Cells(n, 4).Value = blab(i)
+                sh.Cells(n, 4).Value = OneLine(s2.Cells(starts(i), 2).Value)
                 sh.Cells(n, 5).Value = s2.Cells(r, 1).Value
                 sh.Cells(n, 6).Value = OneLine(s2.Cells(r, 2).Value)
                 sh.Cells(n, 7).Value = lab
@@ -329,13 +346,13 @@ Public Sub XuatFileKey()
     sh.Range("A1:R1").Value = Array("KeyID", "Block", "BlockName", "Label", _
         "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12", "C13", "C14")
     n = 2
-    n = DumpBlock(lk, sh, n, "MIX", "3.3 Cơ cấu theo tổ chức phát hành", 147, 238, 249, 7)
-    n = DumpBlock(lk, sh, n, "HOLD", "3.4 Cơ cấu theo thời gian nắm giữ", 164, 274, 284, 5)
+    n = DumpBlock(lk, sh, n, "MIX", "3.3 Co cau theo to chuc phat hanh", 147, 238, 249, 7)
+    n = DumpBlock(lk, sh, n, "HOLD", "3.4 Co cau theo thoi gian nam giu", 164, 274, 284, 5)
     n = DumpBlock(lk, sh, n, "PNL", "3.5 Unrealized & Realized PnL", 154, 253, 259, 4)
-    n = DumpBlock(lk, sh, n, "CAPITAL", "3.8 Mức độ sử dụng vốn", 158, 262, 270, 6)
-    n = DumpBlock(lk, sh, n, "BS", "3.6 Ghi nhận PnL theo lớp bảng cân đối", 103, 184, 189, 14)
-    n = DumpBlock(lk, sh, n, "FIONBS", "7.1 FI Bond trên bảng cân đối", 169, 288, 294, 5)
-    n = DumpBlock(lk, sh, n, "PNLSCEN", "3.7 Phân tích kịch bản PnL", 140, 230, 234, 7)
+    n = DumpBlock(lk, sh, n, "CAPITAL", "3.8 Muc do su dung von", 158, 262, 270, 6)
+    n = DumpBlock(lk, sh, n, "BS", "3.6 Ghi nhan PnL theo lop bang can doi", 103, 184, 189, 14)
+    n = DumpBlock(lk, sh, n, "FIONBS", "7.1 FI Bond tren bang can doi", 169, 288, 294, 5)
+    n = DumpBlock(lk, sh, n, "PNLSCEN", "3.7 Phan tich kich ban PnL", 140, 230, 234, 7)
 
     ' --- SCEN ---
     Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count)): sh.Name = "SCEN"
@@ -582,8 +599,8 @@ Private Sub DumpTS(cd As Worksheet, sh As Worksheet)
     ReDim isAxis(1 To maxc)
     For c = 1 To maxc
         heads(c) = OneLine(cd.Cells(1, c).Value)
-        Select Case heads(c)
-            Case "Date", "Ngày", "Tháng", "Kỳ hạn", "STT": isAxis(c) = True
+        Select Case Fold(heads(c))
+            Case "date", "ngay", "thang", "ky han", "stt": isAxis(c) = True
         End Select
     Next c
 
