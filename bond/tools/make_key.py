@@ -140,6 +140,53 @@ def clean_text(v):
     return "\n".join(lines)
 
 
+def is_red(font):
+    try:
+        rgb = font.color.rgb if font and font.color else None
+    except Exception:
+        rgb = None
+    if not isinstance(rgb, str):
+        return False
+    return rgb.upper() not in ("FF000000", "00000000", "FFFFFFFF")
+
+
+def rich_markup(cell):
+    """Doc rich text runs -> danh dau [b] [i] [r] [h]."""
+    v = cell.value
+    if v is None:
+        return ""
+    out = []
+    try:
+        blocks = list(v)
+    except TypeError:
+        blocks = [v]
+    for blk in blocks:
+        txt = getattr(blk, "text", None)
+        if txt is None:
+            out.append(str(blk))
+            continue
+        f = getattr(blk, "font", None)
+        pre, post = "", ""
+        if f is not None:
+            if is_red(f):
+                pre += "[r]"; post = "[/r]" + post
+            if getattr(f, "b", False):
+                pre += "[b]"; post = "[/b]" + post
+            if getattr(f, "i", False):
+                pre += "[i]"; post = "[/i]" + post
+        out.append(pre + txt + post if pre else txt)
+    s = "".join(out)
+    try:
+        fill = cell.fill
+        if fill is not None and fill.fgColor is not None:
+            rgb = fill.fgColor.rgb
+            if isinstance(rgb, str) and rgb.upper() not in ("00000000", "FFFFFFFF"):
+                s = "[h]" + s + "[/h]"
+    except Exception:
+        pass
+    return s
+
+
 def rowvals(ws, r, c0, n):
     return [clean(ws.cell(r, c0 + i).value) for i in range(n)]
 
@@ -160,6 +207,11 @@ def build(src, outdir, sanitize=False):
     wb = openpyxl.load_workbook(src, data_only=True)
     s2, lk, cd, rp, rt = (wb["Linked (1)"], wb["Linked"], wb["Chart data"],
                           wb["Report"], wb["Run Tool"])
+    try:
+        rpx = openpyxl.load_workbook(src, data_only=True, rich_text=True)["Report"]
+    except Exception:
+        rpx = None
+
     out = openpyxl.Workbook()
     counts = {}
 
@@ -343,7 +395,10 @@ def build(src, outdir, sanitize=False):
     tsh = out.create_sheet("TEXT")
     tsh.append(["KeyID", "Mo ta", "Nguon", "Value"])
     for keyid, cell, desc in TEXTS:
-        tsh.append([keyid, desc, "Report!" + cell, clean_text(rp[cell].value)])
+        raw = rich_markup(rpx[cell]) if rpx is not None else ""
+        if not raw.strip():
+            raw = clean_text(rp[cell].value)
+        tsh.append([keyid, desc, "Report!" + cell, clean_text(raw)])
     counts["TEXT"] = len(TEXTS)
 
     xsh = out.create_sheet("TS")

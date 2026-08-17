@@ -140,6 +140,61 @@ Public Sub TaoNameNhanDinh()
            "Tu gio o co dich len xuong thi Excel tu cap nhat, macro van doc dung.", vbInformation
 End Sub
 
+' Doc rich text runs cua mot o -> danh dau [b] [i] [r] [h]
+Private Function RichMarkup(rg As Range) As String
+    Dim s As String, i As Long, n As Long
+    Dim curB As Boolean, curI As Boolean, curR As Boolean
+    Dim nB As Boolean, nI As Boolean, nR As Boolean
+    Dim out As String, mixed As Boolean
+
+    s = Txt(rg.Value)
+    If s = "" Then RichMarkup = "": Exit Function
+    n = Len(s)
+
+    mixed = IsNull(rg.Font.Bold) Or IsNull(rg.Font.Italic) Or IsNull(rg.Font.Color)
+    If Not mixed Then
+        out = s
+        If rg.Font.Color <> 0 And Not IsNull(rg.Font.Color) Then out = "[r]" & out & "[/r]"
+        If rg.Font.Bold = True Then out = "[b]" & out & "[/b]"
+        If rg.Font.Italic = True Then out = "[i]" & out & "[/i]"
+        RichMarkup = AddFill(rg, out)
+        Exit Function
+    End If
+
+    curB = False: curI = False: curR = False
+    For i = 1 To n
+        With rg.Characters(i, 1).Font
+            nB = (.Bold = True)
+            nI = (.Italic = True)
+            nR = (.Color <> 0)
+        End With
+        If nB <> curB Or nI <> curI Or nR <> curR Then
+            If curI Then out = out & "[/i]"
+            If curB Then out = out & "[/b]"
+            If curR Then out = out & "[/r]"
+            If nR Then out = out & "[r]"
+            If nB Then out = out & "[b]"
+            If nI Then out = out & "[i]"
+            curB = nB: curI = nI: curR = nR
+        End If
+        out = out & Mid$(s, i, 1)
+    Next i
+    If curI Then out = out & "[/i]"
+    If curB Then out = out & "[/b]"
+    If curR Then out = out & "[/r]"
+
+    RichMarkup = AddFill(rg, out)
+End Function
+
+Private Function AddFill(rg As Range, ByVal s As String) As String
+    On Error Resume Next
+    If rg.Interior.ColorIndex <> xlColorIndexNone And rg.Interior.Color <> 16777215 Then
+        s = "[h]" & s & "[/h]"
+    End If
+    On Error GoTo 0
+    AddFill = s
+End Function
+
 Private Function NameVal(ByVal k As String) As String
     Dim r As Range
     On Error Resume Next
@@ -148,7 +203,7 @@ Private Function NameVal(ByVal k As String) As String
     If r Is Nothing Then
         NameVal = ""
     Else
-        NameVal = KeepLines(r.Cells(1, 1).Value)
+        NameVal = KeepLines(RichMarkup(r.Cells(1, 1)))
     End If
 End Function
 
