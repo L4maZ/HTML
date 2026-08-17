@@ -2012,9 +2012,34 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
     });
   }
 
+  function lockNav(btn) {
+    if (btn.getAttribute('data-locked')) return;
+    btn.setAttribute('data-locked', '1');
+    btn.addEventListener('click', function (e) {
+      if (unlocked) return;
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      var v = window.prompt('Nhap mat khau de mo tab Quan tri du lieu:');
+      if (v === null) return;
+      if (v !== PASS) { window.alert('Mat khau khong dung.'); return; }
+      unlocked = true;
+      if (window.RRTT && window.RRTT.goPage) window.RRTT.goPage('p6');
+    }, true);
+  }
+
   function ui() {
     var nav = document.querySelector('[data-nav="p5"]');
-    if (!nav || document.querySelector('[data-nav="p6"]')) return false;
+    if (!nav) return false;
+
+    var existing = document.querySelector('[data-nav="p6"]');
+    if (existing) {
+      var sec0 = document.querySelector('[data-page="p6"]');
+      if (!sec0) return false;
+      if (!document.getElementById('rrttFile')) sec0.innerHTML = panelHTML();
+      lockNav(existing);
+      wire();
+      return true;
+    }
 
     var btn = nav.cloneNode(true);
     btn.setAttribute('data-nav', 'p6');
@@ -2032,19 +2057,191 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
     sec.innerHTML = panelHTML();
     host.parentNode.appendChild(sec);
 
-    btn.addEventListener('click', function (e) {
-      if (unlocked) return;
-      e.stopImmediatePropagation();
-      e.preventDefault();
-      var v = window.prompt('Nhập mật khẩu để mở tab Quản trị dữ liệu:');
-      if (v === null) return;
-      if (v !== PASS) { window.alert('Mật khẩu không đúng.'); return; }
-      unlocked = true;
-      if (window.RRTT && window.RRTT.goPage) window.RRTT.goPage('p6');
-    }, true);
-
+    lockNav(btn);
     wire();
     return true;
+  }
+
+
+  var EDITS = {}, ORIG = {}, editMode = false, skipped = 0, TMP = null;
+
+  var INLINE = { B: 1, I: 1, EM: 1, STRONG: 1, SPAN: 1, MARK: 1, BR: 1, SMALL: 1,
+    SUP: 1, SUB: 1, A: 1, U: 1, FONT: 1 };
+
+  function isLeafText(el) {
+    if (!(el.textContent || '').trim()) return false;
+    if (el.querySelector('table,canvas,svg,input,button,select')) return false;
+    for (var i = 0; i < el.children.length; i++) {
+      var c = el.children[i];
+      if (!INLINE[c.tagName]) return false;
+    }
+    return true;
+  }
+
+  function editable(root) {
+    var out = [];
+    (root || document).querySelectorAll('[data-page]').forEach(function (pg) {
+      if (!/^p[1-5]$/.test(pg.dataset.page || '')) return;
+      pg.querySelectorAll('td,th,p,li,h1,h2,h3,h4,h5,div,span').forEach(function (el) {
+        if (el.hasAttribute('data-asof-badge')) return;
+        if (el.closest('[data-asof-badge]')) return;
+        if (isLeafText(el)) out.push(el);
+      });
+    });
+    return out;
+  }
+
+  function hash(str) {
+    var h = 5381, i = str.length;
+    while (i) h = (h * 33 ^ str.charCodeAt(--i)) >>> 0;
+    return h.toString(36);
+  }
+
+  function tagEditables() {
+    var seen = {};
+    editable().forEach(function (el) {
+      var host = el.closest('[data-page]');
+      if (!host) return;
+      var pg = host.dataset.page;
+      var txt = (el.textContent || '').trim();
+      var prev = el.getAttribute('data-eid');
+      var base = (prev && EDITS[prev]) ? prev.split('#')[0] : pg + ':' + hash(txt);
+      seen[base] = (seen[base] || 0) + 1;
+      var id = base + '#' + seen[base];
+      el.setAttribute('data-eid', id);
+      if (!EDITS[id]) ORIG[id] = txt;
+    });
+  }
+
+  function applyEdits() {
+    tagEditables();
+    skipped = 0;
+    Object.keys(EDITS).forEach(function (id) {
+      var e = EDITS[id];
+      var el = document.querySelector('[data-eid="' + id + '"]');
+      if (!el) { skipped++; return; }
+      var now = (el.textContent || '').trim();
+      if (TMP == null) TMP = document.createElement('div');
+      TMP.innerHTML = e.h;
+      var edited = (TMP.textContent || '').trim();
+      var ok = (e.o == null) || now === e.o || now === edited || el.innerHTML === e.h;
+      if (!ok) { skipped++; return; }
+      if (el.innerHTML !== e.h) el.innerHTML = e.h;
+    });
+    var n = document.getElementById('rrttEditCount');
+    if (n) n.textContent = String(Object.keys(EDITS).length) + (skipped ? ' (' + skipped + ' khong ap duoc)' : '');
+    if (editMode) setEditable(true);
+  }
+
+  function setEditable(on) {
+    editable().forEach(function (el) {
+      if (on) {
+        el.setAttribute('contenteditable', 'true');
+        el.style.outline = '1px dashed rgba(123,45,59,.35)';
+        el.style.outlineOffset = '1px';
+      } else {
+        el.removeAttribute('contenteditable');
+        el.style.outline = '';
+        el.style.outlineOffset = '';
+      }
+    });
+  }
+
+  function captureEdit(node) {
+    var el = node && node.nodeType === 1 ? node : (node && node.parentElement);
+    var host = el && el.closest ? el.closest('[data-eid]') : null;
+    if (!host) return;
+    var id = host.getAttribute('data-eid');
+    EDITS[id] = { h: host.innerHTML, o: ORIG[id] };
+    var n = document.getElementById('rrttEditCount');
+    if (n) n.textContent = String(Object.keys(EDITS).length);
+  }
+
+  function exec(cmd, val) {
+    try { document.execCommand('styleWithCSS', false, true); } catch (e) {}
+    document.execCommand(cmd, false, val === undefined ? null : val);
+    var sel = window.getSelection();
+    if (sel && sel.anchorNode) captureEdit(sel.anchorNode);
+  }
+
+  function toggleEdit(on) {
+    editMode = on;
+    setEditable(on);
+    var bar = document.getElementById('rrttEditBar');
+    if (bar) bar.style.display = on ? 'flex' : 'none';
+    var hint = document.getElementById('rrttEditHint');
+    if (hint) hint.style.display = on ? 'block' : 'none';
+    var btn = document.getElementById('rrttEditBtn');
+    if (btn) {
+      btn.textContent = on ? 'Tat che do sua' : 'Sua bao cao';
+      btn.style.background = on ? '#5E1F2B' : '#fdfcfa';
+      btn.style.color = on ? '#fff' : '#7B2D3B';
+    }
+    if (on && window.RRTT && window.RRTT.goPage) window.RRTT.goPage('p1');
+  }
+
+  document.addEventListener('input', function (e) {
+    if (editMode) captureEdit(e.target);
+  }, true);
+
+  document.addEventListener('keydown', function (e) {
+    if (!editMode || !(e.ctrlKey || e.metaKey)) return;
+    var k = String(e.key || '').toLowerCase();
+    if (k === 'b') { e.preventDefault(); exec('bold'); }
+    if (k === 'i') { e.preventDefault(); exec('italic'); }
+  }, true);
+
+  var EBTN = 'font-family:inherit;font-size:12.5px;font-weight:600;border:1px solid #e6e2db;' +
+    'background:#fff;color:#33312e;border-radius:8px;padding:7px 12px;cursor:pointer;';
+
+  function editBarHTML() {
+    return '<div id="rrttEditBar" style="display:none;gap:8px;flex-wrap:wrap;align-items:center;' +
+      'margin-top:12px;padding:10px 12px;background:#faf8f6;border:1px solid #e6e2db;border-radius:10px;">' +
+      '<span style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8d877c;">Dinh dang</span>' +
+      '<button type="button" data-cmd="bold" style="' + EBTN + 'font-weight:800;">B</button>' +
+      '<button type="button" data-cmd="italic" style="' + EBTN + 'font-style:italic;">I</button>' +
+      '<button type="button" data-cmd="hilite" style="' + EBTN + 'background:#ffe27a;">Boi vang</button>' +
+      '<button type="button" data-cmd="hiliteOff" style="' + EBTN + '">Bo boi</button>' +
+      '<button type="button" data-cmd="black" style="' + EBTN + 'color:#201f1d;">Chu den</button>' +
+      '<button type="button" data-cmd="red" style="' + EBTN + 'color:#9B2C2C;">Chu do</button>' +
+      '<span style="flex:1"></span>' +
+      '<span style="font-size:11.5px;color:#6b665e;">Da sua: <b id="rrttEditCount">0</b> o</span>' +
+      '<button type="button" data-cmd="reset" style="' + EBTN + 'color:#9B2C2C;">Hoan tac tat ca</button>' +
+      '</div>' +
+      '<p id="rrttEditHint" style="display:none;font-size:12.5px;color:#6b665e;margin-top:10px;line-height:1.7;">' +
+      'Bam thang vao so hoac cau chu tren 5 trang bao cao de sua. Boi den phan chu roi bam nut dinh dang, ' +
+      'hoac dung Ctrl+B / Ctrl+I. Sua xong tat che do sua roi bam Xuat ban gui di.<br>' +
+      'Luu y: nap file key ky moi se ve lai so tu Excel, nhung cac o da sua van duoc ap de len. ' +
+      'Sau khi nap ky moi nen ra soat lai hoac bam Hoan tac tat ca.</p>';
+  }
+
+  function wireEdit() {
+    var bar = document.getElementById('rrttEditBar');
+    var btn = document.getElementById('rrttEditBtn');
+    if (!bar || !btn) return;
+    bar.addEventListener('mousedown', function (e) {
+      if (e.target && e.target.tagName === 'BUTTON') e.preventDefault();
+    });
+    bar.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('button') : null;
+      if (!b) return;
+      var c = b.getAttribute('data-cmd');
+      if (c === 'bold') exec('bold');
+      else if (c === 'italic') exec('italic');
+      else if (c === 'hilite') exec('hiliteColor', '#ffe27a');
+      else if (c === 'hiliteOff') exec('hiliteColor', 'transparent');
+      else if (c === 'black') exec('foreColor', '#201f1d');
+      else if (c === 'red') exec('foreColor', '#9B2C2C');
+      else if (c === 'reset') {
+        if (!window.confirm('Bo toan bo sua doi thu cong, tra ve dung so lieu tu file key?')) return;
+        EDITS = {}; ORIG = {};
+        var n = document.getElementById('rrttEditCount');
+        if (n) n.textContent = '0';
+        if (window.RRTT && window.RRTT.rerender) window.RRTT.rerender();
+        setTimeout(function () { if (editMode) setEditable(true); }, 50);
+      }
+    });
+    btn.addEventListener('click', function () { toggleEdit(!editMode); });
   }
 
   var CARD = 'background:#fdfcfa;border:1px solid #e6e2db;border-radius:12px;overflow:hidden;';
@@ -2064,9 +2261,11 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
         '<div id="rrttStatus" style="margin-top:12px;border-radius:10px;padding:12px 16px;font-size:13px;' +
           'border:1px solid #e6d3a8;background:#fff8e8;color:#6b5320;">Chưa nạp file nào trong phiên này. Báo cáo đang hiển thị dữ liệu nhúng sẵn.</div>' +
         '<div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">' +
+          '<button type="button" id="rrttEditBtn" style="font-family:inherit;font-size:13px;font-weight:600;border:1px solid #7B2D3B;background:#fdfcfa;color:#7B2D3B;border-radius:9px;padding:10px 18px;cursor:pointer;">Sua bao cao</button>' +
           '<button type="button" id="rrttExport" style="font-family:inherit;font-size:13px;font-weight:600;' +
             'border:1px solid #7B2D3B;background:#7B2D3B;color:#fff;border-radius:9px;padding:10px 18px;cursor:pointer;">Xuất bản gửi đi</button>' +
         '</div>' +
+        editBarHTML() +
         '<p style="font-size:12.5px;color:#6b665e;margin-top:10px;line-height:1.7;">Toàn bộ xử lý chạy trong trình duyệt trên máy này. Không có kết nối mạng nào được tạo ra, không dữ liệu nào rời khỏi máy.</p>' +
       '</div></div>' +
       '<div style="' + CARD + '"><div style="' + HEAD + '">Trạng thái dữ liệu</div>' +
@@ -2263,6 +2462,7 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
       SRC = { file: f.name, generatedAt: K.meta.generatedAt, counts: K.counts, problems: K.problems };
       if (window.RRTT && window.RRTT.rerender) window.RRTT.rerender();
       badge();
+      applyEdits();
       renderPanel();
       var n = countIssues();
       LOG.push({ at: new Date().toLocaleString('en-GB', { hour12: false }).replace(',', ''),
@@ -2301,7 +2501,8 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
       var clone = document.documentElement.cloneNode(true);
       var inject = document.createElement('script');
       inject.textContent = 'window.RPT = ' + JSON.stringify(window.RPT).replace(/</g, '\\u003c') + ';\n' +
-        'window.TS = ' + JSON.stringify(window.TS).replace(/</g, '\\u003c') + ';';
+        'window.TS = ' + JSON.stringify(window.TS).replace(/</g, '\\u003c') + ';\n' +
+        'window.RRTT_EDITS = ' + JSON.stringify(EDITS).replace(/</g, '\\u003c') + ';';
       clone.querySelector('head').appendChild(inject);
       var blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html;charset=utf-8' });
       var a = document.createElement('a');
@@ -2311,9 +2512,39 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
     });
 
+    wireEdit();
     renderPanel();
     badge();
+    applyEdits();
+    [300, 1200, 2500].forEach(function (ms) { setTimeout(applyEdits, ms); });
+    watchDom();
   }
+
+  setInterval(function () {
+    if (unlocked) return;
+    var sec = document.querySelector('[data-page="p6"][data-active]');
+    if (!sec) return;
+    var v = window.prompt('Nhap mat khau de mo tab Quan tri du lieu:');
+    if (v === PASS) { unlocked = true; return; }
+    if (v !== null) window.alert('Mat khau khong dung.');
+    if (window.RRTT && window.RRTT.goPage) window.RRTT.goPage('p1');
+  }, 400);
+
+  var moTimer = null, mo = null;
+  function watchDom() {
+    if (mo || !window.MutationObserver) return;
+    var host = document.body;
+    if (!host) return;
+    mo = new MutationObserver(function () {
+      if (moTimer) clearTimeout(moTimer);
+      moTimer = setTimeout(function () {
+        if (Object.keys(EDITS).length) applyEdits(); else tagEditables();
+      }, 120);
+    });
+    mo.observe(host, { childList: true, subtree: true });
+  }
+
+  if (window.RRTT_EDITS) EDITS = window.RRTT_EDITS;
 
   var tries = 0;
   (function boot() {
@@ -2322,7 +2553,7 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
     setTimeout(boot, 100);
   })();
 
-  window.RRTT_ADMIN = { apply: apply, log: function () { return LOG; }, source: function () { return SRC; } };
+  window.RRTT_ADMIN = { apply: apply, edits: function () { return EDITS; }, applyEdits: applyEdits, log: function () { return LOG; }, source: function () { return SRC; } };
 })();
 
 </script>

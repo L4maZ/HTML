@@ -28,8 +28,8 @@ HDR_FONT = Font(color="FFFFFF", bold=True, size=10)
 EDIT_FONT = Font(color="0070C0")
 
 BOOKS = [
-    ("TB_MSB", "2.1.", "TRADING BOOK NỘI BỘ", 5, 30),
-    ("BB_MSB", "2.2.", "BANKING BOOK NỘI BỘ", 32, 53),
+    ("TB_INT", "2.1.", "TRADING BOOK NỘI BỘ", 5, 30),
+    ("BB_INT", "2.2.", "BANKING BOOK NỘI BỘ", 32, 53),
     ("TB_SBV", "2.3.", "TRADING BOOK SBV", 55, 60),
     ("BB_SBV", "2.4.", "BANKING BOOK SBV", 62, 67),
     ("OTHER", "2.5.", "KHÁC", 69, 69),
@@ -127,11 +127,36 @@ def clean(v):
     return v
 
 
+def clean_text(v):
+    """Giu nguyen xuong dong, chi gom khoang trang trong tung dong."""
+    if not isinstance(v, str):
+        return clean(v)
+    v = v.replace("\r\n", "\n").replace("\r", "\n")
+    lines = [re.sub(r"[ \t\u00a0]+", " ", ln).strip() for ln in v.split("\n")]
+    while lines and not lines[0]:
+        lines.pop(0)
+    while lines and not lines[-1]:
+        lines.pop()
+    return "\n".join(lines)
+
+
 def rowvals(ws, r, c0, n):
     return [clean(ws.cell(r, c0 + i).value) for i in range(n)]
 
 
-def build(src, outdir):
+SAFE = [("MSB", "NH"), ("Msb", "Nh"), ("msb", "nh"),
+        ("NỘI BỘ", "NB"), ("Nội bộ", "NB"), ("nội bộ", "NB")]
+
+
+def scrub(v, on):
+    if not on or not isinstance(v, str):
+        return v
+    for a, b in SAFE:
+        v = v.replace(a, b)
+    return v
+
+
+def build(src, outdir, sanitize=False):
     wb = openpyxl.load_workbook(src, data_only=True)
     s2, lk, cd, rp, rt = (wb["Linked (1)"], wb["Linked"], wb["Chart data"],
                           wb["Report"], wb["Run Tool"])
@@ -306,7 +331,7 @@ def build(src, outdir):
     tsh = out.create_sheet("TEXT")
     tsh.append(["KeyID", "Mo ta", "Nguon", "Value"])
     for keyid, cell, desc in TEXTS:
-        tsh.append([keyid, desc, "Report!" + cell, clean(rp[cell].value)])
+        tsh.append([keyid, desc, "Report!" + cell, clean_text(rp[cell].value)])
     counts["TEXT"] = len(TEXTS)
 
     xsh = out.create_sheet("TS")
@@ -327,9 +352,18 @@ def build(src, outdir):
     for sh in (dsh, psh, csh, gsh, ssh, xsh, vsh, rsh, osh):
         sh.freeze_panes = "B2"
 
+    if sanitize:
+        for sh in out.worksheets:
+            for row in sh.iter_rows():
+                for c in row:
+                    if isinstance(c.value, str):
+                        c.value = scrub(c.value, True)
+        for r in range(2, tsh.max_row + 1):
+            tsh.cell(r, 4).value = "[nội dung lược bỏ ở bản test]"
+
     stamp = re.sub(r"[^0-9]", "", str(dates["today"]))
     stamp = stamp[4:8] + stamp[2:4] + stamp[0:2] if len(stamp) == 8 else "unknown"
-    dest = Path(outdir) / ("Key_%s.xlsx" % stamp)
+    dest = Path(outdir) / ("Key_%s%s.xlsx" % (stamp, "_test" if sanitize else ""))
     out.save(dest)
     return dest, counts
 
@@ -384,7 +418,9 @@ def style(ws, widths, value_col=None, wrap=False):
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         sys.exit(__doc__)
-    path, counts = build(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else ".")
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    path, counts = build(args[0], args[1] if len(args) > 1 else ".",
+                         sanitize="--sanitize" in sys.argv)
     print(path)
     for k, v in counts.items():
         print("  %-10s %d dong" % (k, v))
