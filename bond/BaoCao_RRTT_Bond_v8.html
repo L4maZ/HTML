@@ -1652,7 +1652,14 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
     if (t['txt.note10d']) R.note10d = t['txt.note10d'];
     if (t['txt.noteVar']) R.noteVar = t['txt.noteVar'];
 
-    var BOOKMAP = { TB_MSB: ['MSB', 0], BB_MSB: ['MSB', 1], TB_SBV: ['SBV', 0], BB_SBV: ['SBV', 1] };
+    var BOOKMAP = {};
+    K.s2.forEach(function (r) {
+      var b = String(r.Book || '').trim();
+      if (!b || BOOKMAP[b]) return;
+      if (!/^(TB|BB)_/i.test(b)) return;
+      var scope = /SBV/i.test(b) ? 'SBV' : 'MSB';
+      BOOKMAP[b] = [scope, /^BB/i.test(b) ? 1 : 0];
+    });
     R.books = R.books || { MSB: [], SBV: [] };
     Object.keys(BOOKMAP).forEach(function (bk) {
       var scope = BOOKMAP[bk][0], i = BOOKMAP[bk][1];
