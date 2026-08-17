@@ -211,16 +211,36 @@
       });
   }
 
-  function markup(v) {
-    if (v === null || v === undefined) return v;
-    var s = String(v);
-    if (!s) return s;
-    s = s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  var MARK = /\[(\/?)([birh])\]/;
+
+  function markupHtml(txt) {
+    var s = String(txt)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     s = s.replace(/\[b\]/g, '<b>').replace(/\[\/b\]/g, '</b>');
     s = s.replace(/\[i\]/g, '<i>').replace(/\[\/i\]/g, '</i>');
     s = s.replace(/\[r\]/g, '<span style="color:#9B2C2C">').replace(/\[\/r\]/g, '</span>');
-    s = s.replace(/\[h\]/g, '<mark style="background:#ffe27a;color:inherit">').replace(/\[\/h\]/g, '</mark>');
+    s = s.replace(/\[h\]/g, '<mark style="background:#ffe27a;color:inherit">')
+         .replace(/\[\/h\]/g, '</mark>');
     return s;
+  }
+
+  function renderMarkup(root) {
+    var scope = root || document;
+    scope.querySelectorAll('[data-page]').forEach(function (pg) {
+      if (!/^p[1-5]$/.test(pg.dataset.page || '')) return;
+      var walker = document.createTreeWalker(pg, NodeFilter.SHOW_TEXT, null);
+      var hits = [], node;
+      while ((node = walker.nextNode())) {
+        if (MARK.test(node.nodeValue || '')) hits.push(node);
+      }
+      hits.forEach(function (tn) {
+        var host = tn.parentNode;
+        if (!host || host.nodeType !== 1) return;
+        var span = document.createElement('span');
+        span.innerHTML = markupHtml(tn.nodeValue);
+        host.replaceChild(span, tn);
+      });
+    });
   }
 
   function apply(K) {
@@ -237,8 +257,7 @@
       lm: m.dateLastMonth, lq: m.dateLastQuarter, ly: m.dateLastYear
     };
 
-    var t = {};
-    Object.keys(K.texts).forEach(function (k) { t[k] = markup(K.texts[k]); });
+    var t = K.texts;
     R.highlight = R.highlight || {};
     if (t['txt.assessment']) R.highlight.compliance = t['txt.assessment'];
     if (t['txt.itdTB']) R.highlight.tb = t['txt.itdTB'];
@@ -1085,6 +1104,7 @@
       SRC = { file: f.name, generatedAt: K.meta.generatedAt, counts: K.counts, problems: K.problems };
       if (window.RRTT && window.RRTT.rerender) window.RRTT.rerender();
       badge();
+      renderMarkup();
       applyEdits();
       renderPanel();
       var n = countIssues();
@@ -1138,8 +1158,9 @@
     wireEdit();
     renderPanel();
     badge();
+    renderMarkup();
     applyEdits();
-    [300, 1200, 2500].forEach(function (ms) { setTimeout(applyEdits, ms); });
+    [300, 1200, 2500].forEach(function (ms) { setTimeout(function () { renderMarkup(); applyEdits(); }, ms); });
     watchDom();
   }
 
@@ -1161,6 +1182,7 @@
     mo = new MutationObserver(function () {
       if (moTimer) clearTimeout(moTimer);
       moTimer = setTimeout(function () {
+        renderMarkup();
         if (Object.keys(EDITS).length) applyEdits(); else tagEditables();
       }, 120);
     });
