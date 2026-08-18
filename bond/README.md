@@ -563,3 +563,53 @@ Banking  (dòng 135) — y hệt, chỉ đổi Trading!DQ:DQ,"TD"  ->  "BK"
 
 Nếu vẫn muốn giữ `SUM` theo kỳ hạn thì phải đổi nhãn cột thành "ước tính theo PV01" và bỏ dòng
 Total đi, chứ để chung một bảng thì người đọc cộng tay sẽ thấy lệch.
+
+## 18/08 — chuỗi "sơ cấp/thứ cấp" không rác, và lỗi lớn nhất của cả project
+
+### Không phải rác
+
+Khối `Chart data!AS:AZ` nuôi hai chart thật:
+
+- **Excel** `chart3.xml` — "Thanh khoản TT sơ cấp và thứ cấp", nguồn `AX:AZ`
+- **HTML** `ch_primary` — tab Thị trường TPCP → Thanh khoản, "Lịch sử · sơ cấp & thứ cấp theo tháng"
+
+Số liệu thật: 13 tháng, GTTT sơ cấp 7.089 → 64.581 tỷ, GTGD thứ cấp 127.627 → 305.793 tỷ.
+
+Chỉ có **cột `AT` (STT)** là thừa — hằng số 1…13, không công thức nào trong `Chart data` tham
+chiếu (252 chỗ dùng "AT" đều nằm ở sheet `VaR senerio`, cột AT khác). `AU`/`AV`/`AW`
+(Date/Year/Month) thì **phải giữ** — `AY`/`AZ` dùng chúng làm tiêu chí SUMIFS.
+
+### Lỗi lớn nhất tìm được: 11/19 chuỗi biểu đồ vẽ bằng số nhúng sẵn
+
+Tên trường trong file key là **tiêu đề cột bên Excel**, còn HTML đọc theo **tên rút gọn của
+riêng nó**. Lệch tên thì bộ ánh xạ lấy giá trị nhúng sẵn từ kỳ dựng file — im lặng.
+
+| Chuỗi | HTML cần | File key có | Hậu quả |
+|---|---|---|---|
+| `vonSD` | `RealizedNIM` · `RealizedChua` · `LoTiemAn` · `VonYeuCau` · `Tong` | `Realized&NIM lũy kế năm` · … · `Tổng` | **5/5 trường** → cả chart Mức độ sử dụng vốn là số cũ |
+| `ytmRepo` | `tenor` · `gov` · `fi` · `repo` | `Kỳ hạn` · `YTM GovBond` · `YTM FIBond` · `RepoRate` | **4/4** → cả chart tương quan YTM vs repo |
+| `tdpnl` · `bkpnl` | `ItD` · `YtD` | `ItD PnL` · `YtD PnL 2026` | biểu đồ lịch sử ItD và YtD PnL vẽ đường của kỳ cũ |
+| `primary` | cả chuỗi | tên khối ra `month` do cột STT | chart thanh khoản đứng ở 24/07 |
+| `qlhsFi` · `qlhsGov` | `Realized` | `Realized PnL` | |
+| `fiPos` | `FIBond` · `Limit` | `FI Bond` · `Hạn mức` | |
+| `gdTPDN` · `fiCoupon` | `FIBond` | `FI Bond` | |
+| `corr` | `SoCap` | `LS sơ cấp` | |
+
+Nghĩa là bản gửi BLĐ ghi ngày 17/08 nhưng một loạt biểu đồ vẽ số **24/07** — đúng loại lỗi
+"âm thầm nguy hiểm nhất" mà briefing cảnh báo.
+
+**Đã sửa:** thêm bảng `FIELD_ALIAS` khớp tên hai bên, và **không im lặng nữa** — trường nào vẫn
+không khớp thì tab Quản trị liệt kê đỏ (`TS_MISS`), chuỗi nào file key không có thì báo riêng
+(`TS_STALE`).
+
+Kiểm với key 17/08: không còn cảnh báo nào, không lỗi JS ở cả 5 trang. Số đã chạy đúng:
+
+| | Trước | Sau |
+|---|---|---|
+| `vonSD.Tong` | 1.184,77 | 258,80 |
+| `ytmRepo.gov` | 4,724 | 4,733 |
+| `primary.SoCap` | 12.003,8 | 14.700 |
+| `tdpnl.ItD` | −1.590,43 | −1.642,39 |
+
+Còn `tdpv01.>20Y`, `yieldTs.15Y`, `qlhsGov.Realized`… trùng giá trị cũ là trùng thật, không
+phải thiếu — đã đối chiếu theo tên trường trong file key.

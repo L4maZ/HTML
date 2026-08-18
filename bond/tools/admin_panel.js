@@ -14,6 +14,7 @@
   /* Chuỗi biểu đồ nào file key không có -> trang vẫn vẽ bằng số nhúng sẵn từ kỳ dựng file.
      Phải nói ra, không được im lặng dùng số cũ. */
   var TS_STALE = null;
+  var TS_MISS = [];
   var SRC = window.RRTT_SRC || null;
 
   function $(s, r) { return (r || document).querySelector(s); }
@@ -616,6 +617,23 @@
       };
     }
 
+  /* Tên trường trong file key là tiêu đề cột bên Excel, còn HTML đọc theo tên rút gọn
+     của riêng nó. Lệch tên thì trường đó lặng lẽ giữ số nhúng sẵn của kỳ dựng file.
+     Bảng này khớp hai bên lại; TS_MISS ghi lại chỗ nào vẫn không khớp được. */
+  var FIELD_ALIAS = {
+    tdpnl:   { ItD: 'ItD PnL', YtD: 'YtD PnL 2026' },
+    bkpnl:   { ItD: 'ItD PnL', YtD: 'YtD PnL 2026' },
+    corr:    { SoCap: 'LS sơ cấp' },
+    gdTPDN:  { FIBond: 'FI Bond' },
+    fiPos:   { FIBond: 'FI Bond', Limit: 'Hạn mức' },
+    fiCoupon:{ FIBond: 'FI Bond' },
+    qlhsFi:  { Realized: 'Realized PnL' },
+    qlhsGov: { Realized: 'Realized PnL' },
+    primary: { SoCap: 'GTTT sơ cấp', ThuCap: 'GTGD thứ cấp' },
+    ytmRepo: { tenor: '@date', gov: 'YTM GovBond', fi: 'YTM FIBond', repo: 'RepoRate' },
+    vonSD:   { RealizedNIM: 'Realized&NIM lũy kế năm', RealizedChua: 'Realized&NIM chưa ghi nhận',
+               LoTiemAn: 'Lỗ tiềm ẩn', VonYeuCau: 'Vốn yêu cầu', Tong: 'Tổng' }
+  };
     if (Object.keys(K.ts).length) {
       var TS = window.TS || {};
       var MAP = {
@@ -624,9 +642,10 @@
         bidAskSpread: 'spreadTs', tuongQuanLs10y: 'corr', gdTpdn: 'gdTPDN',
         posiFibondCd: 'fiPos', couponBqFibondCd: 'fiCoupon', yieldFiBond: 'fiYield',
         mucDoSuDungVon: 'vonSD', qlhsFibondCd: 'qlhsFi', qlhsGovbond: 'qlhsGov',
-        tuongQuanYtmVsRepo: 'ytmRepo'
+        tuongQuanYtmVsRepo: 'ytmRepo', soCapThuCapBond: 'primary', month: 'primary'
       };
       TS_STALE = Object.keys(TS).slice();
+      TS_MISS = [];
       Object.keys(K.ts).forEach(function (s) {
         var target = MAP[s];
         if (!target || !TS[target]) return;
@@ -641,8 +660,14 @@
           if (!m) return String(d).slice(0, 8);
           return mon ? (m[2] + '/' + m[3].slice(2)) : (m[1] + '/' + m[2]);
         });
+        var al = FIELD_ALIAS[target] || {};
+        Object.keys(al).forEach(function (f) {
+          var from = al[f];
+          if (from === '@date') { if (raw.length) dst[f] = raw.slice(); return; }
+          if (src[from] !== undefined) dst[f] = src[from];
+        });
         Object.keys(TS[target]).forEach(function (f) {
-          if (dst[f] === undefined) dst[f] = TS[target][f];
+          if (dst[f] === undefined) { dst[f] = TS[target][f]; TS_MISS.push(target + '.' + f); }
         });
         TS[target] = dst;
       });
@@ -1029,6 +1054,10 @@
           fm(a) + ' vs ' + fm(b) + (Math.abs(diff) < 0.5 ? '' : ' · lệch ' + fm(diff))]);
       });
 
+    if (TS_MISS.length) {
+      items.push(['no', 'Trường biểu đồ file key không có — đang vẽ bằng số nhúng sẵn',
+        TS_MISS.join(' · ')]);
+    }
     if (TS_STALE && TS_STALE.length) {
       var NICE = {
         primary: 'Sơ cấp / thứ cấp bond', lsttPrimary: 'Lãi suất trúng thầu sơ cấp',
