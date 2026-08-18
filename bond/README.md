@@ -166,8 +166,34 @@ Excel tự cập nhật vùng khi dòng dịch.
 ### Cài đặt
 
 1. `Alt+F11` → Import `tools/XuatFileKey.bas`
-2. Chạy `TaoNameNhanDinh` — **một lần duy nhất**
-3. Mỗi kỳ: chạy `XuatFileKey` → `Key_YYYYMMDD.xlsx` nằm cùng thư mục File 02
+2. Assign **một macro duy nhất**: `XuatFileKey`. Trong hộp Macro chỉ hiện đúng tên này.
+
+Mỗi kỳ bấm một lần → `Key_YYYYMMDD.xlsx` nằm cùng thư mục File 02. Lần chạy đầu macro tự đặt
+17 Named Range `HTML_*`; các lần sau không đặt lại, để Excel tự dời vùng khi ô nhận định dịch
+lên xuống. Muốn đặt lại thì xoá name `HTML_*` trong Formulas → Name Manager, lần chạy kế tiếp
+macro tự tạo lại.
+
+## Macro chạy nhanh (18/08) — viết lại phần lõi
+
+Bản trước chạy hơn 10 phút. Nguyên nhân là **đọc và ghi từng ô qua COM**: khoảng 15.000 lượt
+gọi qua lại giữa VBA và Excel, cộng thêm việc đọc định dạng chữ từng ký tự một.
+
+| Chỗ | Trước | Sau |
+|---|---|---|
+| Đọc `Linked (1)` + `Linked` | ~7.000 lượt đọc từng ô | 2 lượt, nạp cả vùng vào mảng |
+| Ghi 12 sheet của file key | ~7.600 lượt ghi từng ô | 12 lượt, mỗi sheet một mảng |
+| Đọc bôi đậm/đỏ/nghiêng | mỗi ký tự một lượt (~6.000/ô) | hỏi cả ô trước; ô đồng nhất xong trong 3 lượt |
+| Tính lại & vẽ màn hình | bật suốt | tắt, khôi phục cả khi macro lỗi |
+
+Sau khi chạy, macro hiện thời gian từng chặng — đọc nguồn / bảng số / nhận định / tổng — kèm
+số lượt đọc định dạng, để nếu vẫn chậm thì biết chậm ở đâu mà không phải đoán.
+
+**Chặn treo máy.** Quét định dạng chữ có ngân sách 20.000 lượt; chạm trần thì phần còn lại lấy
+định dạng của ký tự đầu đoạn thay vì tiếp tục chia nhỏ. Vùng đệm ghi có giới hạn rõ ràng, tràn
+thì macro dừng và báo, không xuất file thiếu.
+
+**Toạ độ khối** trong macro khớp từng con số với `tools/make_key.py` — bản Python đã đối chiếu
+số liệu ô-với-ô. Riêng khối 2 vẫn dò theo nhãn `TRADING BOOK NỘI BỘ`…, không theo toạ độ.
 
 ## Sửa trình bày (17/08, sau rà soát của Jak)
 
