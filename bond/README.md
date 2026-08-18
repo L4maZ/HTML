@@ -367,3 +367,65 @@ HTML nay chặn: `|bps| > 200` thì ô chuyển đỏ và hiện banner đỏ gi
 biểu đồ báo lãi thêm 4.755 tỷ.
 
 Nhãn cột trên biểu đồ VIRA chuyển lên **trên** cột — trước để dưới nên đè lên nhãn trục.
+
+## 18/08 — bản xuất bị thọt, và một lượt rà số
+
+### Bản xuất mất tính năng (đã sửa)
+
+Ba lỗi, hai cái cùng một gốc: **dùng thuộc tính DOM làm cờ "đã gắn sự kiện"**. Bản xuất
+serialise cả DOM nên cờ đó đi theo sang file mới, hàm gắn sự kiện thấy cờ đã bật liền bỏ qua —
+nút còn đó nhưng bấm không ra gì.
+
+| Chỗ | Cờ cũ | Hậu quả ở bản xuất |
+|---|---|---|
+| `wireEdit()` | `data-wired` trên nút | **Bấm "Sửa báo cáo" không có phản ứng** — đúng lỗi Jak gặp |
+| `lockNav()` | `data-locked` trên mục rail | Không gắn được khoá mật khẩu (còn chốt chặn 400ms nên vẫn không vào được, nhưng là may) |
+
+Cả hai chuyển sang biến JS trong closure.
+
+Lỗi thứ ba: `renderVon` ném `Cannot read properties of undefined (reading 'TPCP')` — bộ ánh xạ
+file key dựng `issuerMix.TB.total` nhưng quên `issuerMix.TB.pct`, mà bảng cơ cấu có dòng
+"Tỷ trọng". Cả tab **Cơ cấu & sử dụng vốn** hỏng từ chỗ đó trở xuống, kể cả bản gốc sau khi nạp
+key. Nay `pct` tính từ total; không có dòng Tổng thì tự cộng theo cột.
+
+### Nhật ký nạp không đi theo file (đã sửa)
+
+`LOG` và `SRC` là biến trong closure, bản xuất chỉ nhúng `RPT` / `TS` / `EDITS` nên mở file mới
+ra là nhật ký trắng. Nay xuất kèm `window.RRTT_LOG` + `window.RRTT_SRC`, giới hạn 60 dòng gần
+nhất. Mỗi lần xuất bản cũng ghi một dòng "— xuất bản gửi đi —".
+
+Kiểm: nạp key 14/08 → xuất bản → mở lại: hỏi mật khẩu ✓ · thanh công cụ sửa hiện ✓ ·
+2.554 ô sửa được ✓ · nhật ký 2 dòng ✓ · không lỗi JS ở cả 5 trang ✓ · 1,96 MB.
+
+### Rà số — đơn vị Volatility sai 100 lần (đã sửa)
+
+Sheet `Volatility` chở **chênh lệch yield theo ngày, đơn vị bps**, không phải %. Kiểm chéo:
+`Delta Yield` ghi 4Y ngày 14/08 = 3.971, ngày 13/08 = 3.976 → chênh −0,005 điểm phần trăm, và
+`Volatility` ghi **−0.5**. Dải giá trị −16,9 đến +9,6 cũng chỉ hợp lý với bps.
+
+HTML lại gắn nhãn `%`, nên bảng đọc thành "1,18 %/ngày" — tức 118 bps/ngày, gấp trăm lần thực
+tế. Đã đổi nhãn sang `bps / ngày` và `bps / năm` ở cả hai bảng và trục biểu đồ.
+
+### Ba chỗ số liệu cần Jak xác nhận
+
+Không sửa được từ HTML, phải nhìn lại Excel:
+
+1. **Banking Book nội bộ · ItD lệch 716 tỷ.** Dòng tổng ghi −1.739,6 nhưng hai dòng con cộng
+   lại −2.456,0. Vấn đề cũ đã ghi trong mục "Kiểm tra nhất quán": tổng lấy SUMIFS còn hai dòng
+   con là số gõ tay.
+2. **Trading Book SBV · Face Value 2.450 tỷ, hạn mức ghi ≤ 20.000, nhưng % sử dụng ghi 4,75%.**
+   2.450/20.000 = 12,25%. Hai con số trên cùng một dòng không khớp nhau — hoặc hạn mức thật của
+   book SBV khác 20.000, hoặc ô % sử dụng lấy mẫu số khác.
+3. **Kịch bản VaR 1 ngày · tổng ≠ cộng theo kỳ hạn.** Ví dụ VaR95% 1 ngày: chỉ kỳ 7Y có biến
+   động 0,30 bps → tác động −0,81 tỷ, nhưng ô Tổng ghi −23,16 tỷ. Bốn kịch bản VaR 1 ngày đều
+   vậy; các kịch bản 10 và 20 ngày thì khớp. Nếu Tổng lấy từ định giá lại toàn danh mục chứ
+   không phải cộng PV01 × Δy theo kỳ hạn thì cần ghi rõ, vì người đọc sẽ tự cộng và thấy lệch.
+
+### Những chỗ đã kiểm và **đúng**
+
+Face Value = AFS + HTM (Trading) · ItD = AFS + HTM (Trading) · bảng theo kỳ hạn khớp dòng Tổng
+và khớp bảng Indicator ở cả Face, ItD, PV01 (lệch PV01 0,04 do làm tròn từng kỳ hạn) ·
+VaR 95% < VaR 99% và CVaR ≥ VaR ở mọi mức · đường cong yield: mid = (bid+ask)/2 và
+spread = bid − ask khớp cả 10 kỳ hạn · VIRA: ItD sau = ItD gốc + PV01 × bps khớp tuyệt đối ·
+tỷ trọng rating cộng đúng 100% · 5.990 dòng TS không ô rỗng, không giá trị vượt ngưỡng,
+ngày đúng định dạng (trừ `tuongQuanYtmVsRepo` dùng trục kỳ hạn — đúng thiết kế).

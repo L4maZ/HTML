@@ -583,14 +583,14 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
           <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
             <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
               <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_vol_01">Yield volatility · theo ngày</h2>
-              <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">% / ngày</span>
+              <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">bps / ngày</span>
             </div>
             <div style="min-width:0;overflow-x:auto;"><div id="tblVolD"></div></div>
           </section>
           <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
             <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
               <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_vol_02">Yield volatility · quy năm</h2>
-              <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">% / năm</span>
+              <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">bps / năm</span>
             </div>
             <div style="min-width:0;overflow-x:auto;"><div id="tblVolA"></div></div>
             <div id="ch_vol" style="height:300px;margin-top:16px;"></div>
@@ -1270,9 +1270,11 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
       rows.forEach(r => { y += '<tr>' + tdL(r.k) + r.v.map(v => tdR(v.toFixed(2) + unit)).join('') + '</tr>'; });
       setTbl(id, y + '</tbody>');
     };
-    volTable('tblVolD', vol.daily, '%'); volTable('tblVolA', vol.annual, '%');
+    /* Sheet Volatility chở chênh lệch yield theo NGÀY, đơn vị bps (14/08 4Y: 3.971 − 3.976 = −0.5).
+       Độ biến động tính từ đó cũng là bps, không phải %. */
+    volTable('tblVolD', vol.daily, ' bps'); volTable('tblVolA', vol.annual, ' bps');
     mk('ch_vol', baseOpt({
-      xAxis: axX(vol.tenors), yAxis: axY('% / năm'),
+      xAxis: axX(vol.tenors), yAxis: axY('bps / năm'),
       series: vol.annual.map((r, i) => ({ name: r.k, type: 'line', data: r.v, smooth: true, symbol: 'none', lineStyle: { width: i === 3 ? 2.4 : 1.5, color: [K.gold, 'rgba(182,130,53,.5)', K.blue, K.ink][i] } }))
     }));
     setHtml('cmtMarket', esc(R.reportMarket));
@@ -1486,8 +1488,13 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
   var SCHEMA = 'bond.key.v3';
   var PAGES = ['p1', 'p2', 'p3', 'p4', 'p5'];
   var unlocked = false;
-  var LOG = [];
-  var SRC = null;
+  /* Nhat ky va nguon phai song sot qua ban xuat -> doc lai tu bien duoc nhung khi xuat */
+  var LOG = (window.RRTT_LOG && window.RRTT_LOG.slice) ? window.RRTT_LOG.slice(-60) : [];
+  /* Co "da gan su kien" phai la bien JS, khong duoc la thuoc tinh DOM:
+     ban xuat serialise ca DOM nen thuoc tinh se theo sang file moi va chan viec gan lai. */
+  var navLocked = false;
+  var editWired = false;
+  var SRC = window.RRTT_SRC || null;
 
   function $(s, r) { return (r || document).querySelector(s); }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -1845,10 +1852,23 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
         TPCQDP: body.map(function (r) { return num(r.C6); })
       };
       var tot = mix.filter(function (r) { return /Tổng/.test(String(r.Label)); })[0];
-      if (tot) {
-        R.issuerMix.TB.total = { TPCP: num(tot.C1), TPCPBL: num(tot.C2), TPCQDP: num(tot.C3) };
-        R.issuerMix.BB.total = { TPCP: num(tot.C4), TPCPBL: num(tot.C5), TPCQDP: num(tot.C6) };
-      }
+      var sumCol = function (a) { return a.reduce(function (s, x) { return s + (x || 0); }, 0); };
+      ['TB', 'BB'].forEach(function (bk) {
+        var b = R.issuerMix[bk];
+        if (tot) {
+          b.total = bk === 'TB'
+            ? { TPCP: num(tot.C1), TPCPBL: num(tot.C2), TPCQDP: num(tot.C3) }
+            : { TPCP: num(tot.C4), TPCPBL: num(tot.C5), TPCQDP: num(tot.C6) };
+        } else {
+          b.total = { TPCP: sumCol(b.TPCP), TPCPBL: sumCol(b.TPCPBL), TPCQDP: sumCol(b.TPCQDP) };
+        }
+        var g = b.total.TPCP + b.total.TPCPBL + b.total.TPCQDP;
+        b.pct = {
+          TPCP: g ? b.total.TPCP / g : 0,
+          TPCPBL: g ? b.total.TPCPBL / g : 0,
+          TPCQDP: g ? b.total.TPCQDP / g : 0
+        };
+      });
     }
 
     var hold = grid(K.grid, 'HOLD');
@@ -2144,8 +2164,8 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
   }
 
   function lockNav(btn) {
-    if (btn.getAttribute('data-locked')) return;
-    btn.setAttribute('data-locked', '1');
+    if (navLocked) return;
+    navLocked = true;
     btn.addEventListener('click', function (e) {
       if (unlocked) return;
       e.stopImmediatePropagation();
@@ -2388,8 +2408,9 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
 
   function wireEdit() {
     var btn = document.getElementById('rrttEditBtn');
-    if (!btn || btn.getAttribute('data-wired')) return;
-    btn.setAttribute('data-wired', '1');
+    if (!btn || editWired) return;
+    editWired = true;
+    btn.removeAttribute('data-wired');
     btn.addEventListener('click', function () { toggleEdit(!editMode); });
   }
 
@@ -2654,9 +2675,15 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
       if (window.RRTT && window.RRTT.goPage) window.RRTT.goPage('p1');
       var clone = document.documentElement.cloneNode(true);
       var inject = document.createElement('script');
+      LOG.push({ at: new Date().toLocaleString('en-GB', { hour12: false }).replace(',', ''),
+        file: '— xuất bản gửi đi —', asOf: String((window.RPT && window.RPT.asOf) || '—'), w: countIssues() });
+      if (LOG.length > 60) LOG = LOG.slice(-60);
+      renderPanel();
       inject.textContent = 'window.RPT = ' + JSON.stringify(window.RPT).replace(/</g, '\\u003c') + ';\n' +
         'window.TS = ' + JSON.stringify(window.TS).replace(/</g, '\\u003c') + ';\n' +
-        'window.RRTT_EDITS = ' + JSON.stringify(EDITS).replace(/</g, '\\u003c') + ';';
+        'window.RRTT_EDITS = ' + JSON.stringify(EDITS).replace(/</g, '\\u003c') + ';\n' +
+        'window.RRTT_LOG = ' + JSON.stringify(LOG).replace(/</g, '\\u003c') + ';\n' +
+        'window.RRTT_SRC = ' + JSON.stringify(SRC).replace(/</g, '\\u003c') + ';';
       clone.querySelector('head').appendChild(inject);
       var blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html;charset=utf-8' });
       var a = document.createElement('a');

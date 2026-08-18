@@ -5,8 +5,13 @@
   var SCHEMA = 'bond.key.v3';
   var PAGES = ['p1', 'p2', 'p3', 'p4', 'p5'];
   var unlocked = false;
-  var LOG = [];
-  var SRC = null;
+  /* Nhat ky va nguon phai song sot qua ban xuat -> doc lai tu bien duoc nhung khi xuat */
+  var LOG = (window.RRTT_LOG && window.RRTT_LOG.slice) ? window.RRTT_LOG.slice(-60) : [];
+  /* Co "da gan su kien" phai la bien JS, khong duoc la thuoc tinh DOM:
+     ban xuat serialise ca DOM nen thuoc tinh se theo sang file moi va chan viec gan lai. */
+  var navLocked = false;
+  var editWired = false;
+  var SRC = window.RRTT_SRC || null;
 
   function $(s, r) { return (r || document).querySelector(s); }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -364,10 +369,23 @@
         TPCQDP: body.map(function (r) { return num(r.C6); })
       };
       var tot = mix.filter(function (r) { return /Tổng/.test(String(r.Label)); })[0];
-      if (tot) {
-        R.issuerMix.TB.total = { TPCP: num(tot.C1), TPCPBL: num(tot.C2), TPCQDP: num(tot.C3) };
-        R.issuerMix.BB.total = { TPCP: num(tot.C4), TPCPBL: num(tot.C5), TPCQDP: num(tot.C6) };
-      }
+      var sumCol = function (a) { return a.reduce(function (s, x) { return s + (x || 0); }, 0); };
+      ['TB', 'BB'].forEach(function (bk) {
+        var b = R.issuerMix[bk];
+        if (tot) {
+          b.total = bk === 'TB'
+            ? { TPCP: num(tot.C1), TPCPBL: num(tot.C2), TPCQDP: num(tot.C3) }
+            : { TPCP: num(tot.C4), TPCPBL: num(tot.C5), TPCQDP: num(tot.C6) };
+        } else {
+          b.total = { TPCP: sumCol(b.TPCP), TPCPBL: sumCol(b.TPCPBL), TPCQDP: sumCol(b.TPCQDP) };
+        }
+        var g = b.total.TPCP + b.total.TPCPBL + b.total.TPCQDP;
+        b.pct = {
+          TPCP: g ? b.total.TPCP / g : 0,
+          TPCPBL: g ? b.total.TPCPBL / g : 0,
+          TPCQDP: g ? b.total.TPCQDP / g : 0
+        };
+      });
     }
 
     var hold = grid(K.grid, 'HOLD');
@@ -663,8 +681,8 @@
   }
 
   function lockNav(btn) {
-    if (btn.getAttribute('data-locked')) return;
-    btn.setAttribute('data-locked', '1');
+    if (navLocked) return;
+    navLocked = true;
     btn.addEventListener('click', function (e) {
       if (unlocked) return;
       e.stopImmediatePropagation();
@@ -907,8 +925,9 @@
 
   function wireEdit() {
     var btn = document.getElementById('rrttEditBtn');
-    if (!btn || btn.getAttribute('data-wired')) return;
-    btn.setAttribute('data-wired', '1');
+    if (!btn || editWired) return;
+    editWired = true;
+    btn.removeAttribute('data-wired');
     btn.addEventListener('click', function () { toggleEdit(!editMode); });
   }
 
@@ -1173,9 +1192,15 @@
       if (window.RRTT && window.RRTT.goPage) window.RRTT.goPage('p1');
       var clone = document.documentElement.cloneNode(true);
       var inject = document.createElement('script');
+      LOG.push({ at: new Date().toLocaleString('en-GB', { hour12: false }).replace(',', ''),
+        file: '— xuất bản gửi đi —', asOf: String((window.RPT && window.RPT.asOf) || '—'), w: countIssues() });
+      if (LOG.length > 60) LOG = LOG.slice(-60);
+      renderPanel();
       inject.textContent = 'window.RPT = ' + JSON.stringify(window.RPT).replace(/</g, '\\u003c') + ';\n' +
         'window.TS = ' + JSON.stringify(window.TS).replace(/</g, '\\u003c') + ';\n' +
-        'window.RRTT_EDITS = ' + JSON.stringify(EDITS).replace(/</g, '\\u003c') + ';';
+        'window.RRTT_EDITS = ' + JSON.stringify(EDITS).replace(/</g, '\\u003c') + ';\n' +
+        'window.RRTT_LOG = ' + JSON.stringify(LOG).replace(/</g, '\\u003c') + ';\n' +
+        'window.RRTT_SRC = ' + JSON.stringify(SRC).replace(/</g, '\\u003c') + ';';
       clone.querySelector('head').appendChild(inject);
       var blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], { type: 'text/html;charset=utf-8' });
       var a = document.createElement('a');
