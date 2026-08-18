@@ -492,3 +492,74 @@ BK120 (VaR95% 20 ngày, Total):  =SUM(BK111:BK119)
 Bỏ sót **dòng 110 = kỳ hạn 1Y**. Năm kịch bản còn lại đều `SUM(x110:x119)`. Hiện `BK110` = 0
 nên chưa lệch, nhưng hễ kỳ 1Y có biến động trong kịch bản đó là Total thiếu, âm thầm.
 Sửa thành `=SUM(BK110:BK119)`.
+
+## 18/08 — xoá dòng con AFS/HTM ở Banking, và thống nhất hàm VaR
+
+### Xoá `D36`/`D37` và mọi dòng con AFS/HTM ở Banking Book — **không ảnh hưởng gì**
+
+Macro dò khối theo nhãn (`TRADING BOOK NỘI BỘ`, `BANKING BOOK NỘI BỘ`…) rồi đọc tới nhãn kế
+tiếp, nên khối ngắn đi là tự co. KeyID sinh từ tên chỉ tiêu nên các dòng còn lại giữ nguyên key.
+
+Đã thử thật: dựng file key từ bản 17/08, xoá 6 dòng con Banking (`a) Book DCM tự fund` /
+`b) Book fund từ Pool` ở ba chỗ: ItD, YTM và một chỗ nữa), rồi nạp vào HTML.
+
+| | Còn dòng con | Đã xoá |
+|---|---|---|
+| Số chỉ tiêu Banking nội bộ | 20 | 14 |
+| ItD Banking | −1.750,47 | −1.750,47 |
+| KPI tab ItD | −1.642 / −1.049 / −1.750 / −3.393 | y hệt |
+| Kiểm tra nhất quán | chạy bình thường | chạy bình thường |
+| Lỗi JS trên 5 trang | không | không |
+
+Phép kiểm "Face = AFS + HTM" trong tab Quản trị chỉ áp cho Trading nội bộ, và có nhánh bỏ qua
+khi không thấy dòng con — nên không báo đỏ giả.
+
+**Vẫn phải cẩn thận một chỗ:** xoá dòng trong `Linked (1)` thì an toàn, nhưng xoá dòng trong
+sheet `Linked` thì **không** — các khối POS · CURVE · GRID · SCEN · VIRA vẫn đọc theo toạ độ
+dòng/cột cứng, lệch là lệch im lặng.
+
+### Thống nhất hàm cho bảng kịch bản VaR
+
+Hiện mỗi bảng dùng **hai cách** cho dòng Total. Đối chiếu với mô hình VaR ở mục 21 sheet
+`Trading` (có đủ cả 6 tổ hợp `VaR1D`/`VaR10D`/`VaR20D` × `VaR95%`/`VaR99%`, tách theo Bộ và Book):
+
+**Trading Book (dòng 120)** — đơn vị tỷ VND
+
+| Kịch bản | Công thức hiện tại | Đang ghi | Mô hình |
+|---|---|---|---|
+| VaR95% 1 ngày | SUMIFS mô hình | −23,15 | −23,15 |
+| VaR99% 1 ngày | SUMIFS mô hình | −48,52 | −48,52 |
+| VaR95% 10 ngày | `SUM(BG110:BG119)` | −148,35 | **−129,51** |
+| VaR99% 10 ngày | `SUM(BI110:BI119)` | −187,50 | **−174,25** |
+| VaR95% 20 ngày | `SUM(BK110:BK119)` | −207,99 | **−188,48** |
+| VaR99% 20 ngày | `SUM(BM110:BM119)` | −247,19 | **−234,33** |
+
+**Banking Book (dòng 135)** — chênh lệch ngược chiều và lớn hơn nhiều
+
+| Kịch bản | Đang ghi | Mô hình | Lệch |
+|---|---|---|---|
+| VaR95% 10 ngày | −113,03 | **−167,30** | thiếu 54,3 |
+| VaR99% 10 ngày | −131,13 | **−195,89** | thiếu 64,8 |
+| VaR95% 20 ngày | −157,78 | **−238,81** | thiếu 81,0 |
+| VaR99% 20 ngày | −168,65 | **−285,94** | **thiếu 117,3** |
+
+Cộng theo kỳ hạn là xấp xỉ tuyến tính `PV01 × Δyield` trên đúng 10 điểm kỳ hạn chuẩn, nên
+không thể bằng định giá lại toàn danh mục. Ở Banking nó đang **báo thiếu rủi ro tới 117 tỷ**.
+
+**Đề xuất: đưa cả 12 ô Total về mô hình VaR**, vì đó mới là số hạn mức soi vào, và mô hình có
+sẵn đủ 6 tổ hợp. Thay công thức dòng Total:
+
+```
+Trading  (dòng 120, Book="TD")
+  BC120  =-SUMIFS(Trading!DU:DU,Trading!DT:DT,"VaR95%",Trading!DR:DR,"VaR1D", Trading!DQ:DQ,"TD",Trading!DP:DP,"MSB")/10^9   (giữ nguyên)
+  BE120  =-SUMIFS(Trading!DU:DU,Trading!DT:DT,"VaR99%",Trading!DR:DR,"VaR1D", Trading!DQ:DQ,"TD",Trading!DP:DP,"MSB")/10^9   (giữ nguyên)
+  BG120  =-SUMIFS(Trading!DU:DU,Trading!DT:DT,"VaR95%",Trading!DR:DR,"VaR10D",Trading!DQ:DQ,"TD",Trading!DP:DP,"MSB")/10^9
+  BI120  =-SUMIFS(Trading!DU:DU,Trading!DT:DT,"VaR99%",Trading!DR:DR,"VaR10D",Trading!DQ:DQ,"TD",Trading!DP:DP,"MSB")/10^9
+  BK120  =-SUMIFS(Trading!DU:DU,Trading!DT:DT,"VaR95%",Trading!DR:DR,"VaR20D",Trading!DQ:DQ,"TD",Trading!DP:DP,"MSB")/10^9
+  BM120  =-SUMIFS(Trading!DU:DU,Trading!DT:DT,"VaR99%",Trading!DR:DR,"VaR20D",Trading!DQ:DQ,"TD",Trading!DP:DP,"MSB")/10^9
+
+Banking  (dòng 135) — y hệt, chỉ đổi Trading!DQ:DQ,"TD"  ->  "BK"
+```
+
+Nếu vẫn muốn giữ `SUM` theo kỳ hạn thì phải đổi nhãn cột thành "ước tính theo PV01" và bỏ dòng
+Total đi, chứ để chung một bảng thì người đọc cộng tay sẽ thấy lệch.
