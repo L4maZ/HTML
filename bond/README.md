@@ -275,3 +275,30 @@ Nên làm hai việc:
 Kèm theo sửa một lỗi âm thầm: `RichMarkup` trước đây lấy chuỗi **đã Trim** để định vị ký tự,
 trong khi `Characters(st, ln)` đếm theo chuỗi gốc. Ô `Report!L84` bắt đầu bằng nhiều dấu cách
 nên đánh dấu `[b]`/`[r]` lệch chỗ. Nay dùng chuỗi gốc.
+
+## 18/08 — "ở đâu có chữ cũng vàng khè"
+
+Macro chạy được rồi. Nhưng cả báo cáo bị bôi vàng, vì `AddFill` lấy dấu hiệu là **"ô có nền"**.
+Mở file 02 ra đo thì cả 17 ô nhận định trong `Report` đều có nền solid — theme 6, tint 0.8,
+tức **xám nhạt (237, 237, 237)** — đó là cách anh Jak tô khung cho khối nhận định, không phải
+bôi vàng. Nên ô nào cũng ra `[h]`.
+
+Sửa: chỉ coi là bôi vàng khi nền **thực sự vàng / hổ phách**. Đọc `Interior.Color`, tách RGB,
+yêu cầu `R ≥ 200 · G ≥ 160 · B ≤ 170 · R−B ≥ 70 · G−B ≥ 60`.
+
+| Màu nền | Kết quả |
+|---|---|
+| Vàng chuẩn `#FFFF00` | bôi vàng |
+| Vàng nhạt `#FFFF99` | bôi vàng |
+| Hổ phách `#FFC000` | bôi vàng |
+| Xám nền Report `#EDEDED` | bỏ qua |
+| Trắng · kem `#FFF8E7` | bỏ qua |
+| Xanh `#C6EFCE` · đỏ nhạt `#FFC7CE` | bỏ qua |
+
+**Giới hạn cần biết:** Excel không tô nền được cho từng ký tự, chỉ cho cả ô. Nên muốn bôi vàng
+một đoạn giữa câu thì làm bằng thanh công cụ sửa trong HTML, không làm được từ Excel. Tô vàng
+cả ô trong Excel thì HTML bôi vàng cả đoạn.
+
+### Tab Highlight — đổi thứ tự
+
+4 thẻ KPI lên đầu, khối "Rủi ro tuân thủ" xuống dưới.

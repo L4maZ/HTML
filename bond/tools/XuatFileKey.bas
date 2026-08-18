@@ -376,11 +376,21 @@ Private Function Emit(rg As Range, ByVal st As Long, ByVal ln As Long, ByRef s A
     Emit = Emit(rg, st, half, s) & Emit(rg, st + half, ln - half, s)
 End Function
 
+' Chi coi la BOI VANG khi nen thuc su vang/ho phach.
+' Sheet Report to nen xam nhat (theme 6, tint .8 -> 237,237,237) cho MOI o
+' nhan dinh, neu lay "co nen" lam dau hieu thi ca bao cao vang khe.
 Private Function AddFill(rg As Range, ByVal s As String) As String
-    On Error Resume Next
-    If rg.Interior.ColorIndex <> xlColorIndexNone And rg.Interior.Color <> 16777215 Then
+    Dim col As Long, rr As Long, gg As Long, bb As Long
+    On Error GoTo Done
+    If rg.Interior.ColorIndex = xlColorIndexNone Then GoTo Done
+    col = rg.Interior.Color
+    rr = col Mod 256
+    gg = (col \ 256) Mod 256
+    bb = (col \ 65536) Mod 256
+    If rr >= 200 And gg >= 160 And bb <= 170 And (rr - bb) >= 70 And (gg - bb) >= 60 Then
         s = "[h]" & s & "[/h]"
     End If
+Done:
     On Error GoTo 0
     AddFill = s
 End Function
