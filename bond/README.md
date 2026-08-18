@@ -302,3 +302,68 @@ cả ô trong Excel thì HTML bôi vàng cả đoạn.
 ### Tab Highlight — đổi thứ tự
 
 4 thẻ KPI lên đầu, khối "Rủi ro tuân thủ" xuống dưới.
+
+## 18/08 — rà soát vòng 2 của Jak
+
+### Nhận định đặt sai chỗ (mục 1 & 4)
+
+Trước đây 4 nhận định GovBond bị gom thành một khối thẻ ở **đầu** tab Indicator, tách rời khỏi
+bảng mà chúng nói về. Đã đổi theo đúng cách bản Excel làm — mỗi nhận định nằm **ngay dưới bảng
+tương ứng**:
+
+| Nhận định | Nguồn | Chỗ mới |
+|---|---|---|
+| Trading Book | `txt.itdTB` | dưới bảng 2.1 Trading Book Nội bộ |
+| Banking Book | `txt.itdBB` | dưới bảng 2.2 Banking Book Nội bộ |
+| Rủi ro lỗ từ NIM | `txt.noteRealized` | dưới bảng Unrealized & Realized PnL (tab Lãi/lỗ) |
+| Rủi ro lỗ về giá | `txt.note10d` | **bỏ** — trùng với ghi chú kịch bản 10 ngày ở tab QTRR |
+
+Kiểu trình bày giống ghi chú ở "Cấu trúc trạng thái theo lớp ghi nhận": viền trái, nền nhạt,
+xuống dòng giữ nguyên.
+
+### Nhãn (mục 2 & 3)
+
+- 2.1 Trading Book bỏ hậu tố `· tổng book (AFS + HTM)`; 2.2 Banking giữ.
+- `2.5 Khác · 2.6 FI Bond & CD` → `2.x FIBond & CD`.
+- Bảng Trạng thái và chú giải biểu đồ ItD: `Trading (AFS)` → `Trading`.
+
+### KPI tab ItD (mục 5)
+
+Thẻ "Trading · Book AFS" trước lấy `posTradingTotal.itd` — đó là tổng bảng theo kỳ hạn, không
+phải riêng AFS, nên trùng số với thẻ toàn book. Nay AFS/HTM đọc từ chính hai dòng con
+`a) Book AFS` / `b) Book HTM` của `ItD Unrealized MtM PnL` trong `DATA_S2`, không hardcode nữa.
+Tiêu đề thống nhất: `ItD toàn book Trading` · `ItD Trading · riêng Book AFS` ·
+`ItD toàn book Banking` · `Tổng GBond`. Bỏ dòng "phân rã theo kỳ hạn".
+
+### Số trong biểu đồ (mục 6)
+
+Tooltip và nhãn trục nay qua `num2()` — tối đa 2 chữ số thập phân, có phân cách nghìn. Hết
+`-42.916000000000004`.
+
+Ngày hiện ra dạng serial (`45664`) được chặn ở tầng HTML: `xlDate()` nhận ra số trong khoảng
+20000–80000 và đổi về `dd/mm/yyyy`. Chuỗi theo tháng thì nhãn trục là `mm/yy` thay vì `dd/mm`.
+
+**Phần cần chỉnh trong Excel** — không sửa được từ HTML:
+
+| Sheet | Cột | Vấn đề |
+|---|---|---|
+| `Chart data` | tiêu đề cột trục | Macro nhận trục theo chữ: `Date` · `Ngày` · `Tháng` · `Kỳ hạn` · `STT`. Cột trục đặt tên khác thì cả khối không được đọc. |
+| `Chart data` | `Sơ cấp/thứ cấp bond` (cột AS…) | Cột `STT` đứng ngay sau tiêu đề khối nên macro lấy STT làm trục, chuỗi ra tên `stt`/`month` thay vì tên khối. Chuyển `STT` ra sau cột `Date` là hết. |
+| `Chart data` | cột ngày | Để định dạng **Date**. Nếu ô là số thuần thì vẫn chạy được nhờ `xlDate()`, nhưng nên sửa ở gốc. |
+
+### VIRA (mục 7)
+
+Giá trị `+-445.3 bps` có hai lỗi chồng nhau.
+
+**Lỗi hiển thị:** HTML luôn ghép dấu `+` phía trước, gặp số âm thành `+-445.3`. Đã sửa: dấu
+theo giá trị, 2 chữ số thập phân.
+
+**Lỗi số liệu — nằm ở Excel:** `bps = (yield dự báo − yield hiện tại) × 100`. Trong
+`VIRA scenarios`, dòng của tháng báo cáo còn **trống**, Excel coi là 0, nên ra
+`0 − 4.424 = −4.424` điểm phần trăm = −442.4 bps. Đúng bằng mức yield 10Y hiện tại, đảo dấu.
+Điền dự báo tháng đó là hết.
+
+HTML nay chặn: `|bps| > 200` thì ô chuyển đỏ và hiện banner đỏ giải thích, thay vì lặng lẽ vẽ
+biểu đồ báo lãi thêm 4.755 tỷ.
+
+Nhãn cột trên biểu đồ VIRA chuyển lên **trên** cột — trước để dưới nên đè lên nhãn trục.

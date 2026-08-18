@@ -610,7 +610,13 @@
         if (!target || !TS[target]) return;
         var src = K.ts[s], dst = {};
         Object.keys(src).forEach(function (f) { dst[f] = src[f]; });
-        dst.date = src.date.map(function (d) { return String(d).slice(0, 5); });
+        var raw = src.date.map(function (d) { return xlDate(d); });
+        var mon = isMonthly(raw);
+        dst.date = raw.map(function (d) {
+          var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(d);
+          if (!m) return String(d).slice(0, 8);
+          return mon ? (m[2] + '/' + m[3].slice(2)) : (m[1] + '/' + m[2]);
+        });
         Object.keys(TS[target]).forEach(function (f) {
           if (dst[f] === undefined) dst[f] = TS[target][f];
         });
@@ -620,6 +626,30 @@
     }
 
     window.RPT = R;
+  }
+
+  /* Serial ngay cua Excel lot qua duoc thi doi ve dd/mm/yyyy, khong bao gio de tro so */
+  function xlDate(v) {
+    var s = String(v == null ? '' : v).trim();
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) return s;
+    if (!/^\d+(\.\d+)?$/.test(s)) return s;
+    var n = Number(s);
+    if (!(n > 20000 && n < 80000)) return s;
+    var d = new Date(Date.UTC(1899, 11, 30) + Math.round(n) * 86400000);
+    var p = function (x) { return (x < 10 ? '0' : '') + x; };
+    return p(d.getUTCDate()) + '/' + p(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear();
+  }
+  /* Chuoi theo thang thi nhan truc la mm/yy, theo ngay thi dd/mm */
+  function isMonthly(list) {
+    if (!list.length || list.length > 40) return false;
+    var seen = {}, ok = 0;
+    for (var i = 0; i < list.length; i++) {
+      var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(list[i]);
+      if (!m) return false;
+      seen[m[2] + m[3]] = 1;
+      ok++;
+    }
+    return Object.keys(seen).length === ok;
   }
 
   function ageDays(d) {
