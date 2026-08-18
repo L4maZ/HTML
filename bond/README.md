@@ -223,3 +223,55 @@ gộp 3 cột đầu — thay vì một dòng dữ liệu trống hai ô.
 
 **Màu ô chú giải lệch màu đường kẻ.** Series dạng đường chỉ đặt `lineStyle.color`, ECharts lấy
 màu mặc định cho chú giải. `mk()` giờ tự gán `itemStyle` theo `lineStyle` cho mọi chart.
+
+## 18/08 — lỗi `Type mismatch` và những gì tìm ra khi mổ File 02
+
+Anh Jak gửi lại `02.Report_Bond_2026.08.14.xlsm`, đã lưu ở `bond/source/`. Từ đó soi được
+mấy điều mà trước giờ chỉ đoán.
+
+### Đối chiếu toàn bộ toạ độ với file thật — khớp hết
+
+Mô phỏng đúng logic macro bằng Python trên file 14/08:
+
+| Khối | Macro dò ra | File key chuẩn |
+|---|---|---|
+| DATA_S2 | 63 | 63 |
+| POS | 22 | 22 |
+| CURVE | 18 | 18 |
+| GRID | 54 | 54 |
+| SCEN | 264 | 264 |
+| VIRA | 52 | 52 |
+| RATING | 21 | 21 |
+| VIRA4 | 5 | 5 |
+| VOL | 800 | 800 |
+
+Sáu nhãn khối tìm thấy ở dòng 4 · 31 · 52 · 59 · 66 · 68 của `Linked (1)`.
+
+### Lỗi thật tìm được: TS bị cắt cụt hơn một nửa
+
+`DumpTS` lấy dòng cuối theo **cột B** của `Chart data`. Nhưng cột B chỉ là trục ngày của khối
+đầu tiên (`TD PV01`) và dừng ở dòng 42, trong khi `Yield`, `Ls Repo`, `Bid-ask spread` dài tới
+gần 200 điểm. Hậu quả: file key chỉ có **2.528** dòng TS thay vì **5.990** — biểu đồ mất hơn
+một nửa dữ liệu, mà không báo gì.
+
+Sửa: lấy dòng cuối của **cả sheet** (`UsedRange`). Kiểm lại ra đúng 5.990, khớp bản Python.
+
+Cũng phát hiện `Linked` có 190 cột chứ không phải 180 → nới vùng đọc lên 195.
+
+### Vẫn chưa tìm ra dòng gây `Type mismatch`
+
+Đã loại trừ: không ô lỗi nào trong các vùng macro đọc (`Linked`, `Linked (1)`, `Chart data`,
+`Volatility`, `VIRA scenarios`); cả 17 ô nhận định đều là text; module biên dịch sạch (nếu sai
+kiểu lúc dịch thì Excel đã báo *Compile error* chứ không phải *Type mismatch*).
+
+Nên làm hai việc:
+
+1. **Bọc kín các chỗ đổi kiểu** — `Txt`, `VnDate`, `VnSerial` chặn thêm giá trị lỗi và object;
+   `G()` kiểm tra `IsArray` trước khi `LBound`; đọc định dạng chữ (`RichMarkup`, `Uniform`) có
+   đường lui: hỏng thì trả về chữ trơn chứ không làm chết macro.
+2. **Đánh dấu 31 bước chạy.** Macro gãy ở đâu thì hộp thoại ghi thẳng tên bước và mã lỗi, ví dụ
+   `Macro dung o buoc: GRID - BS` / `Loi 13: Type mismatch`.
+
+Kèm theo sửa một lỗi âm thầm: `RichMarkup` trước đây lấy chuỗi **đã Trim** để định vị ký tự,
+trong khi `Characters(st, ln)` đếm theo chuỗi gốc. Ô `Report!L84` bắt đầu bằng nhiều dấu cách
+nên đánh dấu `[b]`/`[r]` lệch chỗ. Nay dùng chuỗi gốc.

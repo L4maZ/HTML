@@ -27,7 +27,7 @@ Private Const NM_PREFIX As String = "HTML_"
 Private Const S2_ROWS As Long = 160
 Private Const S2_COLS As Long = 14
 Private Const LK_ROWS As Long = 330
-Private Const LK_COLS As Long = 180
+Private Const LK_COLS As Long = 195
 
 ' --- vung dem ghi ---
 Private mB() As Variant
@@ -41,6 +41,7 @@ Private gS2 As Variant
 Private gLK As Variant
 
 ' Doc dinh dang chu: dem so lan hoi Excel, co tran an toan
+Private gStep As String
 Private mFmtCalls As Long
 Private Const FMT_BUDGET As Long = 20000
 Private Const FMT_MINSEG As Long = 3
@@ -48,7 +49,9 @@ Private Const FMT_MINSEG As Long = 3
 ' ============================ tien ich chuoi ============================
 
 Private Function Txt(v As Variant) As String
-    If IsError(v) Then
+    If IsObject(v) Then
+        Txt = ""
+    ElseIf IsError(v) Then
         Txt = ""
     ElseIf IsNull(v) Or IsEmpty(v) Then
         Txt = ""
@@ -146,13 +149,30 @@ End Function
 
 ' Ngay tu o doc bang .Value (con kieu Date)
 Private Function VnDate(v As Variant) As String
-    If IsDate(v) Then VnDate = Format$(v, "dd/mm/yyyy") Else VnDate = Txt(v)
+    On Error Resume Next
+    If IsObject(v) Then
+        VnDate = ""
+    ElseIf IsError(v) Then
+        VnDate = ""
+    ElseIf IsDate(v) Then
+        VnDate = Format$(v, "dd/mm/yyyy")
+    Else
+        VnDate = Txt(v)
+    End If
+    On Error GoTo 0
 End Function
 
 ' Ngay tu mang doc bang .Value2 (chi con so serial)
 Private Function VnSerial(v As Variant) As String
-    If IsEmpty(v) Or IsNull(v) Then
+    On Error Resume Next
+    If IsObject(v) Then
         VnSerial = ""
+    ElseIf IsError(v) Then
+        VnSerial = ""
+    ElseIf IsEmpty(v) Or IsNull(v) Then
+        VnSerial = ""
+    ElseIf VarType(v) = vbDate Then
+        VnSerial = Format$(v, "dd/mm/yyyy")
     ElseIf IsNumeric(v) Then
         If CDbl(v) > 20000 And CDbl(v) < 80000 Then
             VnSerial = Format$(CDate(CDbl(v)), "dd/mm/yyyy")
@@ -162,12 +182,14 @@ Private Function VnSerial(v As Variant) As String
     Else
         VnSerial = Txt(v)
     End If
+    On Error GoTo 0
 End Function
 
 ' ============================ tien ich mang ============================
 
 ' Doc an toan tu mang 2 chieu, ngoai vung thi tra ve rong
 Private Function G(a As Variant, ByVal r As Long, ByVal c As Long) As Variant
+    If Not IsArray(a) Then Exit Function
     If r < LBound(a, 1) Or r > UBound(a, 1) Then Exit Function
     If c < LBound(a, 2) Or c > UBound(a, 2) Then Exit Function
     G = a(r, c)
@@ -272,10 +294,20 @@ End Function
 ' Duong nhanh: hoi dinh dang CA O bang 3 loi goi. O nao dong nhat (phan lon)
 ' thi xong ngay. Chi o co nhieu dinh dang moi phai quet chia doi.
 
+' Dung chuoi GOC (chua Trim) vi Characters(st, ln) dem theo chuoi goc.
+' Bat ky truc trac nao khi doc dinh dang cung chi lam mat dinh dang,
+' khong duoc lam chet ca macro.
 Private Function RichMarkup(rg As Range) As String
     Dim s As String, fb As Variant, fi As Variant, fc As Variant
-    s = Txt(rg.Value2)
-    If s = "" Then
+    Dim v As Variant
+    On Error GoTo Plain
+    v = rg.Value2
+    If IsError(v) Or IsNull(v) Or IsEmpty(v) Then
+        RichMarkup = ""
+        Exit Function
+    End If
+    s = CStr(v)
+    If Len(s) = 0 Then
         RichMarkup = ""
         Exit Function
     End If
@@ -287,11 +319,15 @@ Private Function RichMarkup(rg As Range) As String
         Exit Function
     End If
     RichMarkup = AddFill(rg, Emit(rg, 1, Len(s), s))
+    Exit Function
+Plain:
+    RichMarkup = s
 End Function
 
 Private Function Uniform(rg As Range, ByVal st As Long, ByVal ln As Long, _
                          ByRef bb As Boolean, ByRef ii As Boolean, ByRef rr As Boolean) As Boolean
     Dim f As Object
+    On Error GoTo NotUniform
     mFmtCalls = mFmtCalls + 1
     Set f = rg.Characters(st, ln).Font
     If IsNull(f.Bold) Or IsNull(f.Italic) Or IsNull(f.Color) Then
@@ -302,6 +338,9 @@ Private Function Uniform(rg As Range, ByVal st As Long, ByVal ln As Long, _
         rr = (f.Color <> 0)
         Uniform = True
     End If
+    Exit Function
+NotUniform:
+    Uniform = False
 End Function
 
 Private Function Wrap(ByVal t As String, ByVal bb As Boolean, ByVal ii As Boolean, _
@@ -372,6 +411,7 @@ Public Sub XuatFileKey()
     t0 = Timer
     On Error GoTo Fail
 
+    gStep = "mo cac sheet nguon"
     Set s2 = ThisWorkbook.Sheets(SH_S2)
     Set lk = ThisWorkbook.Sheets(SH_LK)
     Set cd = ThisWorkbook.Sheets(SH_CD)
@@ -379,6 +419,7 @@ Public Sub XuatFileKey()
     Set vs = ThisWorkbook.Sheets(SH_VS)
     Set vo = ThisWorkbook.Sheets(SH_VOL)
 
+    gStep = "dat Named Range cho o nhan dinh"
     If Not NamesReady() Then DatName True
 
     oCalc = Application.Calculation
@@ -393,14 +434,18 @@ Public Sub XuatFileKey()
     Application.StatusBar = "File key 1/6 - doc du lieu nguon..."
 
     ' ---- doc mot lan toan bo vung nguon ----
+    gStep = "doc sheet Linked (1)"
     gS2 = s2.Range(s2.Cells(1, 1), s2.Cells(S2_ROWS, S2_COLS)).Value2
+    gStep = "doc sheet Linked"
     gLK = lk.Range(lk.Cells(1, 1), lk.Cells(LK_ROWS, LK_COLS)).Value2
     tRead = Timer - t0
 
+    gStep = "tao workbook tam"
     Set wb = Workbooks.Add(xlWBATWorksheet)
     Application.StatusBar = "File key 2/6 - khoi 2 va cac bang so..."
 
     ' ---------------- META ----------------
+    gStep = "sheet META"
     Set sh = wb.Sheets(1)
     sh.Name = "META"
     sh.Range("A1:C1").Value = Array("Key", "Value", "Ghi chu")
@@ -426,6 +471,7 @@ Public Sub XuatFileKey()
         "ChiTieu", "Sub", "Today", "DtD", "Yesterday", "LastMonth", "LastQuarter", _
         "LastYear", "Limit", "Used", "Light")
 
+    gStep = "DATA_S2 - do nhan khoi"
     Dim bcode As Variant, blab As Variant, bkey As Variant
     bkey = Array("TB_INT", "BB_INT", "TB_SBV", "BB_SBV", "OTHER", "FIBOND")
     bcode = Array("2.1.", "2.2.", "2.3.", "2.4.", "2.5.", "2.6.")
@@ -452,6 +498,7 @@ Public Sub XuatFileKey()
     Next i
 
     Dim dict As Object, lab As String, base As String, kk As String
+    gStep = "DATA_S2 - doc 52 chi tieu"
     Set dict = CreateObject("Scripting.Dictionary")
     BufNew 17, 600
     For i = 0 To 5
@@ -490,7 +537,9 @@ Public Sub XuatFileKey()
     sh.Range("A1:O1").Value = Array("KeyID", "Book", "Tenor", "Face", "FaceYest", "FaceLM", _
         "DtD", "MtD", "PV01", "Itd", "ItdYest", "ItdLM", "ItdMtD", "ItdYtD", "Daily")
     BufNew 15, 300
+    gStep = "POS - Trading"
     DumpGrid "POS.TB.", "TB", 14, 65, 75, 13
+    gStep = "POS - Banking"
     DumpGrid "POS.BB.", "BB", 28, 80, 90, 13
     If mFull Then GoTo Overflow
     BufFlush sh
@@ -501,7 +550,9 @@ Public Sub XuatFileKey()
     sh.Range("A1:J1").Value = Array("KeyID", "Type", "Tenor", "V1", "V2", "V3", "V4", _
         "DtD", "MtD", "YtD")
     BufNew 10, 300
+    gStep = "CURVE - yield"
     DumpCurve "YIELD", 41, 80, 89
+    gStep = "CURVE - repo"
     DumpCurve "REPO", 95, 171, 178
     If mFull Then GoTo Overflow
     BufFlush sh
@@ -512,12 +563,19 @@ Public Sub XuatFileKey()
     sh.Range("A1:R1").Value = Array("KeyID", "Block", "BlockName", "Label", _
         "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12", "C13", "C14")
     BufNew 18, 2000
+    gStep = "GRID - MIX"
     DumpBlock "MIX", "3.3 Co cau theo to chuc phat hanh", 147, 238, 249, 7
+    gStep = "GRID - HOLD"
     DumpBlock "HOLD", "3.4 Co cau theo thoi gian nam giu", 164, 274, 284, 5
+    gStep = "GRID - PNL"
     DumpBlock "PNL", "3.5 Unrealized & Realized PnL", 154, 253, 259, 4
+    gStep = "GRID - CAPITAL"
     DumpBlock "CAPITAL", "3.8 Muc do su dung von", 158, 262, 270, 6
+    gStep = "GRID - BS"
     DumpBlock "BS", "3.6 Ghi nhan PnL theo lop bang can doi", 103, 184, 189, 14
+    gStep = "GRID - FIONBS"
     DumpBlock "FIONBS", "7.1 FI Bond tren bang can doi", 169, 288, 294, 5
+    gStep = "GRID - PNLSCEN"
     DumpBlock "PNLSCEN", "3.7 Phan tich kich ban PnL", 140, 230, 234, 7
     If mFull Then GoTo Overflow
     BufFlush sh
@@ -528,9 +586,13 @@ Public Sub XuatFileKey()
     sh.Range("A1:J1").Value = Array("KeyID", "Book", "Kind", "Scenario", "Sub", "Tenor", _
         "PV01", "Itd", "YieldBps", "ItdChange")
     BufNew 10, 1200
+    gStep = "SCEN - TB recent"
     DumpScen "TB", "recent", 51, 95, 105, 92
+    gStep = "SCEN - TB var"
     DumpScen "TB", "var", 51, 110, 120, 107
+    gStep = "SCEN - BB recent"
     DumpScen "BB", "recent", 51, 140, 150, 137
+    gStep = "SCEN - BB var"
     DumpScen "BB", "var", 51, 125, 135, 122
     If mFull Then GoTo Overflow
     BufFlush sh
@@ -540,6 +602,7 @@ Public Sub XuatFileKey()
     sh.Name = "VIRA4"
     sh.Range("A1:F1").Value = Array("Month", "VIRA", "Big4", "MarketMaker", "Top3", "Actual")
     Dim av As Variant
+    gStep = "VIRA4 - doc VIRA scenarios"
     av = vs.Range(vs.Cells(1, 1), vs.Cells(40, 6)).Value2
     BufNew 6, 60
     For r = 2 To UBound(av, 1)
@@ -560,7 +623,9 @@ Public Sub XuatFileKey()
     sh.Range("A1:H1").Value = Array("KeyID", "Scope", "Label", "PV01", "Itd", _
         "Scenario", "YieldBps", "ItdAfter")
     BufNew 8, 600
+    gStep = "VIRA - theo book"
     DumpVira "BOOK", 66, 154, 155, 151
+    gStep = "VIRA - theo ky han"
     DumpVira "BB_TENOR", 78, 154, 164, 151
     If mFull Then GoTo Overflow
     BufFlush sh
@@ -571,6 +636,7 @@ Public Sub XuatFileKey()
     sh.Range("A1:J1").Value = Array("KeyID", "Issuer", "Amount", "Rating", "ReviewDate", _
         "Pct", "CumPct", "Fitch", "Moody", "SP")
     BufNew 10, 200
+    gStep = "RATING"
     Dim iss As String
     For r = 203 To 223
         iss = OneLine(G(gLK, r, 131))
@@ -596,6 +662,7 @@ Public Sub XuatFileKey()
     Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
     sh.Name = "VOL"
     Dim va As Variant
+    gStep = "VOL - doc Volatility"
     va = vo.Range(vo.Cells(1, 1), vo.Cells(VOL_ROWS + 1, 11)).Value2
     BufNew 11, VOL_ROWS + 10
     ' hang tieu de ghi rieng vi BufFlush bat dau tu A2
@@ -620,6 +687,7 @@ Public Sub XuatFileKey()
     Application.StatusBar = "File key 4/6 - nhan dinh va ghi chu..."
     Dim tText0 As Single
     tText0 = Timer
+    gStep = "TEXT - doc nhan dinh"
     mFmtCalls = 0
     Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
     sh.Name = "TEXT"
@@ -639,6 +707,7 @@ Public Sub XuatFileKey()
         BufSet 1, "txt." & tk(i)
         BufSet 2, td(i)
         BufSet 3, NM_PREFIX & tk(i)
+        gStep = "TEXT - o nhan dinh " & NM_PREFIX & tk(i)
         BufSet 4, NameVal(CStr(tk(i)))
     Next i
     If mFull Then GoTo Overflow
@@ -651,6 +720,7 @@ Public Sub XuatFileKey()
     Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
     sh.Name = "TS"
     sh.Range("A1:D1").Value = Array("Series", "Field", "Date", "Value")
+    gStep = "TS - chuoi bieu do"
     DumpTS cd
     If mFull Then GoTo Overflow
     BufFlush sh
@@ -659,6 +729,7 @@ Public Sub XuatFileKey()
     Application.StatusBar = "File key 6/6 - dang luu..."
     dest = ThisWorkbook.Path & Application.PathSeparator & _
            "Key_" & Format$(rt.Range("B2").Value, "yyyymmdd") & ".xlsx"
+    gStep = "luu file key"
     wb.SaveAs Filename:=dest, FileFormat:=xlOpenXMLWorkbook
     wb.Close SaveChanges:=False
     Set wb = Nothing
@@ -690,12 +761,13 @@ NoLabel:
 
 Fail:
     Dim em As String
-    em = Err.Description
+    em = "Loi " & Err.Number & ": " & Err.Description
     On Error Resume Next
     If Not wb Is Nothing Then wb.Close False
     On Error GoTo 0
     RestoreApp started, oCalc, oEvt, oUpd, oAlert
-    MsgBox "Macro dung giua chung:" & vbCrLf & em, vbCritical
+    MsgBox "Macro dung o buoc:" & vbCrLf & "   " & gStep & vbCrLf & vbCrLf & em & vbCrLf & vbCrLf & _
+           "Chup nguyen hop thoai nay gui lai.", vbCritical
 End Sub
 
 Private Sub RestoreApp(ByVal started As Boolean, ByVal oCalc As Long, _
@@ -831,7 +903,12 @@ Private Sub DumpTS(cd As Worksheet)
     Dim serName As String, axisCol As Long, endCol As Long, dtxt As String
 
     maxc = cd.Cells(1, cd.Columns.Count).End(xlToLeft).Column
-    maxr = cd.Cells(cd.Rows.Count, 2).End(xlUp).Row
+    ' Moi chuoi mot do dai khac nhau, cot B chi la truc cua khoi dau tien.
+    ' Phai lay dong cuoi cua CA sheet, neu khong cac chuoi dai bi cat cut.
+    maxr = 0
+    On Error Resume Next
+    maxr = cd.UsedRange.Row + cd.UsedRange.Rows.Count - 1
+    On Error GoTo 0
     If maxr < 2 Then maxr = 2
     If maxc < 2 Then Exit Sub
     src = cd.Range(cd.Cells(1, 1), cd.Cells(maxr, maxc)).Value2
