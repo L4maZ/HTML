@@ -73,3 +73,28 @@ Chạy bộ trích xuất trên 3 bản File 02: **12/08 · 13/08 · 14/08**.
   Jak luôn đổi `Run Tool!B2` ngay khi mở file.
 - Ranh giới dễ vỡ là **File 02 → macro**, không phải **file key → HTML**. HTML khớp theo
   tên cột và KeyID nên thêm dòng/cột vào file key là vô hại; macro thì đang đọc theo toạ độ.
+
+## Trạng thái 18/08 — còn mở
+
+| # | Nội dung | Ai xử lý |
+|---|---|---|
+| O1 | **Macro chưa chạy trên file thưa.** Bản 13/02 mà briefing nhắc (2 deal, cột AK rỗng, từng gây VBA runtime error) vẫn chưa test. Đây là rủi ro còn lại lớn nhất — mọi bản đã chạy đều là file đủ dữ liệu | Jak chạy thử, gửi lại nếu gãy |
+| O2 | **Chuỗi "Sơ cấp / thứ cấp bond" không nạp được từ file key.** Khối trong `Chart data` có cột `STT` đứng ngay sau tiêu đề khối nên bộ đọc lấy STT làm trục, chuỗi ra tên `stt`/`month` không khớp bảng ánh xạ. Biểu đồ vẫn vẽ — **bằng số nhúng sẵn từ 24/07**. Đã thêm cảnh báo đỏ ở tab Quản trị để không im lặng nữa | Jak chuyển cột `STT` ra sau cột `Date` là hết; hoặc báo tôi sửa bộ đọc |
+| O3 | `txt.itdBB` (nhận định lỗ MtM Banking) giống hệt nhau ở cả 12 · 13 · 14/08 trong khi `txt.itdTB` đổi mỗi ngày. Không phải lỗi công cụ | Jak xác nhận có phải quên cập nhật không |
+| O4 | Dòng dự báo của **tháng báo cáo** trong sheet `VIRA scenarios` còn trống → giả định biến động yield ra −442 bps. HTML đang chặn bằng banner đỏ | Jak điền dự báo |
+| O5 | Sheet `Linked` vẫn đọc theo **toạ độ dòng/cột cứng** (POS · CURVE · GRID · SCEN · VIRA). Chèn/xoá dòng ở đó là lệch im lặng. `Linked (1)` thì đã dò theo nhãn nên an toàn | để ngỏ; chuyển sang dò nhãn được nếu muốn |
+| O6 | Block "Bình luận / Nhận định" chuẩn `mkCmt*` — chưa dựng | chưa cần |
+
+### Quyết định của Jak (18/08)
+
+Dòng Total của bảng kịch bản VaR **quy hết về `SUM` các ô kỳ hạn** cho thống nhất, không dùng
+số từ mô hình VaR mục 21 sheet `Trading`. Hệ quả trên mặt báo cáo, bốn ô sẽ đổi:
+
+| | Trước (mô hình) | Sau (SUM) |
+|---|---|---|
+| Trading · VaR95% 1 ngày | −23,15 | −0,81 |
+| Trading · VaR99% 1 ngày | −48,52 | −29,93 |
+| Banking · VaR95% 1 ngày | −25,64 | −6,92 |
+| Banking · VaR99% 1 ngày | −57,56 | **+19,12** |
+
+Ô cuối ra số dương trong cột "lỗ tăng thêm" — cần biết trước khi gửi đi.

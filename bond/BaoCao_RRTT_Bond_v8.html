@@ -1494,6 +1494,9 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
      ban xuat serialise ca DOM nen thuoc tinh se theo sang file moi va chan viec gan lai. */
   var navLocked = false;
   var editWired = false;
+  /* Chuỗi biểu đồ nào file key không có -> trang vẫn vẽ bằng số nhúng sẵn từ kỳ dựng file.
+     Phải nói ra, không được im lặng dùng số cũ. */
+  var TS_STALE = null;
   var SRC = window.RRTT_SRC || null;
 
   function $(s, r) { return (r || document).querySelector(s); }
@@ -2106,9 +2109,12 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
         mucDoSuDungVon: 'vonSD', qlhsFibondCd: 'qlhsFi', qlhsGovbond: 'qlhsGov',
         tuongQuanYtmVsRepo: 'ytmRepo'
       };
+      TS_STALE = Object.keys(TS).slice();
       Object.keys(K.ts).forEach(function (s) {
         var target = MAP[s];
         if (!target || !TS[target]) return;
+        var ix = TS_STALE.indexOf(target);
+        if (ix >= 0) TS_STALE.splice(ix, 1);
         var src = K.ts[s], dst = {};
         Object.keys(src).forEach(function (f) { dst[f] = src[f]; });
         var raw = src.date.map(function (d) { return xlDate(d); });
@@ -2505,6 +2511,16 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
         items.push([Math.abs(diff) < 0.5 ? 'ok' : 'no', spec[0],
           fm(a) + ' vs ' + fm(b) + (Math.abs(diff) < 0.5 ? '' : ' · lệch ' + fm(diff))]);
       });
+
+    if (TS_STALE && TS_STALE.length) {
+      var NICE = {
+        primary: 'Sơ cấp / thứ cấp bond', lsttPrimary: 'Lãi suất trúng thầu sơ cấp',
+        gdTPDN: 'Giao dịch TPDN', ytmRepo: 'Tương quan YTM vs repo',
+        qlhsGov: 'QLHS GovBond', qlhsFi: 'QLHS FIBond & CD'
+      };
+      items.push(['no', 'Chuỗi biểu đồ không có trong file key — đang vẽ bằng số nhúng sẵn',
+        TS_STALE.map(function (k) { return NICE[k] || k; }).join(' · ')]);
+    }
 
     var breach = [];
     ['MSB', 'SBV'].forEach(function (sc) {
