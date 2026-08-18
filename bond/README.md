@@ -429,3 +429,66 @@ VaR 95% < VaR 99% và CVaR ≥ VaR ở mọi mức · đường cong yield: mid 
 spread = bid − ask khớp cả 10 kỳ hạn · VIRA: ItD sau = ItD gốc + PV01 × bps khớp tuyệt đối ·
 tỷ trọng rating cộng đúng 100% · 5.990 dòng TS không ô rỗng, không giá trị vượt ngưỡng,
 ngày đúng định dạng (trừ `tuongQuanYtmVsRepo` dùng trục kỳ hạn — đúng thiết kế).
+
+## 18/08 — truy ba chỗ nghi vấn về đúng ô trong File 02
+
+Bản 17/08 lưu ở `bond/source/02.Report_Bond_2026.08.17.xlsm`. Cả ba đều nằm ở Excel, không
+phải lỗi macro hay HTML.
+
+### 1 · Banking Book nội bộ · ItD lệch 705 tỷ → `Linked (1)!D36`, `D37`
+
+| Ô | Nhãn | Công thức | Giá trị |
+|---|---|---|---|
+| `D35` | ItD Unrealized MtM PnL | `=SUMIFS(Banking!$S:$S, Banking!$P:$P,D2, Banking!$R:$R,"")` | −1.750,47 |
+| `D36` | a) Book DCM tự fund | `=-690` | −690 |
+| `D37` | b) Book fund từ Pool | `-1766` (hằng số, không có cả dấu `=`) | −1.766 |
+
+Dòng tổng tự tính từ sheet `Banking`, hai dòng con là số gõ tay từ kỳ nào đó. −690 − 1.766 =
+−2.456 so với −1.750,47 → lệch **705,5 tỷ**. Hai ô `D44`/`D45` (YTM theo book) cũng hardcode
+`0.0288` / `0.0258` — cùng bệnh.
+
+Cần công thức SUMIFS lọc theo book, giống cách `D5`/`D6`/`D7` làm bên Trading (Face = AFS + HTM
+khớp tuyệt đối).
+
+### 2 · Trading Book SBV · % sử dụng sai → `Linked (1)!K53`
+
+```
+K53:  =950/20000          → 4,75%
+```
+
+Số **950 gõ cứng** trong công thức, không nối với `D53` (Face Value hiện là 2.450). So sánh với
+dòng tương ứng của Trading nội bộ:
+
+```
+K5:   =D5/RIGHT(J5,LEN(J5)-2)     → 17513/20000 = 87,57%   (đúng)
+```
+
+Sửa `K53` thành `=D53/RIGHT(J53,LEN(J53)-2)` → 12,25%.
+
+### 3 · Kịch bản VaR · Total và các kỳ hạn đo hai thứ khác nhau — không phải lỗi
+
+Trong cùng một bảng, dòng Total của sáu kịch bản dùng **hai phương pháp**:
+
+| Kịch bản | Công thức dòng Total | Nguồn |
+|---|---|---|
+| VaR95% / VaR99% **1 ngày** | `=-SUMIFS(Trading!DU:DU, Trading!DT:DT,"VaR95%", Trading!DR:DR,"VaR1D", …)/10^9` | mô hình VaR MHCC, mục 21 sheet `Trading` |
+| VaR **10 ngày** · **20 ngày** | `=SUM(BG110:BG119)` | cộng đúng 10 dòng kỳ hạn |
+
+Còn từng kỳ hạn luôn là xấp xỉ `PV01 × Δyield`, với Δyield lấy từ `Delta Yield` khối chênh lệch
+1 ngày (đã kiểm công thức `INDEX/MATCH … +10` trỏ đúng cột — không sai).
+
+Nên hai kịch bản 1 ngày cộng tay không ra Total là **đúng thiết kế**: Total là kết quả định giá
+lại toàn danh mục, còn các ô kỳ hạn chỉ là xấp xỉ tuyến tính trên 10 điểm chuẩn. Với file 14/08,
+VaR95% 1 ngày: cộng kỳ hạn −0,81 tỷ vs Total −23,16 tỷ.
+
+Cần ghi chú vào báo cáo, vì người đọc sẽ tự cộng và tưởng sai.
+
+### 4 · Lỗi tiềm ẩn tìm thêm được → `Linked!BK120`
+
+```
+BK120 (VaR95% 20 ngày, Total):  =SUM(BK111:BK119)
+```
+
+Bỏ sót **dòng 110 = kỳ hạn 1Y**. Năm kịch bản còn lại đều `SUM(x110:x119)`. Hiện `BK110` = 0
+nên chưa lệch, nhưng hễ kỳ 1Y có biến động trong kịch bản đó là Total thiếu, âm thầm.
+Sửa thành `=SUM(BK110:BK119)`.
