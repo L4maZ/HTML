@@ -319,7 +319,7 @@ Cần Jak quyết: coupon của trạng thái âm nên tính hay không. Bỏ l�
 
 ## #7 — File 03 `Phan_tich_PnL`: hai ô cross-check vỡ sau khi đổi nền File 01
 
-**Trạng thái**: chưa sửa
+**Trạng thái**: ✅ đã sửa (19/08) — `J4` và `J9` về 0. `J7` (MtD) còn lệch, xem [#11](#11).
 
 File 03 giải thích PnL **theo từng deal**, dựng bottom-up từ `Deal YtD/MtD/DtD`, phân deal
 thành 6 nhóm (`OutT0,OutT1` · `OutT0,SellT1` · `BuyT1,OutT1` …). Nó **không biết gì về
@@ -500,3 +500,91 @@ M3 nền cũ + [HTM(18/08) − HTM(31/07)]   = −236,797 + 190,467 = −46,331
 | 31/07/2026 | 28 | **−687,8519698095** |
 | 17/08/2026 | 29 | **−593,8772111732** |
 | 18/08/2026 | 26 | **−497,3855320562** |
+
+
+---
+
+<a id="11"></a>
+## #11 — File 03: PnL realized MtD thừa 1.407 tỷ, đang bị vá tay
+
+**Trạng thái**: đã xác định cơ chế · **chưa có bản sửa dùng được**
+
+Ô `3.8.PnL Breakdown!E19` (trước khi chèn dòng là `E18`) chứa hằng số **1407** gõ tay, bị trừ
+khỏi `E16` qua đuôi `-E19` của công thức. Jak xác nhận đây là adjust tay vì số đang sai, và
+muốn bỏ hẳn nó.
+
+### Cơ chế — đã chứng minh
+
+Mọi dòng bán bị ép `X=0`:
+
+```excel
+X  = IF(F="S", 0, ...)
+Y  = IF(X=0, 0, ...)                    ' Goc = 0
+AD = IF(F="S", -AB*H, -AB*Y)            ' = qty x gia ban, TOAN BO GROSS
+AB = IF(F="S",-G, IF(X=2,V, IF(X=4,G, IF(X=5,V-W, IF(X=6,G-W, 0)))))
+```
+
+Giá vốn của lô đã bán phải đến từ dòng đối ứng. Nhưng khi lô đó được **mua lại trong kỳ và còn
+giữ tới cuối kỳ**, dòng mua mang `X=3` — mà `X=3` **rơi vào nhánh `0`** của `AB` → `AD = 0`.
+Giá vốn không bao giờ vào realized.
+
+Ví dụ `TD2232114` (`Deal MtD` r77–r78):
+
+| | qty | giá | X | Gốc | AD |
+|---|---|---|---|---|---|
+| Bán | 1.000.000 | 111.212 | 0 | **0** | **+111,212 tỷ** |
+| Mua lại | 1.000.000 | 111.117 | 3 | 111.117 | **0** |
+
+Lãi thật ≈ 1.000.000 × (111.212 − 111.117) = **+0,095 tỷ**. File ghi **+111,212 tỷ**.
+
+### Phạm vi — 10 mã
+
+`TD2434022` · `TD2530010` · `TD2434024` · `TD2131012` · `TD2535023` · `TD2434026` ·
+`TD2232114` · `TD1934188` · `TD2333118` · `TD2535028`
+
+Đều là bán trong kỳ + mua lại trong kỳ còn giữ tới cuối kỳ (dạng cặp repo).
+
+Cùng gốc với hai ô check đang đỏ mà chưa ai để ý: `Runtool!J5` = −15.050.000 và
+**`J6` = 17.702 tỷ** (kiểm position MtD). `Deal DtD` có `SUM(AG)` = 0 nên không dính.
+
+### Hai cách tái lập đã thử và LOẠI
+
+`PPL!F4` ghi phương pháp Risk: *"Tính theo giá vốn bình quân gia quyền của các deal tồn đầu năm
+(theo giá mtm đầu năm + giá mua các deal mới trong năm đến thời điểm bán)"*.
+
+**Cách 1 — bình quân gia quyền tĩnh cả kỳ** (tồn đầu kỳ theo giá MtM đầu kỳ + toàn bộ mua trong kỳ):
+
+| | File | Cách 1 | Check hiện tại |
+|---|---|---|---|
+| YtD | 252,648 | 200,983 | `J4` = 0 ✓ |
+| MtD | 1.490,343 | **84,035** | `J7` = 1407 ✗ |
+| DtD | 6,944 | 1,436 | `J9` = 0 ✓ |
+
+MtD cần 83,762 → cách 1 lệch **0,273**, nằm trong khoảng hở 0,419 vốn có giữa File 03 và File 01.
+Rất sát. **Nhưng nó làm hỏng YtD (−51,7) và DtD (−5,5)** — hai chỗ đang khớp File 01 qua một
+đường tính hoàn toàn độc lập. Nên cách 1 không phải phương pháp file đang dùng.
+
+**Cách 2 — bình quân gia quyền động theo ngày giao dịch** (đúng chữ *"đến thời điểm bán"*, deal
+mua sau khi bán không vào giá vốn của lần bán đó): số bung ra vô nghĩa ở cả ba cửa sổ
+(YtD ra 191 triệu tỷ). Mô hình trình tự deal của tôi sai — có bán khống, deal ngoài cửa sổ,
+và lượng tồn về 0 làm bình quân nổ.
+
+### Việc còn lại
+
+Cần biết **quy tắc khớp thật** khi một mã vừa tồn đầu kỳ vừa có giao dịch trong kỳ: deal mua
+phát sinh **sau** một lần bán có được tính vào giá vốn của lần bán đó không. Đây là câu hỏi cho
+người viết bộ phân loại `X` (theo Log là `thaottp14`), hoặc Jak quyết.
+
+Có câu trả lời đó thì sửa ở **`AH`/`AI`** là đủ — thay cụm `SUMIFS(AD:AD,C:C,bond)` bằng PnL
+realized đúng ở cấp mã, giữ nguyên `X`/`Gốc`/`AB`/`AE` để không đụng vào vế unrealized.
+
+### Trong lúc chờ
+
+**Giữ nguyên plug 1407 ở `E19`.** Bỏ ra bây giờ thì MtD sai 1.407 tỷ trên báo cáo. Plug xấu
+nhưng đang giữ số đúng — chỉ gỡ sau khi bản sửa thật đã kiểm xong trên cả ba cửa sổ.
+
+### Liên quan
+
+`Runtool` r11 Log của chính file: *"Nếu có deal bị xóa thì số DtD bị lệch, nếu xóa vắt tháng
+hoặc vắt năm thì số YtD và MtD bị lệch => Pending"*. Cùng vùng vấn đề nhưng **khác cơ chế** —
+mục này là phân loại `X=3`, không phải deal bị xoá.
