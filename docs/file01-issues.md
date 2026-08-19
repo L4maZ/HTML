@@ -131,7 +131,11 @@ Tổng SBV (`DS1+DS2` + `AU4+AU5`) = **−380,7459**, không đổi. Nên `Doubl
 
 ### Còn treo
 
-- **Restate baseline trên DB53** cho `M3`/`M4`/`M5` (và `P3`/`P4`/`P5`) — xem [#5](#5).
+- **Restate baseline trên DB53** — chỉ còn **2 mốc**: 31/07 (`M3`) và 04/08 (`M5`).
+  **31/12/2025 không cần restate**: `TB_HTM` chưa tồn tại tại ngày đó nên
+  `SUM(TB_HTM[ItD])` = 0, cơ sở cũ đã là cơ sở mới. `M4` = −1.161,7875 hiện đã đúng nền.
+  Điều này cũng gỡ rủi ro lớn nhất — ngày 31/12/2025 trên 53 chỉ có **328 dòng** so với **349**
+  của hai mốc kia, tức là có lệch phiên bản; không đụng vào là an toàn nhất.
 - **Dòng 9 xanh không chứng minh YtD đã đúng.** Nó so *tổng*; sai số ở TB và BB ngược dấu nên
   triệt tiêu. Từng vế vẫn lệch tới khi restate xong.
 - **Giá điều chuyển nội bộ** chốt theo sổ hay theo thị trường — quyết định khoảng hở 1,1 tỷ.
@@ -187,7 +191,7 @@ Không có `Option Explicit` nên VBA coi là biến rỗng → gán `0` → **e
 <a id="5"></a>
 ## #5 — Bóc theo tenor và loại TP không cộng bằng tổng sau khi sửa #1
 
-**Trạng thái**: đã sửa
+**Trạng thái**: đã sửa và đã đẩy lại 53 cho ngày 18/08
 
 `L27` và `P2` nhận phần `TB_HTM` nhưng các bảng bóc chi tiết thì không, nên tổng chi tiết
 lệch tổng chung đúng **497,3855 tỷ**. Ba bảng vỡ, không phải một:
@@ -261,7 +265,14 @@ có phần `TB_HTM` còn `SUM(FNRP!BS)` thì không → `P23` nhảy **+497,3855
 ```excel
 P23  =P2-P22
 O23  =P1-O22
+Q23  =(P1+P2)-Q22
 ```
+
+`Q23` là ô kiểm **cộng gộp** (`=SUM(FNRP!BR:BS)/10^9-Q22`), nằm ngoài khung `M:P` nên rất dễ
+sót — Jak phát hiện. Nó vỡ y hệt `P23`. `N23` (coupon) giữ nguyên, `TB_HTM` không đụng coupon.
+
+Hai chỗ trong file **đã theo đúng quy ước này từ trước**, không phải sửa: `T9:T18` (bóc theo
+thời gian nắm giữ, đã có `-SUMIFS(TB_HTM[Amt],...)`) và `O26` "ItD Unrealized adj".
 
 Vế TB không có ô đối chiếu tương đương (`L23` vs `L27` không được so ở đâu cả).
 **Optimization suggestion**: thêm một ô `=L27-L23` và `=K27-K23`, cùng dạng với `O23`/`P23`.
@@ -273,7 +284,8 @@ Vế TB không có ô đối chiếu tương đương (`L23` vs `L27` không đ�
 | `L23` = `L27` | −1.743,5172 |
 | `L28+L29+L30` = `L27` | −1.743,5172 |
 | `P22` = `P2` | −1.885,2672 |
-| `P23`, `O23` | 0 |
+| `Q22` | −351,8721 |
+| `O23`, `P23`, `Q23` | 0 |
 
 ### Điểm mỏng
 
@@ -300,3 +312,81 @@ Vế BB không dính — `N23` không lọc nên hai bên cùng cơ sở.
 
 Cần Jak quyết: coupon của trạng thái âm nên tính hay không. Bỏ lọc ở `J27` hay thêm lọc vào
 `J12:J22` — hai hướng cho hai con số khác nhau, không tự chọn được.
+
+
+---
+
+## #7 — File 03 `Phan_tich_PnL`: hai ô cross-check vỡ sau khi đổi nền File 01
+
+**Trạng thái**: chưa sửa
+
+File 03 giải thích PnL **theo từng deal**, dựng bottom-up từ `Deal YtD/MtD/DtD`, phân deal
+thành 6 nhóm (`OutT0,OutT1` · `OutT0,SellT1` · `BuyT1,OutT1` …). Nó **không biết gì về
+`TB_HTM`**, nên toàn bộ số của nó ở **cơ sở cũ**.
+
+`Runtool!J4` và `J9` nối thẳng sang File 01 qua external link `[1]`:
+
+```excel
+J4 = ROUND('3.8.PnL Breakdown'!D17 - '[1]Phan tich_TB'!$M$4, 0)
+J9 = ROUND('3.8.PnL Breakdown'!F17 - '[1]Phan tich_TB'!$M$2, 0)
+```
+
+| | File 03 | File 01 cũ | File 01 mới |
+|---|---|---|---|
+| YtD `D17` | −664,450 | −664,402 | −1.161,788 |
+| MtD `E17` | −237,216 | −236,797 | −734,183 |
+| DtD `F17` | −92,578 | −92,578 | +3,913 |
+
+→ `J4` nhảy **+497**, `J9` nhảy **−96**. Đúng bằng `SUM(TB_HTM[ItD])` và `ΔHTM`.
+
+### Cách sửa
+
+**Giữ nguyên phần bóc theo nhóm deal** — nó đang đúng, đo biến động thị trường theo từng deal.
+Điều chuyển TB↔BB không phải sự kiện thị trường mà là phân loại lại; ép vào 6 nhóm kia sẽ phá
+mất giá trị giải thích của bảng.
+
+Thêm một dòng vào `3.8.PnL Breakdown` — *"3. Điều chỉnh deal điều chuyển TB↔BB"* — rồi đổi
+`Total` dòng 17 thành `=D14+D11+D16b`.
+
+| Cột | Công thức | Giá trị |
+|---|---|---|
+| `D` YtD | `HTM(18/08) − HTM(31/12/2025)` = `−497,3855 − 0` | **−497,3855** |
+| `E` MtD | `HTM(18/08) − HTM(31/07)` | *cần số 31/07* |
+| `F` DtD | `HTM(18/08) − HTM(17/08)` = `−497,3855 + 593,8772` | **+96,4917** |
+
+Kiểm: `F17` mới = −92,578 + 96,492 = **+3,914** vs `M2` = +3,913 → `J9` = 0.
+`D17` mới = −664,450 − 497,386 = **−1.161,836** vs `M4` = −1.161,788 → `J4` = 0.
+*(Lệch 0,05 là khoảng hở có sẵn từ trước, không phải do việc này.)*
+
+Nên trỏ qua external link `[1]` sang một ô trên `Phan tich_TB` chứa `SUM(TB_HTM[ItD])/10^9`,
+đừng gõ tay — cùng cơ chế mà `J4`/`J9` đang dùng.
+
+---
+
+## #8 — File 02: hằng số cộng/trừ tay trong `Linked (1)`
+
+**Trạng thái**: `−90` là cố ý (Jak xác nhận, sẽ bỏ hôm sau) · còn lại chưa rõ
+
+File 02 đọc `Bond_Trading_Historical` qua SQL ở `Code!D18` rồi `SUMIFS` theo
+`"Lo ngay"/"Lo thang"/"Lo nam"`. Nền mới **tự chảy xuống**, không phải sửa công thức.
+
+Nhưng sheet `Linked (1)` — nuôi thẳng mặt báo cáo và file key — có 5 chỗ cộng trừ hằng số:
+
+| Ô | Hằng số | Ghi chú |
+|---|---|---|
+| `Linked (1)!D36` · `D37` · `D38` | `−90` | **cố ý**, Jak bỏ hôm sau |
+| `Linked (1)!F16` | `+5` | chưa rõ nguồn gốc |
+| `Linked (1)!G63` | `−100` | chưa rõ nguồn gốc |
+| `Linked!T67` | `+0` | vô hại, cùng họ |
+
+Cùng họ với `+1` ở [#2](#2). Mỗi lần đổi nền tính toán thì phải rà lại các hằng số này — nếu
+một trong số chúng từng vá cho chính vấn đề mà `TB_HTM` giờ xử lý đúng thì đang đếm hai lần.
+
+---
+
+## #9 — `01.RptTool_FIBond` chưa đọc được
+
+**Trạng thái**: chặn bởi định dạng
+
+File ở dạng `.xlsb` (nhị phân). Tooling hiện có không parse được công thức. Muốn soát thì cần
+bản `Save As` sang `.xlsm`.
