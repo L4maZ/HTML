@@ -8,6 +8,7 @@ file HTML nào.
 - [`docs/key-system.md`](docs/key-system.md) — key-ification 3 tier, cơ chế fallback 2 tầng, Excel
 - [`docs/content-console.md`](docs/content-console.md) — pattern cho công cụ đọc/học (không phải dashboard)
 - [`docs/comment-block.md`](docs/comment-block.md) — block "Bình luận / Nhận định" (**chưa triển khai**)
+- [`docs/file01-rpttool.md`](docs/file01-rpttool.md) — File 01 `RptTool_Bond`: cấu trúc thật, đối chiếu memory
 - [`docs/projects.md`](docs/projects.md) — trạng thái từng file
 
 ## Ràng buộc không thương lượng
