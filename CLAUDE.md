@@ -9,6 +9,7 @@ file HTML nào.
 - [`docs/content-console.md`](docs/content-console.md) — pattern cho công cụ đọc/học (không phải dashboard)
 - [`docs/comment-block.md`](docs/comment-block.md) — block "Bình luận / Nhận định" (**chưa triển khai**)
 - [`docs/file01-rpttool.md`](docs/file01-rpttool.md) — File 01 `RptTool_Bond`: cấu trúc thật, đối chiếu memory
+- [`docs/file01-issues.md`](docs/file01-issues.md) — File 01: nhật ký issue, có bằng chứng số
 - [`docs/projects.md`](docs/projects.md) — trạng thái từng file
 
 ## Ràng buộc không thương lượng
