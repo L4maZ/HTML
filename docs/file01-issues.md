@@ -131,7 +131,8 @@ Tổng SBV (`DS1+DS2` + `AU4+AU5`) = **−380,7459**, không đổi. Nên `Doubl
 
 ### Còn treo
 
-- **Restate baseline trên DB53** — chỉ còn **2 mốc**: 31/07 (`M3`) và 04/08 (`M5`).
+- **Restate baseline trên DB53** — ✅ **31/07 đã xong** (19/08). Xem [#10](#10) về việc
+  vì sao không restate 04/08 và các mốc còn lại.
   **31/12/2025 không cần restate**: `TB_HTM` chưa tồn tại tại ngày đó nên
   `SUM(TB_HTM[ItD])` = 0, cơ sở cũ đã là cơ sở mới. `M4` = −1.161,7875 hiện đã đúng nền.
   Điều này cũng gỡ rủi ro lớn nhất — ngày 31/12/2025 trên 53 chỉ có **328 dòng** so với **349**
@@ -390,3 +391,112 @@ một trong số chúng từng vá cho chính vấn đề mà `TB_HTM` giờ x�
 
 File ở dạng `.xlsb` (nhị phân). Tooling hiện có không parse được công thức. Muốn soát thì cần
 bản `Save As` sang `.xlsm`.
+
+
+---
+
+<a id="10"></a>
+## #10 — Restate baseline 53: làm 31/07, bỏ phần còn lại
+
+**Trạng thái**: 31/07 đã xong · các mốc khác chủ động bỏ
+
+### Quy tắc
+
+Một mốc cần restate khi **và chỉ khi** cả hai điều đúng:
+
+1. Bản ghi ngày đó được đẩy từ file **chưa có fix** `L27`/`P2`
+2. `SUM(TB_HTM[ItD])` tại ngày đó **≠ 0**
+
+Từ 18/08 trở đi mọi file đều có fix → mọi bản ghi mới đều nền mới.
+
+### Quyết định từng mốc
+
+| Mốc | Chỉ tiêu | Làm | Lý do |
+|---|---|---|---|
+| 17/08 | `M2` Lỗ ngày | ✅ đã xong | |
+| **31/07** | `M3` Lỗ tháng | ✅ **đã xong 19/08** | Một lần, chữa `M3` cho cả tháng 8 |
+| 31/12/2025 | `M4` Lỗ năm | ❌ bỏ | `TB_HTM` chưa tồn tại → `HTM` = 0, cơ sở cũ đã là cơ sở mới |
+| 04/08 … 14/08 | `M5` 14D | ❌ bỏ | **Mốc của `M5` chạy theo từng ngày** |
+
+Điểm dễ sai (tôi đã tư vấn hụt lần đầu): restate 04/08 **chỉ** chữa `M5` cho riêng ngày 18/08.
+Hôm sau `M5` lấy mốc 05/08, hôm sau nữa 06/08… Muốn `M5` đúng mọi ngày phải restate ~8 ngày.
+Trong khi `M3` có mốc `Lastmonth` = 31/07 **cố định suốt tháng 8** — một lần là xong.
+
+`M5` chấp nhận sai tới 01/09 rồi tự lành, có ghi chú. Tỷ lệ công/lợi ích quá xấu.
+
+### Từ 01/09 không phải restate gì nữa
+
+| Chỉ tiêu | Mốc tháng 9 | Nền |
+|---|---|---|
+| `M2` | ngày làm việc trước | mới |
+| `M3` | 31/08 | mới |
+| `M4` | 31/12/2025 | `HTM` = 0 |
+| `M5` | `RPT−14` ≥ 18/08 | mới |
+
+### Vì sao dùng `UPDATE` chứ không chạy macro
+
+Với **18/08** thì chạy macro (delete-then-insert) là đúng — cả file hôm đó nhất quán.
+
+Với **ngày lịch sử thì không**. Macro đẩy lại toàn bộ ngày đó, gồm ba dòng `Lo ngay`/`Lo thang`/
+`Lo nam` = `M2`/`M3`/`M4` **của chính file 31/07** — mà `M2`/`M3` trong đó so với mốc 30/07 và
+30/06, hai ngày chưa restate, nên lệch đúng −687,85. File 02 đọc chuỗi `"Lo ngay"/"Lo nam"`
+theo ngày để vẽ biểu đồ xu hướng (`Chart data!P2`…), nên đó là ghi số rác vào biểu đồ, rồi lại
+phải restate 30/07 và 30/06 — dây chuyền không có điểm dừng.
+
+`M3` chỉ đọc **2 dòng** từ 53 (bộ lọc PQ `Data53_PnL`), và `ItD_PnL_Realised` không đổi vì
+`K27` giữ nguyên. Nên phạm vi thật sự là **1 dòng mỗi bảng**.
+
+### Đã chạy
+
+`SUM(TB_HTM[ItD])` tại 31/07 = **−687,8519698095** (28 dòng).
+
+Đối chiếu trước khi sửa — file phải khớp đúng bản ghi trên 53:
+
+| | File 31/07 | DB53 |
+|---|---|---|
+| `SUM(FNRP!AA:AA)/10^9` | −1014,0872236090 | −1014,087223609 |
+| `SUM(FNRP!BS:BS)/10^9` | −2600,3273748588 | −2600,3273748588 |
+
+```sql
+UPDATE Bond_Trading_Historical
+SET Actual = Actual + (-687.8519698095)
+WHERE Rptdate='2026-07-31' AND Indicators='PnL' AND Input_data='Spot'
+  AND Class='All' AND Tenor_Value='' AND Rpt_Grp='ItD_PnL_Unrealised';
+
+UPDATE Bond_Banking_Historical
+SET Actual = Actual - (-687.8519698095)
+WHERE Rptdate='2026-07-31' AND Indicators='PnL' AND Input_data='Spot'
+  AND Class='All' AND Tenor_Value='' AND Rpt_Grp='ItD_PnL_Unrealised';
+```
+
+Kết quả trên 53:
+
+| Book | Rpt_Grp | Trước | Sau |
+|---|---|---|---|
+| TB | ItD_PnL_Realised | 1719,3963730977 | *không đổi* |
+| TB | ItD_PnL_Unrealised | −1014,087223609 | **−1701,9391934185** |
+| BB | ItD_PnL_Realised | 1553,2253933152 | *không đổi* |
+| BB | ItD_PnL_Unrealised | −2600,3273748588 | **−1912,4754050493** |
+
+Trong file 18/08, refresh riêng `Data53_PnL` và `His53_BB_MSB` (đừng chạy `Refresh_data`):
+
+| Ô | Trước | Sau |
+|---|---|---|
+| `Phan tich_TB!M3` | −734,183 | **−46,33** |
+| `Phan tich_BB!P4` | 197,844 | **+7,38** |
+
+Kiểm chéo hai đường độc lập, khớp:
+
+```
+M27(18/08) − [1719,3964 + (−1701,9392)] = −28,8738 − 17,4572 = −46,331
+M3 nền cũ + [HTM(18/08) − HTM(31/07)]   = −236,797 + 190,467 = −46,331
+```
+
+### Giá trị `SUM(TB_HTM[ItD])` đã đo được
+
+| Ngày | Số dòng | `SUM(TB_HTM[ItD])` tỷ VND |
+|---|---|---|
+| 31/12/2025 | *(chưa có bảng)* | 0 |
+| 31/07/2026 | 28 | **−687,8519698095** |
+| 17/08/2026 | 29 | **−593,8772111732** |
+| 18/08/2026 | 26 | **−497,3855320562** |
