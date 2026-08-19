@@ -131,14 +131,12 @@ Tổng SBV (`DS1+DS2` + `AU4+AU5`) = **−380,7459**, không đổi. Nên `Doubl
 
 ### Còn treo
 
-- **Restate baseline trên DB53** cho `M3`/`M4`/`M5` (và `P3`/`P4`/`P5`). Mốc 17/08 đã xong.
-  Còn 04/08 (14D), 31/07 (tháng), 31/12/2025 (năm) — cần `SUM(TB_HTM[ItD])` tại từng ngày,
-  lấy từ file lưu theo ngày.
+- **Restate baseline trên DB53** cho `M3`/`M4`/`M5` (và `P3`/`P4`/`P5`) — xem [#5](#5).
 - **Dòng 9 xanh không chứng minh YtD đã đúng.** Nó so *tổng*; sai số ở TB và BB ngược dấu nên
   triệt tiêu. Từng vế vẫn lệch tới khi restate xong.
-- **Bóc theo tenor không cộng bằng tổng.** `His.TB!L172/L183` lấy `K12`/`L12` theo tenor, chưa
-  có phần `TB_HTM`. Muốn khớp phải phân bổ `TB_HTM[ItD]` theo `TB_HTM[Tenor]` (cột `DN`).
 - **Giá điều chuyển nội bộ** chốt theo sổ hay theo thị trường — quyết định khoảng hở 1,1 tỷ.
+
+Bóc theo tenor / loại TP: đã xử lý, xem [#5](#5).
 
 ---
 
@@ -182,3 +180,123 @@ Application.Calculation = xlCalculationAutomat   ' thieu 'ic'
 
 Không có `Option Explicit` nên VBA coi là biến rỗng → gán `0` → **error 1004** khi nhánh
 `dieukien > 4` chạy. Đúng phải là `xlCalculationAutomatic`.
+
+
+---
+
+<a id="5"></a>
+## #5 — Bóc theo tenor và loại TP không cộng bằng tổng sau khi sửa #1
+
+**Trạng thái**: đã sửa
+
+`L27` và `P2` nhận phần `TB_HTM` nhưng các bảng bóc chi tiết thì không, nên tổng chi tiết
+lệch tổng chung đúng **497,3855 tỷ**. Ba bảng vỡ, không phải một:
+
+| Bảng bóc | Ô | BB có tương ứng? |
+|---|---|---|
+| TB theo tenor | `L13:L22` | `P12:P21` |
+| TB theo loại TP | `L28:L30` | không có |
+
+Chỉ cột **Unrealised** phải chỉnh. `K`/`O` (Realised) giữ nguyên — `TB_HTM` là trạng thái còn
+mở, realised = 0 theo định nghĩa.
+
+### Phân bổ `TB_HTM[ItD]` theo tenor (tỷ VND)
+
+| Bucket | Điều chỉnh | `L` mới (TB, cộng) | `P` mới (BB, trừ) |
+|---|---|---|---|
+| 1Y *(3M+6M+1Y)* | −5,1453 | `L13` −13,8731 | `P12` −19,9590 |
+| 2Y | 0 | `L14` 0 | `P13` −22,6806 |
+| 3Y | 0 | `L15` 7,5784 | `P14` −12,5550 |
+| 4Y | −6,8511 | `L16` −34,0430 | `P15` −21,6536 |
+| 5Y | −0,2094 | `L17` −5,5884 | `P16` −3,7943 |
+| 7Y | −99,4464 | `L18` −495,0197 | `P17` −199,7578 |
+| 10Y | −53,4993 | `L19` −572,5067 | `P18` −163,4337 |
+| 15Y | −332,2340 | `L20` −630,0648 | `P19` −1.248,5682 |
+| 20Y | 0 | `L21` 0 | `P20` −10,0655 |
+| 30Y | 0 | `L22` 0 | `P21` −182,7995 |
+| **Tổng** | **−497,3855** | | |
+
+Mọi tenor trong `TB_HTM` (3M · 6M · 4Y · 5Y · 7Y · 10Y · 15Y) đều rơi đúng vào bucket có sẵn.
+Dòng dư (`L12`, `P11`) không phải đụng.
+
+Theo loại TP: TPCP **−221,5648** · TPCPBL **−275,8207** · TPCQĐP **0**.
+
+### Công thức
+
+TB tenor `L13` (bucket gộp), rồi `L14` fill xuống `L22`:
+
+```excel
+L13  =SUM(SUMIFS(FNRP!$AA:$AA,FNRP!$AI:$AI,{"3M","6M","1Y"}))/10^9
+     +SUM(SUMIFS(TB_HTM[ItD],TB_HTM[Tenor],{"3M","6M","1Y"}))/10^9
+L14  =SUMIFS(FNRP!$AA:$AA,FNRP!$AI:$AI,'Phan tich_TB'!I14)/10^9
+     +SUMIFS(TB_HTM[ItD],TB_HTM[Tenor],'Phan tich_TB'!I14)/10^9
+```
+
+TB loại TP `L28` fill xuống `L30`:
+
+```excel
+=SUMIFS(FNRP!$AA:$AA,FNRP!$AJ:$AJ,'Phan tich_TB'!I28)/10^9
++SUMIFS(TB_HTM[ItD],TB_HTM[Type],'Phan tich_TB'!I28)/10^9
+```
+
+BB tenor `P12` (bucket gộp), rồi `P13` fill xuống `P21` — **dấu trừ**:
+
+```excel
+P12  =SUM(SUMIFS(FNRP!BS:BS,FNRP!$CA:$CA,{"3M","6M","1Y"}))/10^9
+     -SUM(SUMIFS(TB_HTM[ItD],TB_HTM[Tenor],{"3M","6M","1Y"}))/10^9
+P13  =SUMIFS(FNRP!BS:BS,FNRP!$CA:$CA,'Phan tich_BB'!M13)/10^9
+     -SUMIFS(TB_HTM[ItD],TB_HTM[Tenor],'Phan tich_BB'!M13)/10^9
+```
+
+Upload tự theo: `His.TB!L173:L182` (tenor), `L154/L157/L160` (loại TP), `His.BB!L150:L159`.
+Không đụng VBA.
+
+### Phải sửa kèm — bộ kiểm tra sẵn có báo sai
+
+`Phan tich_BB!P23` = `=SUM(FNRP!BS:BS)/10^9-P22` đang bằng 0. Sau khi sửa `P12:P21` thì `P22`
+có phần `TB_HTM` còn `SUM(FNRP!BS)` thì không → `P23` nhảy **+497,3855** dù không có gì sai.
+
+Đổi thành so với chính ô tổng, tự bám theo mọi điều chỉnh về sau:
+
+```excel
+P23  =P2-P22
+O23  =P1-O22
+```
+
+Vế TB không có ô đối chiếu tương đương (`L23` vs `L27` không được so ở đâu cả).
+**Optimization suggestion**: thêm một ô `=L27-L23` và `=K27-K23`, cùng dạng với `O23`/`P23`.
+
+### Kiểm chứng
+
+| Phải bằng nhau | Giá trị |
+|---|---|
+| `L23` = `L27` | −1.743,5172 |
+| `L28+L29+L30` = `L27` | −1.743,5172 |
+| `P22` = `P2` | −1.885,2672 |
+| `P23`, `O23` | 0 |
+
+### Điểm mỏng
+
+`I12` / `M11` là dòng dư, tiêu chí `SUMIFS` là **ô trống** — Excel hiểu là `0`, may là cột
+`FNRP!AI` / `CA` dùng đúng số `0` cho nhóm dư nên khớp. Gõ nhầm gì vào `I12` là bucket đó lệch
+âm thầm, không có cảnh báo.
+
+---
+
+## #6 — Bóc coupon TB lệch tổng 44,25 tỷ (có sẵn từ trước)
+
+**Trạng thái**: chưa sửa · không liên quan #1, phát hiện khi rà #5
+
+| | Giá trị |
+|---|---|
+| `J23` = `SUM(J12:J22)` | 8.488,8849 |
+| `J27` = `SUMIFS(FNRP!P:P,FNRP!J:J,">="&0)/10^9` | 8.533,1349 |
+| Chênh | **−44,2500** |
+
+Nguyên nhân: `J27` lọc `FNRP!J:J >= 0` (bỏ trạng thái âm), các dòng tenor `J12:J22` **không
+lọc**. Phần `QUANTITY < 0` có coupon đúng bằng **−44,2500**.
+
+Vế BB không dính — `N23` không lọc nên hai bên cùng cơ sở.
+
+Cần Jak quyết: coupon của trạng thái âm nên tính hay không. Bỏ lọc ở `J27` hay thêm lọc vào
+`J12:J22` — hai hướng cho hai con số khác nhau, không tự chọn được.
