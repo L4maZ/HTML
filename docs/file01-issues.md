@@ -507,7 +507,7 @@ M3 nền cũ + [HTM(18/08) − HTM(31/07)]   = −236,797 + 190,467 = −46,331
 <a id="11"></a>
 ## #11 — File 03: PnL realized MtD thừa 1.407 tỷ, đang bị vá tay
 
-**Trạng thái**: đã xác định cơ chế · **chưa có bản sửa dùng được**
+**Trạng thái**: ✅ đã tìm ra nguyên nhân gốc — lỗi một định danh trong PQ `Bond_Deals MtD`
 
 Ô `3.8.PnL Breakdown!E19` (trước khi chèn dòng là `E18`) chứa hằng số **1407** gõ tay, bị trừ
 khỏi `E16` qua đuôi `-E19` của công thức. Jak xác nhận đây là adjust tay vì số đang sai, và
@@ -569,19 +569,61 @@ mua sau khi bán không vào giá vốn của lần bán đó): số bung ra vô
 (YtD ra 191 triệu tỷ). Mô hình trình tự deal của tôi sai — có bán khống, deal ngoài cửa sổ,
 và lượng tồn về 0 làm bình quân nổ.
 
-### Việc còn lại
+### NGUYÊN NHÂN GỐC — `Table.ExpandTableColumn` sai tên cột
 
-Cần biết **quy tắc khớp thật** khi một mã vừa tồn đầu kỳ vừa có giao dịch trong kỳ: deal mua
-phát sinh **sau** một lần bán có được tính vào giá vốn của lần bán đó không. Đây là câu hỏi cho
-người viết bộ phân loại `X` (theo Log là `thaottp14`), hoặc Jak quyết.
+Bộ máy `X`/`Gốc`/`AB`/`AH`/`AI` **không sai** — nó chạy đúng ở YtD và DtD. MtD bị **bỏ đói dữ
+liệu đầu vào**.
 
-Có câu trả lời đó thì sửa ở **`AH`/`AI`** là đủ — thay cụm `SUMIFS(AD:AD,C:C,bond)` bằng PnL
-realized đúng ở cấp mã, giữ nguyên `X`/`Gốc`/`AB`/`AE` để không đụng vào vế unrealized.
+| | Số deal trong `ItD_*` (tồn T0) | Trong `Deal *` | Giao nhau |
+|---|---|---|---|
+| DtD | 89 | 99 | **88** ✓ |
+| **MtD** | 79 | 108 | **0** ✗ |
 
-### Trong lúc chờ
+`Deal MtD` chỉ chứa deal phát sinh trong tháng (ID 50273+), không một deal tồn đầu kỳ nào
+(ID 41818, 42756…). Vì thế `V` (OutT0) luôn = 0 ở **0/26 mã**, và không sell nào có giá vốn.
 
-**Giữ nguyên plug 1407 ở `E19`.** Bỏ ra bây giờ thì MtD sai 1.407 tỷ trên báo cáo. Plug xấu
-nhưng đang giữ số đúng — chỉ gỡ sau khi bản sửa thật đã kiểm xong trên cả ba cửa sổ.
+```m
+' Bond_Deals MtD
+#"Merged Queries"   = Table.NestedJoin(..., {"DEAL_ID"}, #"ItD MtD", {"DEAL_BUY_ID"}, ...)   ' join DUNG
+#"Expanded ItD MtD" = Table.ExpandTableColumn(..., "ItD MtD", {"BondsDeals_Id"}, ...)        ' expand SAI
+```
+
+`ItD MtD` chỉ có `DEAL_BUY_ID` và `Amt` — **không có** `BondsDeals_Id`.
+`Table.ExpandTableColumn` gặp cột không tồn tại thì **không báo lỗi**, nó tạo cột toàn `null`.
+Nên `([ItD MtD.BondsDeals_Id] <> null)` luôn FALSE, điều kiện lọc rút về còn
+`[CAPTURE_DATE] > Lastmonth`, và toàn bộ deal tồn đầu kỳ bị loại.
+
+`DtD`/`YtD` không dính vì nguồn của chúng đặt tên cột là `BondsDeals_Id`, khớp lệnh expand.
+Join của MtD đã được sửa sang `DEAL_BUY_ID` nhưng expand thì quên.
+
+### Bản sửa
+
+Đổi 3 chỗ `BondsDeals_Id` → `DEAL_BUY_ID` trong `Bond_Deals MtD` (expand, điều kiện lọc,
+remove column). Không đụng gì trên sheet.
+
+### Kiểm
+
+| Kiểm | Trước | Sau |
+|---|---|---|
+| `Deal MtD` có dòng `V ≠ 0` | 0/26 mã | phải có |
+| `Runtool!J5` | −15.050.000 | 0 |
+| `Runtool!J6` position MtD | **17.702 tỷ** | 0 |
+| `Runtool!J7` | 1407 | 0 |
+| `3.8!E14` | 1.490,343 | ≈ 83,8 |
+
+`J6` = 17.702 tỷ là ô đã báo động về việc này từ đầu, nằm ngay trong `Runtool`, chưa ai xử lý.
+
+Chỉ xoá `1407` khỏi `E19` **sau khi** `J7` = 0.
+
+### Bài học
+
+Tôi mất bốn lượt đi tái lập phương pháp tính giá vốn (bình quân tĩnh, bình quân động theo
+TRADING_DATE, theo CAPTURE_DATE — xem phần dưới) trong khi vấn đề là dữ liệu không tới. Ba
+sheet YtD/MtD/DtD **cùng một cấu trúc** và hai trong ba đang đúng — lẽ ra phải so chúng với
+nhau trước tiên, chỗ khác nhau mới là chỗ cần nhìn.
+
+Bẫy chung cần nhớ: **`Table.ExpandTableColumn` với tên cột không tồn tại trả về `null` chứ
+không báo lỗi.** Mọi điều kiện `<> null` dựa trên nó sẽ âm thầm thành FALSE.
 
 ### Liên quan
 
