@@ -507,7 +507,7 @@ M3 nền cũ + [HTM(18/08) − HTM(31/07)]   = −236,797 + 190,467 = −46,331
 <a id="11"></a>
 ## #11 — File 03: PnL realized MtD thừa 1.407 tỷ, đang bị vá tay
 
-**Trạng thái**: ✅ đã tìm ra nguyên nhân gốc — lỗi một định danh trong PQ `Bond_Deals MtD`
+**Trạng thái**: ✅ **ĐÃ SỬA XONG** (19/08) — `J5`/`J6`/`J7` đều về 0, plug 1407 đã gỡ
 
 Ô `3.8.PnL Breakdown!E19` (trước khi chèn dòng là `E18`) chứa hằng số **1407** gõ tay, bị trừ
 khỏi `E16` qua đuôi `-E19` của công thức. Jak xác nhận đây là adjust tay vì số đang sai, và
@@ -609,11 +609,15 @@ remove column). Không đụng gì trên sheet.
 | `Runtool!J5` | −15.050.000 | 0 |
 | `Runtool!J6` position MtD | **17.702 tỷ** | 0 |
 | `Runtool!J7` | 1407 | 0 |
-| `3.8!E14` | 1.490,343 | ≈ 83,8 |
+| `3.8!E14` | 1.490,343 | **100,8** |
+| `3.8!E11` | −320,559 | **−337,6** |
+| `3.8` Total MtD | 1.360,250 | **−46,3** khớp `M3` = −46,331 |
 
 `J6` = 17.702 tỷ là ô đã báo động về việc này từ đầu, nằm ngay trong `Runtool`, chưa ai xử lý.
 
-Chỉ xoá `1407` khỏi `E19` **sau khi** `J7` = 0.
+Lưu ý khi đọc lại: tôi từng dự đoán `E14` ≈ 83,8. Thực tế ra 100,8 vì việc đưa lại các dòng
+tồn đầu kỳ làm dịch **cả hai** vế realized và unrealized, không chỉ realized. Con số 83,8 đến
+từ bản tái lập tĩnh đã bị loại ở trên, đừng dùng nó làm mốc.
 
 ### Bài học
 
@@ -630,3 +634,28 @@ không báo lỗi.** Mọi điều kiện `<> null` dựa trên nó sẽ âm th�
 `Runtool` r11 Log của chính file: *"Nếu có deal bị xóa thì số DtD bị lệch, nếu xóa vắt tháng
 hoặc vắt năm thì số YtD và MtD bị lệch => Pending"*. Cùng vùng vấn đề nhưng **khác cơ chế** —
 mục này là phân loại `X=3`, không phải deal bị xoá.
+
+
+---
+
+## #12 — Hai ô check YtD của File 03 chưa bao giờ bằng 0
+
+**Trạng thái**: chưa sửa · có sẵn từ trước, không do đợt sửa 19/08
+
+| Ô | Nội dung | Giá trị |
+|---|---|---|
+| `Runtool!J2` | YtD — Amt realized tổng mua = tổng bán | **19.117.854** |
+| `Runtool!J3` | YtD — Check position cuối kỳ datamart vs FNRP | **−3.823.570.800** |
+
+Cùng họ với `J5`/`J6` đã chữa ở [#11](#11), chỉ khác cửa sổ và nhẹ hơn nhiều (3,8 tỷ so với
+17.702 tỷ). Đáng nghi là cũng lệch khớp dữ liệu bên `Bond_Deals YtD`.
+
+Đáng chú ý: `J4` (YtD PnL vs File 02) **đang bằng 0**, tức là tổng PnL YtD vẫn khớp dù hai ô
+kiểm dữ liệu đầu vào thì không. Nên đây không phải lỗi lớn như MtD, nhưng cũng chưa được giải
+thích. Cần soi `Bond_Deals YtD` theo cùng cách đã làm với MtD:
+
+```
+so sánh tập DEAL_ID giữa ItD_YtD ('Amt Outs'!F:G) và Deal YtD
+```
+
+MtD trước khi sửa có giao nhau = 0. Nếu YtD ra một con số nhỏ hơn kỳ vọng thì cùng bản chất.
