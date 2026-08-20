@@ -80,6 +80,30 @@ export `outerHTML` (dòng 593) — cơ chế save duy nhất đang thực sự c
 
 Không phải dashboard tài chính. Xem [`content-console.md`](content-console.md).
 
+## Sắp build — Internal Rating Report (HTML)
+
+Jak sẽ start dự án chuyển bảng internal rating của FI Bond thành report HTML.
+
+**Nguồn dữ liệu:** `bond/source/01.RptTool_FIBond_2026.08.19.xlsm` (đã lưu trong repo).
+
+Ba thứ cần lấy từ file đó:
+
+| Vùng | Nội dung |
+|---|---|
+| `Rating!A1:K22` | Bảng `Portfolio_rating` — Issuer · Total Amount · Rating · Review Date · Fitch · Moody · S&P · Tỷ lệ · Tỷ lệ lũy kế · Đối ứng · Tổng đã điều chỉnh |
+| `Rating!M1:P8` | Tổng hợp theo bậc rating — Rating · Amount · Tỷ lệ · Tỷ lệ lũy kế |
+| `Rating!R1:V22` | **Bảng quy chuẩn rating** — Internal rating ↔ Fitch ↔ S&P ↔ Moody's, kèm nhãn Investment grade / High yield / Default |
+
+Thang nội bộ: `AAA · AA · A · BBB · BB · B · N/A`. Thứ tự xếp hạng đúng nằm ở query
+`Portfolio rating` sau khi sửa (xem [`file01-issues.md`](file01-issues.md) #18) — dùng
+`List.PositionOf` trên thang tường minh, không phải chuỗi `if/else` cũ.
+
+Lưu ý khi build:
+- Rating là **thang thứ bậc**, không phải nhãn rời. Mọi sắp xếp và tô màu phải theo thứ tự
+  `AAA → D`, mã chưa có rating xuống cuối.
+- Có mã ngoại tệ (MFKR, ccy KGS) đã quy đổi VND qua bảng `Tygia` — số trên bảng là tỷ VND.
+- Tone phù hợp: wine (bond risk) theo [`design-system.md`](design-system.md).
+
 ## Chưa build
 
 - "Đặt cược dự báo" — logged, chưa build

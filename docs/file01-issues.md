@@ -868,3 +868,178 @@ Không khớp. Market value đến từ một nguồn định giá khác, chưa 
 Tôi hướng dẫn gỡ hardcode ở `Portfolio rating` **trước khi** tìm ra nguyên nhân gốc. Kết quả:
 MFKR bị lọc mất mà không còn gì bù vào, bảng `Rating` mất hẳn mã này. Đáng lẽ phải xác định
 nguồn thay thế trước, gỡ hardcode sau.
+
+---
+
+## #16 — FIBond: khối `Ls DM` lọc nhầm cột, hai chỉ tiêu con sai suốt thời gian dài
+
+**File:** `01.RptTool_FIBond` · sheet `Summary`, khối `CI:CL` ("Ls DM")
+
+Cột nguồn ở sheet `RPBOD3`: `G` = `Face_Amount` (trọng số), `P` = `ThisCouponRate`,
+`V` = `Accr`, `W` = `TypeOfInstr_ShortName`, `X` = `Yield*Amount`, `Y` = `Coupon*Amount`.
+
+Bốn công thức lọc `"CD"` trên **cột `V`** — mà `V` là `Accr`, một cột **số**. So sánh
+`"<>CD"` với số luôn đúng, nên hai ô `CJ` âm thầm trả về cả danh mục thay vì phần loại CD.
+`CK5` lọc `V:V,"CD"` không khớp dòng nào nên ra `#DIV/0!`. `CK3` lọc đúng cột `W` nhưng lấy
+mẫu số là `P` (tổng các coupon rate) thay vì `G`.
+
+| Ô | Chỉ tiêu | Đang hiện | Đúng |
+|---|---|---|---|
+| `CJ3` | Coupon rate bq_On BS — FIBOND | 7,2258 | **7,4763** |
+| `CK3` | Coupon rate bq_On BS — CD | 309.963.478.064 | **7,0485** |
+| `CJ5` | Yield bq_On BS — FIBOND | 7,1397 | **7,3527** |
+| `CK5` | Yield bq_On BS — CD | `#DIV/0!` | **6,9890** |
+
+Sửa: đổi cột lọc thành `W:W`, mẫu số thành `G:G` ở cả 4 ô.
+
+Hai ô `CL` dùng `SUM(...)/SUM(...)` không lọc gì nên vốn đã đúng — chính vì vậy lỗi sống lâu:
+**dòng tổng luôn hợp lý, chỉ hai cột con sai.** Đối chiếu: 59 dòng CD (19.446,1 tỷ) + 25 dòng
+khác (13.769,74 tỷ) = 33.215,84 tỷ.
+
+**Đã sửa.**
+
+## #17 — FIBond: macro `Upload53()` của bảng Rating bỏ dòng không báo
+
+**File:** workbook rating master · macro `Upload53()`
+
+Ba lỗi chồng nhau, đều thuộc loại bỏ qua thầm lặng:
+
+1. `STT = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row - 1` — số dòng lấy từ cột `A`
+   (`CptyName`), nhưng điều kiện lọc kiểm cột `B` (`CptyCode`). Hai cột khác nhau: dòng có
+   `CptyCode` mà `CptyName` trống, nằm ở cuối danh sách, thì vòng lặp không chạy tới.
+2. `Month`/`Year` đọc theo từng dòng nhưng chỉ kiểm ở `Q2`/`R2`. Dòng nào bỏ trống `Q` hoặc
+   `R` là bị bỏ qua.
+3. `nIns` chỉ đếm dòng đã insert. Sheet 199 dòng, upload 192, thông báo hiện
+   "Upload xong: 192 dong." — không có gì để biết thiếu 7.
+
+Sửa: `STT` lấy dòng xa nhất trong cả vùng `A:K`; `Month`/`Year` trống thì fallback về
+`Q2`/`R2`; đếm và **liệt kê** dòng bị bỏ qua trong MsgBox. Thêm `dbo.` và bọc
+`[Month]`/`[Year]` (từ khoá T-SQL).
+
+Chạy lại lộ ra **7 dòng thiếu `CptyCode`**, trong đó dòng 200 = `QUOC GIA KYRGYZ REPUBLIC`
+= **MFKR** (khớp `RPBOD3`: issuer `MFKR`, bond `GBA05310713`/`GBA05310727`, ccy KGS).
+
+Theo yêu cầu của Jak, bản cuối đẩy lên **cả dòng thiếu `CptyCode`**, chỉ bỏ dòng rỗng hoàn
+toàn, và giữ cảnh báo để biết dòng nào cần điền mã. Lưu ý: dòng `CptyCode` NULL nằm trong
+database nhưng **không join được** vào `Portfolio rating` (khoá join là `CptyCode`).
+
+**Đã sửa.**
+
+## #18 — FIBond: thang xếp hạng của `Portfolio rating` dừng ở `BB`, `D` xếp trên `B`
+
+**File:** `01.RptTool_FIBond` · query `Portfolio rating`
+
+```m
+each if [Rating] = "AAA" then 1 else ... else if [Rating] = "BB" then 5 else 6
+```
+
+Liệt kê tới `BB`, còn lại rơi hết vào `else 6`. `B` và `D` cùng bằng 6, hoà nhau, và
+`Table.Sort` giữ nguyên thứ tự cũ → `OJBV` (D) hiện **trên** `PVFC` (B). Mã chưa có rating
+(`null`) cũng bằng 6, xen giữa bảng.
+
+Sửa: thay bằng thang tường minh + `List.PositionOf`; mã lạ hoặc `null` → 999 xuống cuối;
+thêm sort cấp hai theo `Total Amount` giảm dần (không có cấp hai thì thứ tự trong cùng bậc
+đổi theo mỗi lần refresh, không đối chiếu được giữa hai ngày).
+
+**Đã sửa.**
+
+## #19 — File 02: bốn ô hỏng, không ô nào được tham chiếu
+
+**File:** `02.Report_Bond` · sheet `Market info`, `Run Tool`
+
+| Ô | Vấn đề |
+|---|---|
+| `Market info!AP110` | `#REF!` trong công thức. `AP100:AP109` trỏ tuần tự `AN2992:AN3001`, khớp kỳ hạn từng cặp; `AP110` (2.75Y) đối ứng `AN3002`. Kéo theo `AQ100 = AVERAGE(AP100:AP111)` cũng `#REF!` |
+| `Market info!F450`, `F451` | Hai ô duy nhất có công thức trong cả cột `F`, dữ liệu 09/05/2019. Ô nháp bỏ quên |
+| `Market info!BX92` | Hỏng 3 tầng: `RptDate` không tồn tại (chỉ có `RPT`) → `#NAME?`; `SUMIFS` cộng cột `R` = Month lọc theo cột `O` = Market so với một ngày → luôn 0; `/10000` thừa vì `P` đã là tỷ VND |
+| `Run Tool!F14` | `COUNTA('Chart data'!#REF!)` → vùng ra `$BW$1:$BY$1`. Vùng `BW:BZ` cũng sai — nó thuộc Chart 30; khối NIM QLHS thật là `DU:DY` |
+
+Không ô nào được tham chiếu từ nơi khác. `Run Tool!F14` **không** làm hỏng Chart 22:
+`b_Chart.bas` chỉ có 2 sub, đọc `F3` và `F4`; Chart 22 gắn dữ liệu tĩnh trong file
+(`chart17` → `DV$2:DY$13`) và vẫn vẽ đúng.
+
+Jak chọn **xoá cả bốn**.
+
+*Ghi chú kiểm tra sai của tôi:* cột `M` của `MK_Aution_Outright` chứa text `'2026-08-19'`
+chứ không phải kiểu ngày. Tôi từng nghi đây là lỗi lan rộng (92 công thức `SUMIFS` lọc theo
+cột này), nhưng `Chart data!AA42 = 10.507,46` chứng minh `SUMIFS` vẫn khớp text với tiêu chí
+ngày. **Không phải lỗi.**
+
+## #20 — File 03: hai ô check YtD đỏ vì 4 deal `AFS-ITB` (khép lại #12)
+
+**File:** `03.Phan_tich_PnL` · query `Bond_Deals YtD` / `MtD` / `DtD`
+
+`Runtool!J2` = 19.117.854 và `J3` = −3.823.570.800 quy về **đúng 4 deal** MFKR, folder
+`AFS-ITB`:
+
+| deal | bond | X | QUANTITY |
+|---|---|---|---|
+| 50188 | GBA05310713 | 4 | 985.492 |
+| 50197 | GBA05310713 | 4 | 5.387.362 |
+| 50242 | GBA05310727 | 4 | 10.255.273 |
+| 50243 | GBA05310727 | 4 | 2.489.727 |
+| | | | **19.117.854** = `J2` |
+
+Bốn deal này lọt vào `Deal YtD` nhưng **không có trong `Amt Outs` lẫn `Clean Price`** — hai
+bảng đó chỉ phủ danh mục trong nước. Hệ quả: `OutT0 = OutT1 = 0` → `X = 4` → `AB = QUANTITY`,
+tức file coi 1.911,8 tỷ mệnh giá là **đã bán trong năm** dù chưa bán gì. Và `Clean Price`
+không có mã → `AG = 0 − AF` → âm; mỗi mã 2 dòng, `AG` tính theo dòng rồi `SUM` nên nhân đôi:
+`−1.911.785.400 × 2 = −3.823.570.800` = `J3`.
+
+Sửa: bộ lọc `#"Filtered Rows1"` đã có sẵn danh sách loại trừ (`AFS-ALM`, `SBV*`, `VSD*`),
+chỉ thiếu folder mới. Thêm `and [FOLDERS_CODE] <> "AFS-ITB"` vào **cả 3 query**.
+
+**Số báo cáo không đổi** — đã kiểm trước khi sửa: `AH`/`AI` chia cho tổng lượng **bán** của
+mã; MFKR không có deal bán nào → mẫu số 0 → `IFERROR(...,0)` → `AH = AI = 0`. Nên `D15`/`D16`
+vốn đã tự loại. Kiểm chứng bằng số: `SUM(AD)` = 251,5574 tỷ, `D14` = 252,8766 tỷ, chênh đúng
+1,3191 tỷ = phần MFKR. Tức **1,32 tỷ Realized PnL ảo đã bị `IFERROR` chặn một cách tình cờ**
+trước khi vào báo cáo — may, không phải thiết kế.
+
+Sau khi sửa: `J2` = `J3` = `J11` = 0; `D14`/`D18`/`J4`–`J10` giữ nguyên; `Deal YtD`
+1.297 → 1.293 dòng.
+
+Cùng lúc xoá sheet ẩn `YtD Pnl Breakdown (2)` (236 ô `#DIV/0!` do `(B+F)=0` ở 48/82 mã).
+Đã soát trước khi xoá: không VBA, không query, không chart, không defined name, không sheet
+nào tham chiếu — file duy nhất nhắc tên nó là chính nó.
+
+**Đã sửa. #12 khép lại.**
+
+## #21 — PV01 theo tenor trên 53 thiếu ~34% ở các ngày trước khi `TB_HTM` có cột `Tenor`
+
+**File:** `01.RptTool_Bond` · `Phan tich_TB!CH2:CH14` → `His.TB`
+
+Ở file 22/07, dòng `PV01 / Spot / All` upload lên 53 là **−10,5881**, nhưng cộng 12 dòng
+breakdown theo tenor chỉ ra **−6,9882** — hụt **−3,5999**, đúng bằng `SUM(TB_HTM[PV01])`
+của ngày đó.
+
+Nguyên nhân: `CH2` (dòng tổng) đã có `+SUM(TB_HTM[PV01])`, nhưng `CH3:CH14` (breakdown) thì
+chưa, vì bản 22/07 bảng `TB_HTM` **chưa có cột `Tenor`** (chỉ có `Tenor left` dạng số năm).
+
+Bản 18/08 trở đi đã có cột `Tenor` và breakdown cộng khớp đúng tổng (−10,6800). Nhưng **mọi
+ngày trước đó trên 53, series `PV01 By_remain_tenors_ Standard` đang thiếu phần carve-back**
+trong khi dòng tổng thì đủ. Ai backtest hoặc vẽ biểu đồ từ series tenor sẽ thấy PV01 nhảy bậc
+vào ngày thêm cột — đó là giả.
+
+Quy tắc gán bucket suy ra từ cặp (`Tenor left` → `Tenor`) có sẵn trong file 18/08: theo
+`floor` số năm còn lại — 4→4Y, 5→5Y, 7→7Y, 8-9→10Y, 10-14→15Y.
+
+**Chưa xử.** Cần quyết: có restate lịch sử trên 53 hay chỉ ghi nhận đứt gãy.
+
+## Ghi nhận: ba thay đổi ở `His.TB` là chủ ý, không phải lỗi
+
+So file 22/07 với 19/08, `His.TB` đi từ 366 xuống 344 dòng. Hạch toán khớp chính xác:
+−16 (`PV100`) −10 (tenor `Itd_Unrealized_MtM_PnL`) +1 (`Lo ngay book Transfer`)
++3 (ba mục "tu fund" chuyển từ `His.BB` sang) = **−22**.
+
+Jak xác nhận cả ba đều là quyết định:
+
+- **`PV100` bỏ hẳn** khỏi `His.TB`, không upload nữa. (`His.TB.SBV`/`His.BB.SBV` vẫn còn.)
+- **`M8`** ("ItD Unrealized, số nguyên, chưa điều chỉnh") **không dùng nữa**; `Itd_Unrealized_MtM_PnL`
+  nay trỏ `M7` — cùng ô với `Unrealized_ItD_MtM_PnL`. Tức 53 nhận **hai nhãn khác nhau mang
+  cùng một con số**; ai truy vấn 53 cần biết để không tưởng là hai thước đo độc lập.
+- Khối tenor cũ của `Itd_Unrealized_MtM_PnL` (nguồn `J35:J44`) bỏ; khối đang upload là của
+  `Unrealized_ItD_MtM_PnL` (nguồn `J49:J58`).
+
+Đã quét cả 3 file bản 19/08: **không nơi nào tham chiếu `'Phan tich_TB'!M8` hay `J34:J44`**,
+không defined name nào trỏ vào. Xoá an toàn. Lưu ý giữ lại `RP_SEC!N:N` (là nguồn, không phải
+nơi tiêu thụ).
