@@ -3,9 +3,9 @@
 Ghi các vấn đề phát hiện khi rà soát `01.RptTool_Bond`, kèm bằng chứng số và cách sửa.
 Cấu trúc file xem [`file01-rpttool.md`](file01-rpttool.md).
 
-> Bản `.xlsm` trong `bond/source/` là **bản 18/08 trước khi sửa**. Các fix dưới đây Jak áp
-> trực tiếp trên máy bank, không commit ngược lại. Số "trước" trong tài liệu này đọc được từ
-> file trong repo; số "sau" là kết quả Jak xác nhận.
+> `bond/source/` giữ **bản mới nhất** của 4 file (18/08, sau khi đã áp mọi fix trong tài liệu
+> này). Các bản cũ đã xoá khỏi thư mục — vẫn truy được trong lịch sử git nếu cần đối chiếu.
+> Số "trước" trong tài liệu đọc từ các bản cũ đó, số "sau" là trạng thái hiện tại.
 
 ---
 
@@ -387,10 +387,10 @@ một trong số chúng từng vá cho chính vấn đề mà `TB_HTM` giờ x�
 
 ## #9 — `01.RptTool_FIBond` chưa đọc được
 
-**Trạng thái**: chặn bởi định dạng
+**Trạng thái**: ✅ đã gỡ chặn — Jak đã xuất sang `.xlsm` (20/08). **Chưa rà soát.**
 
-File ở dạng `.xlsb` (nhị phân). Tooling hiện có không parse được công thức. Muốn soát thì cần
-bản `Save As` sang `.xlsm`.
+Trước đây file ở dạng `.xlsb` (nhị phân), tooling không parse được công thức. Bản `.xlsm` đã
+có trong `bond/source/`, soát được bất cứ lúc nào.
 
 
 ---
@@ -659,3 +659,97 @@ so sánh tập DEAL_ID giữa ItD_YtD ('Amt Outs'!F:G) và Deal YtD
 ```
 
 MtD trước khi sửa có giao nhau = 0. Nếu YtD ra một con số nhỏ hơn kỳ vọng thì cùng bản chất.
+
+
+---
+
+## #13 — VaR bộ MSB Trading upload số của hôm trước
+
+**Trạng thái**: ✅ đã sửa (20/08)
+
+`His.TB!L20:L25` — cả 6 giá trị VaR **gõ tay**, giống hệt nhau ở cả ba bản file 17/08 và 18/08,
+và khớp đúng bản ghi **17/08** trên DB53. Tức là file 18/08 sắp đẩy VaR của 17/08 lên làm VaR
+của 18/08.
+
+Nguồn số đúng **đã có sẵn trong file** (bảng `VaR`, query `VaR Bond MHCC`), đúng ngày 18/08:
+
+| Chỉ tiêu | Gõ tay (= 17/08) | Đúng (18/08) | Lệch |
+|---|---|---|---|
+| `VaR_95` | 21,3831 | 24,2188 | −2,84 |
+| `VaR_99` | 44,5061 | 51,5956 | −7,09 |
+| `VaR10D_95` | 119,5598 | 136,1272 | −16,57 |
+| `VaR10D_99` | 160,1864 | 181,8744 | −21,69 |
+| `VaR20D_95` | 172,9808 | 196,8365 | −23,86 |
+| `VaR20D_99` | 214,8738 | 246,2924 | −31,42 |
+
+**Thấp hơn thực tế 13–15%.** VaR là số hạn mức, và `Double check` dòng 47 backtest PnL dựa
+trên chuỗi này.
+
+Bằng chứng đây là lỗi chứ không phải chủ ý: **ba book còn lại** (`His.BB`, `His.TB.SBV`,
+`His.BB.SBV`) đều đọc bằng `SUMIFS` từ cùng bảng `VaR` và khớp 100%. Chỉ `His.TB` gõ tay.
+
+Bản sửa — theo đúng pattern đang chạy ở 3 sheet kia:
+
+```excel
+L20  =SUMIFS(VaR!K:K,VaR!J:J,"VaR99%",VaR!H:H,"VaR20D",VaR!G:G,"TD",VaR!F:F,"MSB")/10^9
+L21  =SUMIFS(VaR!K:K,VaR!J:J,"VaR95%",VaR!H:H,"VaR20D",VaR!G:G,"TD",VaR!F:F,"MSB")/10^9
+L22  =SUMIFS(VaR!K:K,VaR!J:J,"VaR99%",VaR!H:H,"VaR10D",VaR!G:G,"TD",VaR!F:F,"MSB")/10^9
+L23  =SUMIFS(VaR!K:K,VaR!J:J,"VaR95%",VaR!H:H,"VaR10D",VaR!G:G,"TD",VaR!F:F,"MSB")/10^9
+L24  =SUMIFS(VaR!K:K,VaR!J:J,"VaR99%",VaR!H:H,"VaR1D", VaR!G:G,"TD",VaR!F:F,"MSB")/10^9
+L25  =SUMIFS(VaR!K:K,VaR!J:J,"VaR95%",VaR!H:H,"VaR1D", VaR!G:G,"TD",VaR!F:F,"MSB")/10^9
+```
+
+### Còn treo — kiểm chuỗi lịch sử
+
+Chưa chạy. Cần biết việc copy-forward đã kéo dài bao lâu:
+
+```sql
+SELECT Rptdate, Indicators, Actual
+FROM Bond_Trading_Historical
+WHERE Indicators IN ('VaR_95','VaR_99') AND Class='All'
+ORDER BY Rptdate DESC;
+```
+
+Các ngày liên tiếp lặp đúng cùng giá trị = chuỗi VaR bộ MSB Trading trên 53 bị trôi.
+
+---
+
+## #14 — CVaR: bốn book dùng bộ kịch bản khác nhau
+
+**Trạng thái**: ✅ đã thống nhất (20/08)
+
+Trước khi sửa, cùng một chỉ tiêu nhưng mỗi book một bộ kịch bản, và `His.TB` còn tự mâu thuẫn
+giữa các horizon:
+
+| Sheet | `CVaR_95` | `CVaR_99` | `CVaR10D_95` | `CVaR10D_99` |
+|---|---|---|---|---|
+| `His.BB.SBV` | gõ cứng | gõ cứng | {1..12} | {1,2} |
+| `His.TB.SBV` | {1..12} | {1,2} | {1..12} | {1,2} |
+| `His.BB` | {1..12} | {1,2} | {1..12} | {1,2} |
+| `His.TB` | {1..12} | {1,2} | **{1..13}** | **{1,2,3}** |
+
+Hệ quả: CVaR của bốn book không so sánh được với nhau và không cộng lại được.
+
+**Quy ước đã chốt** — áp cho **cả 4 book, cả 3 horizon**:
+
+| | Bộ kịch bản |
+|---|---|
+| 95% | `{1,2,3,4,5,6,7,8,9,10,11,12,13}` |
+| 99% | `{1,2,3}` |
+
+```excel
+=-AVERAGE(AVERAGEIFS(VaR!K:K,VaR!J:J,{BỘ},VaR!H:H,"HORIZON",VaR!G:G,"BOOK",VaR!F:F,"BỘ"))/10^9
+```
+
+Lưu ý khi đọc số cũ: `CVaR_95`, `CVaR_99`, `CVaR20D_99` của cả 4 book đổi giá trị do đổi quy
+ước, không phải do số liệu (ví dụ `His.TB` CVaR_95: 40,3823 → 39,1883). Báo cáo sẽ thấy một
+bậc nhảy tại ngày áp dụng.
+
+Còn một khác biệt chưa xử lý: `His.TB` có dòng **`CVaR10D_97.5`** (`{1..6}`) mà ba book kia
+không có. Thêm hay bỏ là quyết định về bộ chỉ tiêu, không phải sửa lỗi.
+
+### Ghi chú về 14 kịch bản
+
+Bảng `VaR` có 14 kịch bản, sắp xếp lỗ nặng nhất trước (`KB=1`). Lấy trung bình 13/14 kịch bản
+cho mức "95%" không phải đuôi 5% theo nghĩa thông thường. Đây là quy ước của phòng, ghi lại để
+người đọc sau không hiểu nhầm là lỗi.
