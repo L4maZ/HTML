@@ -160,12 +160,10 @@ ghi ở đâu, trong khi dòng 30 ghi rõ ngưỡng ±100 đồng ở cột `J`.
 
 ## #3 — Thiếu dòng kiểm upload `His.TB`
 
-**Trạng thái**: chưa sửa
+**Trạng thái**: ✅ **đóng** (20/08). Jak chốt không cần dòng kiểm này.
 
-`Double check` dòng 37–40 kiểm `His.BB`, `His.TB.SBV`, `His.BB.SBV`, `His.Other` đẩy lên 53 có
-lỗi không. **Không có dòng cho `His.TB`** — book lớn nhất là book duy nhất không được kiểm.
-
-File 02 chỉ đọc DB53. Upload hỏng thì File 02 vẫn chạy, vẫn ra báo cáo, chỉ là số cũ.
+`Double check` dòng 37–40 kiểm `His.BB`, `His.TB.SBV`, `His.BB.SBV`, `His.Other`; `His.TB`
+không có dòng tương ứng. Đây là chủ ý, không bổ sung.
 
 ---
 
