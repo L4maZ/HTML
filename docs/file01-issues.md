@@ -753,3 +753,118 @@ không có. Thêm hay bỏ là quyết định về bộ chỉ tiêu, không ph�
 Bảng `VaR` có 14 kịch bản, sắp xếp lỗ nặng nhất trước (`KB=1`). Lấy trung bình 13/14 kịch bản
 cho mức "95%" không phải đuôi 5% theo nghĩa thông thường. Đây là quy ước của phòng, ghi lại để
 người đọc sau không hiểu nhầm là lỗi.
+
+
+---
+
+## #15 — FIBond: mã MFKR bị loại khỏi mọi query, phải bù bằng hardcode
+
+**Trạng thái**: `Tygia` · `RPBOD_B003` · `Upload53_RPBOD03` ✅ đã sửa ·
+`Portfolio rating` ⏸ **code sẵn sàng, chưa áp** · market value còn treo
+
+### Triệu chứng
+
+`Portfolio rating` (FIBond, sheet `Rating`) có 2 step cuối chèn tay một dòng:
+
+```m
+ITB_Amt_Value = Excel.CurrentWorkbook(){[Name="ITB_Amt"]}[Content]{0}[Column1],
+#"Added MFKR" = Table.InsertRows(#"Renamed Columns", Table.RowCount(#"Renamed Columns"),
+    {[Issuer = "MFKR", #"Total Amount" = ITB_Amt_Value, Rating = "B", ...]})
+```
+
+Cả số tiền lẫn rating `"B"` đều gõ tay.
+
+### Nguyên nhân gốc
+
+MFKR = 4 deal, folder **`AFS-ITB`**, đồng tiền **`KGS`**, trái phiếu chính phủ **Kyrgyz**
+(`GBA05310727`, `GBA05310713`). Cả 4 mang `TypeOfInstr_ShortName = 'GOVBOND'`.
+
+| Bước lọc trong `RPBOD_B003` | Còn lại | MFKR |
+|---|---|---|
+| Ban đầu | 840 | ✓ |
+| `Issuer <> "MSB-BANK"` | 348 | ✓ |
+| **bỏ `ECON_UNL` / `GOVBOND`** | **80** | **✗** |
+
+Filter sinh ra để loại TPCP Việt Nam (thuộc File 01) nhưng quét luôn trái phiếu chính phủ
+**nước ngoài**. Nên MFKR biến mất khỏi mọi query, và ai đó bù lại bằng hardcode.
+
+Tiêu chí phân biệt: `Folder = "AFS-ITB"` và `Currency <> "VND"` cho **kết quả giống hệt** —
+đúng 4 dòng MFKR, không dính issuer nào khác. Chọn `Folder` vì nó nói về *book nào thuộc tool
+nào*, đúng bản chất filter.
+
+### Tỷ giá — khớp tuyệt đối
+
+`Tygia` (`Ref!AA1:AD2`): `KGS` = **299,3102** (SOM KYRGYZSTAN).
+
+| | KGS | × 299,3102 |
+|---|---|---|
+| `FaceAmount` | 1.911.785.400 | **572,2169 tỷ** |
+| `GrossAmount` | 1.310.911.248,78 | 392,3691 tỷ |
+| `Accr` | 8.935.572,59 | 2,6745 tỷ |
+
+**572,2169 trùng khít** `ITB_Amt` (`Summary!DB1` = `SUM(FNRP_ITB[Nominal_VND])/10^9`) và dòng
+gõ tay `Upload53!r173`. Xác nhận đây đúng là nguồn của số hardcode.
+
+### Đã sửa
+
+**`Tygia`** — bỏ step cuối `Table.SelectRows(..., each [Indicators] = "KGS")` để trả về mọi
+đồng tiền. An toàn: 3 chỗ dùng `Tygia` (`FNRP!EH2/EH3` XLOOKUP theo `Name`, `BS_KGS` và
+`offBS_KGS` SelectRows theo `Indicators`) đều chọn theo khoá, không cái nào giả định 1 dòng.
+
+**`RPBOD_B003`** và **`Upload53_RPBOD03`** — 3 thay đổi:
+1. `Removed Columns`: **giữ lại** `"Currencies_ShortName"`
+2. `Filtered Rows`: thêm `or [Folder] = "AFS-ITB"`
+3. Thêm 4 step quy đổi ngoại tệ theo từng đồng tiền
+
+```m
+BangTyGia = Excel.CurrentWorkbook(){[Name="Tygia"]}[Content],
+TyGiaCua = (ccy as text) as number =>
+    let hit = Table.SelectRows(BangTyGia, (t) => t[Indicators] = ccy)
+    in  if Table.IsEmpty(hit) then error "Tygia: thieu ty gia cho " & ccy else hit{0}[Average],
+ColsInt = {"FaceValue", "Face_Amount", "Gross_Amount"},
+ColsNum = {"Discount", "Premium", "Discount_Remain", "Premium_Remain", "ValueDate_Accred", "Accr"},
+#"Quy doi ngoai te" = Table.FromRecords(
+    Table.TransformRows(#"Filtered Rows1", (row) =>
+        if row[Currencies_ShortName] = "VND" then row
+        else let fx = TyGiaCua(row[Currencies_ShortName]) in
+            Record.TransformFields(row,
+                List.Transform(ColsInt, (c) => {c, (v) => if v = null then null else Number.Round(v * fx, 0)})
+                & List.Transform(ColsNum, (c) => {c, (v) => if v = null then null else v * fx})
+            )
+    ),
+    Table.ColumnNames(#"Filtered Rows1")
+)
+```
+
+Không còn chuỗi `"MFKR"` hay `"KGS"` nào trong code. Thêm/bớt deal, issuer mới, đồng tiền mới
+đều tự chạy; thiếu tỷ giá thì **báo lỗi rõ** thay vì âm thầm bỏ qua quy đổi.
+
+`Quantity` không quy đổi (là số lượng). `FaceValue` có quy đổi để `Quantity × FaceValue =
+Face_Amount` vẫn đúng.
+
+### Còn treo
+
+**1. `Portfolio rating` chưa áp.** Nó **không đọc từ `RPBOD_B003`** — đọc thẳng file raw và có
+bản sao riêng của cùng cái filter. Cần 3 thay đổi: khai báo `BangTyGia`/`TyGiaCua` sau
+`Promoted Headers`, thêm `or [Folder] = "AFS-ITB"` vào filter, và nhân tỷ giá trong cột `Amount`:
+
+```m
+fx = if [Currencies_ShortName] = "VND" then 1 else TyGiaCua([Currencies_ShortName]),
+final = resultNumber / 1000000000 * fx
+```
+
+Kỳ vọng sau khi áp: bảng `Rating` 20 → **21 dòng**, tổng về lại **31.687,83** (đúng bằng số
+thời còn hardcode, nhưng từ dữ liệu thật), rating MFKR lấy từ `FIBond_Rating` trên 53.
+
+**2. Market value MFKR chưa dựng lại được.** Dòng gõ tay `Upload53!r193` = **405,688 tỷ**.
+Từ file raw chỉ ra được `GrossAmount` × tỷ giá = 392,3691 hoặc `Gross+Accr` = 395,0436.
+Không khớp. Market value đến từ một nguồn định giá khác, chưa xác định.
+
+**3. `Upload53` là sheet gõ tay.** VBA `b_UploadDB` chỉ **đọc** nó, không điền. Nên dòng
+`r173` (Face 572,217) và `r193` (Market 405,688) phải xoá bằng tay khi đã có nguồn thật.
+
+### Lỗi trình tự của tôi
+
+Tôi hướng dẫn gỡ hardcode ở `Portfolio rating` **trước khi** tìm ra nguyên nhân gốc. Kết quả:
+MFKR bị lọc mất mà không còn gì bù vào, bảng `Rating` mất hẳn mã này. Đáng lẽ phải xác định
+nguồn thay thế trước, gỡ hardcode sau.
