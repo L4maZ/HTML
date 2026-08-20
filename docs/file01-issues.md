@@ -11,7 +11,7 @@ Cấu trúc file xem [`file01-rpttool.md`](file01-rpttool.md).
 
 ## #1 — PnL trôi mỗi khi điều chuyển deal TB ↔ BB
 
-**Trạng thái**: đã sửa 18/08/2026 · còn phần restate lịch sử
+**Trạng thái**: ✅ đã sửa 18/08/2026
 
 ### Bối cảnh nghiệp vụ
 
@@ -131,15 +131,9 @@ Tổng SBV (`DS1+DS2` + `AU4+AU5`) = **−380,7459**, không đổi. Nên `Doubl
 
 ### Còn treo
 
-- **Restate baseline trên DB53** — ✅ **31/07 đã xong** (19/08). Xem [#10](#10) về việc
-  vì sao không restate 04/08 và các mốc còn lại.
-  **31/12/2025 không cần restate**: `TB_HTM` chưa tồn tại tại ngày đó nên
-  `SUM(TB_HTM[ItD])` = 0, cơ sở cũ đã là cơ sở mới. `M4` = −1.161,7875 hiện đã đúng nền.
-  Điều này cũng gỡ rủi ro lớn nhất — ngày 31/12/2025 trên 53 chỉ có **328 dòng** so với **349**
-  của hai mốc kia, tức là có lệch phiên bản; không đụng vào là an toàn nhất.
-- **Dòng 9 xanh không chứng minh YtD đã đúng.** Nó so *tổng*; sai số ở TB và BB ngược dấu nên
-  triệt tiêu. Từng vế vẫn lệch tới khi restate xong.
 - **Giá điều chuyển nội bộ** chốt theo sổ hay theo thị trường — quyết định khoảng hở 1,1 tỷ.
+
+Phần restate baseline trên DB53 đã khép — xem [#10](#10).
 
 Bóc theo tenor / loại TP: đã xử lý, xem [#5](#5).
 
@@ -398,7 +392,9 @@ có trong `bond/source/`, soát được bất cứ lúc nào.
 <a id="10"></a>
 ## #10 — Restate baseline 53: làm 31/07, bỏ phần còn lại
 
-**Trạng thái**: 31/07 đã xong · các mốc khác chủ động bỏ
+**Trạng thái**: ✅ **đóng** (20/08). 31/07 đã restate; các mốc còn lại chủ động bỏ.
+Jak chốt **không backdate số lịch sử trên 53** — phần dưới giữ lại làm căn cứ quyết định,
+không phải việc còn phải làm.
 
 ### Quy tắc
 
@@ -699,18 +695,9 @@ L24  =SUMIFS(VaR!K:K,VaR!J:J,"VaR99%",VaR!H:H,"VaR1D", VaR!G:G,"TD",VaR!F:F,"MSB
 L25  =SUMIFS(VaR!K:K,VaR!J:J,"VaR95%",VaR!H:H,"VaR1D", VaR!G:G,"TD",VaR!F:F,"MSB")/10^9
 ```
 
-### Còn treo — kiểm chuỗi lịch sử
-
-Chưa chạy. Cần biết việc copy-forward đã kéo dài bao lâu:
-
-```sql
-SELECT Rptdate, Indicators, Actual
-FROM Bond_Trading_Historical
-WHERE Indicators IN ('VaR_95','VaR_99') AND Class='All'
-ORDER BY Rptdate DESC;
-```
-
-Các ngày liên tiếp lặp đúng cùng giá trị = chuỗi VaR bộ MSB Trading trên 53 bị trôi.
+Chuỗi VaR lịch sử trên 53 có thể đã bị copy-forward trong một khoảng thời gian trước 18/08.
+**Không truy và không backdate** — Jak chốt 20/08. Từ 18/08 trở đi chuỗi lấy từ `SUMIFS` nên
+đúng nền.
 
 ---
 
@@ -759,8 +746,8 @@ người đọc sau không hiểu nhầm là lỗi.
 
 ## #15 — FIBond: mã MFKR bị loại khỏi mọi query, phải bù bằng hardcode
 
-**Trạng thái**: `Tygia` · `RPBOD_B003` · `Upload53_RPBOD03` ✅ đã sửa ·
-`Portfolio rating` ⏸ **code sẵn sàng, chưa áp** · market value còn treo
+**Trạng thái**: `Tygia` · `RPBOD_B003` · `Upload53_RPBOD03` · `Portfolio rating` ✅ đã sửa
+(20/08) · market value MFKR còn treo
 
 ### Triệu chứng
 
@@ -844,24 +831,24 @@ Face_Amount` vẫn đúng.
 
 ### Còn treo
 
-**1. `Portfolio rating` chưa áp.** Nó **không đọc từ `RPBOD_B003`** — đọc thẳng file raw và có
-bản sao riêng của cùng cái filter. Cần 3 thay đổi: khai báo `BangTyGia`/`TyGiaCua` sau
-`Promoted Headers`, thêm `or [Folder] = "AFS-ITB"` vào filter, và nhân tỷ giá trong cột `Amount`:
-
-```m
-fx = if [Currencies_ShortName] = "VND" then 1 else TyGiaCua([Currencies_ShortName]),
-final = resultNumber / 1000000000 * fx
-```
-
-Kỳ vọng sau khi áp: bảng `Rating` 20 → **21 dòng**, tổng về lại **31.687,83** (đúng bằng số
-thời còn hardcode, nhưng từ dữ liệu thật), rating MFKR lấy từ `FIBond_Rating` trên 53.
-
-**2. Market value MFKR chưa dựng lại được.** Dòng gõ tay `Upload53!r193` = **405,688 tỷ**.
+**1. Market value MFKR chưa dựng lại được.** Dòng gõ tay `Upload53!r193` = **405,688 tỷ**.
 Từ file raw chỉ ra được `GrossAmount` × tỷ giá = 392,3691 hoặc `Gross+Accr` = 395,0436.
 Không khớp. Market value đến từ một nguồn định giá khác, chưa xác định.
 
-**3. `Upload53` là sheet gõ tay.** VBA `b_UploadDB` chỉ **đọc** nó, không điền. Nên dòng
+**2. `Upload53` là sheet gõ tay.** VBA `b_UploadDB` chỉ **đọc** nó, không điền. Nên dòng
 `r173` (Face 572,217) và `r193` (Market 405,688) phải xoá bằng tay khi đã có nguồn thật.
+
+### Đã áp `Portfolio rating` (20/08)
+
+Query này **không đọc từ `RPBOD_B003`** — nó đọc thẳng file raw và giữ bản sao riêng của cùng
+cái filter, nên phải vá riêng. Ba thay đổi đã áp: khai báo `BangTyGia`/`TyGiaCua`, thêm
+`or [Folder] = "AFS-ITB"` vào filter, nhân tỷ giá trong cột `Amount`.
+
+Kết quả: bảng `Rating` thêm dòng **MFKR = 572,129**, `Total` 32.643,7106 → **33.215,84** —
+khớp đúng tổng `Face_Amount` của sheet `RPBOD3`, và `Runtool` dòng 7 ("Số CD+FI Bond bảng
+rating = GL") từ −572,1 về **0**.
+
+Cùng lúc sửa thang xếp hạng của query này, xem [#18](#18).
 
 ### Lỗi trình tự của tôi
 
@@ -1023,7 +1010,9 @@ vào ngày thêm cột — đó là giả.
 Quy tắc gán bucket suy ra từ cặp (`Tenor left` → `Tenor`) có sẵn trong file 18/08: theo
 `floor` số năm còn lại — 4→4Y, 5→5Y, 7→7Y, 8-9→10Y, 10-14→15Y.
 
-**Chưa xử.** Cần quyết: có restate lịch sử trên 53 hay chỉ ghi nhận đứt gãy.
+**Đóng** (20/08). Jak chốt **không backdate**: chỉ ghi nhận đứt gãy, không restate lịch sử.
+Từ 18/08 trở đi breakdown cộng khớp đúng tổng. Ai dùng series `PV01 By_remain_tenors_ Standard`
+cho giai đoạn trước 18/08 cần biết nó thiếu phần carve-back — dùng dòng tổng thay thế.
 
 ## Ghi nhận: ba thay đổi ở `His.TB` là chủ ý, không phải lỗi
 
