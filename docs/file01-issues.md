@@ -360,22 +360,37 @@ Nên trỏ qua external link `[1]` sang một ô trên `Phan tich_TB` chứa `SU
 
 ## #8 — File 02: hằng số cộng/trừ tay trong `Linked (1)`
 
-**Trạng thái**: `−90` là cố ý (Jak xác nhận, sẽ bỏ hôm sau) · còn lại chưa rõ
+**Trạng thái**: ✅ **đóng** (20/08). Cả ba hằng số là adjust tay do Jak tự thêm; nền tính
+toán đã đúng nên đã xoá hết.
 
 File 02 đọc `Bond_Trading_Historical` qua SQL ở `Code!D18` rồi `SUMIFS` theo
 `"Lo ngay"/"Lo thang"/"Lo nam"`. Nền mới **tự chảy xuống**, không phải sửa công thức.
 
 Nhưng sheet `Linked (1)` — nuôi thẳng mặt báo cáo và file key — có 5 chỗ cộng trừ hằng số:
 
-| Ô | Hằng số | Ghi chú |
-|---|---|---|
-| `Linked (1)!D36` · `D37` · `D38` | `−90` | **cố ý**, Jak bỏ hôm sau |
-| `Linked (1)!F16` | `+5` | chưa rõ nguồn gốc |
-| `Linked (1)!G63` | `−100` | chưa rõ nguồn gốc |
-| `Linked!T67` | `+0` | vô hại, cùng họ |
+| Ô | Hằng số | Dòng / cột | Trạng thái |
+|---|---|---|---|
+| `Linked (1)!D36` · `D37` · `D38` | `−90` | Lo ngay/tháng/năm Banking | ✅ đã xoá |
+| `Linked (1)!F16` | `+5` | Daily PnL × cột `Yesterday` | ✅ đã xoá |
+| `Linked (1)!G63` | `−100` | Trạng thái mở Face Value × cột `Last month` | ✅ đã xoá |
+| `Linked!T67` | `+0` | — | vô hại, để nguyên |
 
-Cùng họ với `+1` ở [#2](#2). Mỗi lần đổi nền tính toán thì phải rà lại các hằng số này — nếu
-một trong số chúng từng vá cho chính vấn đề mà `TB_HTM` giờ xử lý đúng thì đang đếm hai lần.
+Bằng chứng `+5` là plug: bỏ nó ra thì `F16` = **3,913199117**, trùng khít
+`Phan tich_TB!M2` của File 01 bản 18/08 = 3,9131991169713274. Tức chuỗi trên 53 vốn đã đúng,
+`+5` thổi Daily PnL lên 8,91 — sai 128%. `G63` bỏ `−100` ra thì về 39.522,26, vẫn dưới hạn
+mức `≤ 45.000`.
+
+### Bài học: hằng số bám vào cột, không bám vào ngày
+
+`Linked (1)` có 5 cột ngày, nhãn ở dòng 2 và ngày ở dòng 3: `D` = RPT · `F` = Yesterday ·
+`G` = Last month · `H` = Last Quarter · `I` = Last Year.
+
+Hằng số gắn vào **cột**, mà cột là **ngày tương đối**. Thêm `+5` để vá riêng 18/08 thì hôm sau
+`F3` thành 19/08 và khoản `+5` **tự chuyển sang vá ngày mới**, mãi mãi. Không phải "vá một
+ngày rồi quên gỡ" mà là khoản cộng vĩnh viễn bám cột.
+
+Cả hai đều là số tròn (5 và 100) — dấu hiệu plug tay chứ không phải kết quả tính toán.
+Cùng họ với `+1` ở [#2](#2).
 
 ---
 
