@@ -8,7 +8,8 @@ Cập nhật sau khi đọc trực tiếp 6 file (14/08/2026).
 |---|---|---|---|---|
 | `BaoCao_RRTT_Bond_key_v7` | Report 5 trang, key system | Wine `#7B2D3B` + paper | ECharts inline | Chuẩn tham chiếu |
 | `VBMA_Weekly_20260807` | Weekly 6 trang | Wine `#8B2332` | ECharts inline | Chạy tốt |
-| `Phan_tich_GD_Bond_20260608_20260810` | Phân tích deal 5 trang | Navy/gold + dark mode | ECharts inline | Chạy tốt |
+| `Phan_tich_GD_Bond_20260608_20260810` | Phân tích deal 5 trang | Navy/gold + dark mode | ECharts inline | Bản cũ, thay bằng bản 20/08 |
+| `Phan_tich_GD_Bond_20260608_20260820` | Phân tích deal 6 trang | Navy/gold + dark mode | ECharts inline | Bản hiện hành |
 | `QC.RR.022_lampd3` | Quy chế + đánh giá GAP | Terracotta `#b83a10` | SVG viết tay | Chạy tốt |
 | `Peer_Bond_Dashboard_AutoReport_ByGemini_` | Dashboard 5 tab | Terracotta `#b84a32` | **CDN** | **Không dùng được offline** |
 | `cfa_l1_console` | Study console (không phải dashboard) | Ink/gold/paper | KaTeX CDN, degrade được | Chạy được offline |
@@ -47,6 +48,28 @@ File tốt nhất hiện có. Dùng làm mẫu cho mọi build mới.
 - Resize không cần registry: quét `.ch` rồi `echarts.getInstanceByDom` (dòng 456–457).
 - Tone navy/gold `#0A2463` / `#D4A843` — khác hẳn 2 tone còn lại.
 - Data nằm trong một object `D` (dòng 244).
+
+## Phan_tich_GD_Bond_20260608_20260820 — bản mở rộng
+
+Dựng lại từ `Dealps_0806__2008.xlsx` (346 chân deal, CaptureDate 08/06–20/08/2026), thay bản
+`..._20260810`. Toàn bộ 136 cặp của bản cũ tái lập khớp từng đồng; thêm 37 cặp từ dữ liệu mới.
+
+- 6 trang: Tổng quan · Nhóm A Đi vay · Nhóm B Cho vay · **Đối tác** · Bất thường · Chi tiết cặp deal
+- **Ghép cặp 2 pass**: pass 1 khớp `(CaptureDate, Quantity)` rồi ưu tiên deal-id gần nhau — hai
+  chân của một repo được book cùng lúc nên tiêu chí này thắng thứ tự thanh toán thuần túy khi
+  nhiều chân trùng ngày; pass 2 FIFO phần dư, tách chân lớn. Kết quả 0 chân lẻ.
+- **Ghép chéo đối tác** cho cặp KBNN mua ↔ PGBV-HO bán (deal 50120 ↔ 50127+50128).
+- Chart registry `REG` + thunk `BUILDERS`: option chart bake màu theme nên phải giữ sau hàm để
+  dựng lại được khi đổi dark mode. `chart(id, fn)` thay cho `mk(id, opt)` trực tiếp.
+- **Bẫy CSS đã sửa**: `.pos`/`.neg` global đè lên `.kpi.pos` (dùng `.pos` làm tone nền) → chữ
+  trắng thành xanh lá trên nền xanh đậm. Đã scope về `td.pos, span.pos`.
+- **Bẫy dữ liệu**: cột `GrossAmount` có 16/346 dòng là **string** dạng `'  1012036120.0000000K'`
+  (đơn vị nghìn), không phải số. Không parse là lệch 1000 lần.
+- Ngưỡng ngoại lệ **theo kỳ hạn**: yield lệch ≥ 10bp chỉ là định giá lại khi kỳ hạn ≤ 30 ngày;
+  deal 351 ngày lệch 31bp là bình thường. Deal 1–2 ngày có %/năm phóng đại do làm tròn giá —
+  tách thành nhóm `noise` riêng, không đếm là lỗi.
+- Tách **lãi đã đáo hạn** (−4,4 tỷ) khỏi **lãi theo hợp đồng** (271,8 tỷ, phần lớn đáo hạn sau
+  20/08). Trộn hai con số là đọc sai P&L trong kỳ.
 
 ## QC.RR.022_lampd3
 
