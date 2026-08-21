@@ -1045,3 +1045,75 @@ Jak xác nhận cả ba đều là quyết định:
 Đã quét cả 3 file bản 19/08: **không nơi nào tham chiếu `'Phan tich_TB'!M8` hay `J34:J44`**,
 không defined name nào trỏ vào. Xoá an toàn. Lưu ý giữ lại `RP_SEC!N:N` (là nguồn, không phải
 nơi tiêu thụ).
+
+## #22 — `Keo_cong_thuc` kéo đè lên cột của query: coupon sai mỗi ngày
+
+**File:** `01.RptTool_Bond` · macro `Keo_cong_thuc` (module `a_LoadData`) · bảng đăng ký
+`Runtool!P:U`
+
+### Triệu chứng
+
+Cột coupon của bảng `PTCK_offBS` sai mỗi ngày. Jak phải paste lại query để chữa — nên tưởng
+lỗi ở query. **Không phải query.**
+
+### Cơ chế
+
+`Keo_cong_thuc` chạy theo bảng đăng ký trên `Runtool`: `P2` = số vòng, `Q` = sheet,
+`S` = vùng tham chiếu, `T` = số dòng, `U` = vùng kéo.
+
+```vba
+Range(vungthamchieu).Select
+Selection.AutoFill Destination:=Range(vungkeocth)
+```
+
+Trong bảng đăng ký, **`T` là công thức** (`=COUNTA(...)+1`, tự bám theo bảng) nhưng **`S` là
+chuỗi gõ tay**. Bảng dịch cột thì `T` tự đúng, `S` đứng yên — và không có gì báo.
+
+`PTCK_offBS` (`BA2:BS183`) có `BA:BN` là 14 cột của query, `BO:BS` là 5 cột công thức thêm
+tay. Đăng ký `S17 = BK3:BO3` trỏ vào **`BK`=`COUPON_RATE`, `BL`=`YIELD`, `BM`=`BS`,
+`BN`=`Book`** — toàn cột của query. AutoFill lấy giá trị dòng 3 kéo xuống 183 dòng → **mọi
+deal nhận coupon của deal đầu tiên**, đồng thời `BP:BS` không bao giờ được kéo.
+
+Refresh query sau đó ghi đè trả lại — đó là lý do "paste query lại là hết".
+
+### Vì sao lệch 4 cột
+
+`S17 = BK3:BO3` **giống hệt ở cả ba bản 22/07, 18/08, 19/08** — chưa từng đổi. Trong khi bảng
+đã dịch hai lần: dời 2 cột sang phải (`AY`→`BA`), rồi query thêm cột `FOLDERS_CODE` (+1).
+Ở bản 22/07 nó đã lệch sẵn 1 cột (cột công thức `BL:BP`, đăng ký `BK:BO`) nhưng chỉ ăn vào
+`Book` nên không ai để ý. Thêm `FOLDERS_CODE` là nó trượt vào đúng `COUPON_RATE`.
+
+### Sửa
+
+| Dòng `Runtool` | Bảng | `S` cũ | `S` mới |
+|---|---|---|---|
+| 17 | `PTCK_offBS` | `BK3:BO3` | **`BO3:BS3`** |
+| 16 | `RPBOD3` | `AV3` (= `Gross amt`, cột query) | **`AW3:AX3`** (`ItD adj`, `Check Folder`) |
+| 21 | `Giam_sat_yesterday` | `CH2:CI2` | đã xoá — nhớ giảm `P2` 23 → 22 |
+| 8 | `FNRP_Future` | `IC2:IF2` | `IC2:ID2` (vô hại, `IE`/`IF` rỗng) |
+| 18 | `Newdeals` | `AA2:AO2` | `AA2:AN2` (vô hại, `AO` rỗng) |
+
+Dòng 16 phải sửa **hai ô**, vì `U16` không dùng công thức chuẩn:
+
+```excel
+U16  cũ:  =S16&":AV"&T16        ← hardcode ":AV", đổi S16 là hỏng
+U16  mới: =LEFT(S16,LEN(S16)-1)&T16
+```
+
+Bằng chứng dòng 21 đã bị phá: `CD`–`CG` biến thiên theo dòng, riêng `CH`/`CI` giống hệt nhau ở
+mọi dòng (3906 / 15258) — đúng dấu vết AutoFill san phẳng.
+
+**Đã sửa** (20/08). 18/23 dòng đăng ký còn lại đã soát, sạch.
+
+### Đính chính về [#4](#4)
+
+Tôi từng log `Application.Calculation = xlCalculationAutomat` (thiếu `ic`) là "gây error 1004".
+Module không có `Option Explicit` nên đó là biến rỗng. Nhưng chính triệu chứng coupon chứng
+minh macro **không** chết: nó phải chạy tới i=16 mới phá được. Vẫn nên sửa cho sạch, nhưng nó
+không phải nguyên nhân.
+
+### Chặn gốc — chưa làm
+
+Cả 5 lỗi cùng một gốc: `S` gõ tay, `T` là công thức. Lần sau thêm/bớt một cột trong bất kỳ
+query nào là lại lệch, âm thầm. Cách chặn: cho macro tự dò cột công thức thay vì đọc `S`,
+hoặc thêm ô kiểm so số cột của bảng với số cột trong `S`.
