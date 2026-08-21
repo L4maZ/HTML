@@ -394,11 +394,11 @@ Cùng họ với `+1` ở [#2](#2).
 
 ## #9 — `01.RptTool_FIBond` chưa đọc được
 
-**Trạng thái**: ✅ đã gỡ chặn — Jak đã xuất sang `.xlsm` (20/08). **Chưa rà soát.**
+**Trạng thái**: ✅ đã gỡ chặn — Jak đã xuất sang `.xlsm` (20/08). Đang rà soát dần, xem
+[#23](#23)–[#25](#25) cho các phát hiện cụ thể.
 
 Trước đây file ở dạng `.xlsb` (nhị phân), tooling không parse được công thức. Bản `.xlsm` đã
 có trong `bond/source/`, soát được bất cứ lúc nào.
-
 
 ---
 
@@ -1117,3 +1117,86 @@ không phải nguyên nhân.
 Cả 5 lỗi cùng một gốc: `S` gõ tay, `T` là công thức. Lần sau thêm/bớt một cột trong bất kỳ
 query nào là lại lệch, âm thầm. Cách chặn: cho macro tự dò cột công thức thay vì đọc `S`,
 hoặc thêm ô kiểm so số cột của bảng với số cột trong `S`.
+
+## #23 — FIBond: `RefreshData` chết ở i=20 vì tên bảng gõ tay sai chính tả
+
+**File:** `01.RptTool_FIBond` · macro `RefreshData` (module `a_RefreshData`)
+
+Triệu chứng: `Run-time error '1004': Reference isn't valid` khi chạy `RefreshData`.
+
+```vba
+tenbang = Sheets("Runtool").Range("Y" & i + 1).Value
+Application.GoTo Reference:=tenbang
+```
+
+`Application.GoTo` cần tên khớp tuyệt đối. `Runtool!Y21 = "FNRP_ITB"` nhưng bảng thật tên
+**`FNRP_ITB_2`** (hậu tố `_2` vì Excel tạo lại bảng, tên cũ chưa giải phóng — `Summary!DB1`
+đã dùng đúng tên mới). Vòng lặp dừng ở i=20, nên 19 bảng đầu refresh xong (gồm `RPBOD_B003`)
+nhưng `Portfolio_rating`, `BS_KGS`, `offBS_KGS` và toàn bộ vòng "Kéo công thức" phía sau
+**không chạy**.
+
+`Runtool!Y2 = "FNRP_Fibond"` cũng sai hoa/thường so với `FNRP_FIbond` nhưng vô hại — tên bảng
+không phân biệt hoa thường.
+
+**Sửa**: `Runtool!Y21` → `FNRP_ITB_2`.
+
+**Đã sửa** (20/08).
+
+## #24 — FIBond: `RPBOD_B003` thêm cột, bảng đăng ký kéo công thức lệch — cùng bệnh với [#22](#22)
+
+**File:** `01.RptTool_FIBond` · sheet `RPBOD3` · bảng đăng ký `Runtool!P:U`
+
+Triệu chứng: mọi deal trên `RPBOD3` bị gán `TypeOfInstr_ShortName = "FI_CORP_U"`, khiến CD/
+GOVBOND/FI_CORP_L biến mất khỏi mọi lọc theo cột này (tưởng là "bay hết CD").
+
+Nguyên nhân: bản `RPBOD_B003` sửa hôm 19/08 (xem [#15](#15)) **giữ lại cột
+`Currencies_ShortName`** để quy đổi FX, làm bảng dôi một cột. Hai cột công thức thật
+(`Yield*Amount`, `Coupon*Amount`) dịch từ `W:X` sang `X:Y`, nhưng
+`Runtool!R8 = W2` (gõ tay) đứng yên. AutoFill kéo giá trị dòng 2 của `W` (=`TypeOfInstr_ShortName`)
+xuống cả bảng.
+
+Đây là hệ quả trực tiếp từ việc tôi thêm cột vào `RPBOD_B003` mà không rà bảng đăng ký ngay —
+lẽ ra phải làm cùng lúc.
+
+**Sửa**: `Runtool!R8` → `X2:Y2` · `Runtool!T8` → `=LEFT(R8,LEN(R8)-1)&S8` (mẫu chuẩn như các
+dòng khác, `T8` cũ hardcode `R8&":"&LEFT(R8,LEN(R8)-1)&S8` không tương thích vùng 2 cột).
+
+**Đã sửa** (20/08). Kiểm sau refresh: `RPBOD3!W` phải đủ CD 63 · FI_CORP_U 20 · GOVBOND 4 ·
+FI_CORP_L 1 = 88 dòng.
+
+## #25 — FIBond: `Runtool!L13` vỡ khi MFKR vào `RPBOD3` — không phải lỗi, GL thiếu tài khoản
+
+**File:** `01.RptTool_FIBond` · `Runtool!L13` ("Check số PTCK của FIBond trên GL và RPBOD3")
+
+Sau khi mở filter `RPBOD_B003` cho `AFS-ITB` (xem [#15](#15)), `L13` nhảy từ mức lệch cũ sang
+**−222.718.518.021** (−222,72 tỷ).
+
+```excel
+L13 = SUM(GL PTCK: 130204001+130205001+130208001) − (SUM(RPBOD3!S) − SUM(RPBOD3!R))
+```
+
+4 deal MFKR (bond `GBA05310713`/`GBA05310727`, ccy KGS) đóng góp `Discount_Remain` (cột `S`)
+= **176.898.750.392**, `Premium` (cột `R`) = 0. **`GL` không có tài khoản kế toán cho MFKR**
+— ba mã `130204/205/208` đều là tài khoản CD/FI Bond trong nước — nên vế trái không đổi khi
+thêm MFKR, còn vế phải đổi. Tự nhiên vỡ đúng bằng phần MFKR.
+
+Jak tự sửa đúng, và sửa kỹ hơn đề xuất ban đầu của tôi — không chỉ loại MFKR mà còn đổi cột
+`R` (`Premium`, không phải `_Remain`) thành `T` (`Premium_Remain`), khớp đúng cặp
+`Discount_Remain`/`Premium_Remain`:
+
+```excel
+L13 = SUM(SUMIFS(GL!L:L,GL!J:J,{"130205001","130208001","130204001"}))
+    - (SUMIFS(RPBOD3!T:T,RPBOD3!D:D,"<>MFKR") - SUMIFS(RPBOD3!S:S,RPBOD3!D:D,"<>MFKR"))
+```
+
+Kết quả **−315,86** (≈ −316 đồng trên nền vài chục tỷ, ~10⁻¹¹%) — nằm trong biên độ làm tròn
+giữa số dư GL (số nguyên đồng) và `RPBOD3` (giữ phần thập phân sau quy đổi FX), không truy
+tiếp.
+
+**Đã sửa** (20/08, Jak tự thực hiện).
+
+### Đính chính đề xuất trước của tôi
+
+Tôi đề xuất giữ cặp `S`/`R` (`Discount_Remain`/`Premium`) và chỉ thêm điều kiện loại MFKR —
+sai, vì cặp gốc vốn đã lệch loại cột (`Remain` với không-`Remain`). Jak phát hiện và sửa cả
+hai vấn đề cùng lúc.
