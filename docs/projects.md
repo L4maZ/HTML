@@ -51,8 +51,13 @@ File tốt nhất hiện có. Dùng làm mẫu cho mọi build mới.
 
 ## Phan_tich_GD_Bond_20260608_20260820 — bản mở rộng
 
-Dựng lại từ `Dealps_0806__2008.xlsx` (346 chân deal, CaptureDate 08/06–20/08/2026), thay bản
-`..._20260810`. Toàn bộ 136 cặp của bản cũ tái lập khớp từng đồng; thêm 37 cặp từ dữ liệu mới.
+Dựng lại từ `bond/source/Dealps_0806_2008.xlsx` (346 chân deal, CaptureDate 08/06–20/08/2026),
+thay bản `..._20260810`. Toàn bộ 136 cặp của bản cũ tái lập khớp từng đồng; thêm 37 cặp từ dữ
+liệu mới.
+
+**Sinh lại số:** `python3 bond/tools/ghep_cap_deal_bond.py bond/source/Dealps_0806_2008.xlsx
+--html bond/Phan_tich_GD_Bond_20260608_20260820.html` — thay khối `const D` tại chỗ, không đụng
+phần trình bày. Phương pháp ghép cặp và các bẫy dữ liệu: [`bond-deal-pairing.md`](bond-deal-pairing.md).
 
 - 6 trang: Tổng quan · Nhóm A Đi vay · Nhóm B Cho vay · **Đối tác** · Bất thường · Chi tiết cặp deal
 - **Ghép cặp 2 pass**: pass 1 khớp `(CaptureDate, Quantity)` rồi ưu tiên deal-id gần nhau — hai

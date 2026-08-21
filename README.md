@@ -13,6 +13,7 @@ Docs viết từ việc đọc trực tiếp 6 file production, mỗi khẳng đ
 | [`docs/key-system.md`](docs/key-system.md) | Key-ification 3 tier, cơ chế fallback 2 tầng, Excel `Key_Config` / `Key_Map` |
 | [`docs/content-console.md`](docs/content-console.md) | Pattern công cụ đọc/học: DSL nội dung, KaTeX degrade, screen system, tone ink/gold/paper |
 | [`docs/comment-block.md`](docs/comment-block.md) | Block "Bình luận / Nhận định" — **spec, chưa triển khai** |
+| [`docs/bond-deal-pairing.md`](docs/bond-deal-pairing.md) | Ghép cặp repo từ export deal Bond: phương pháp, quy ước dấu, 4 cái bẫy |
 | [`docs/projects.md`](docs/projects.md) | Trạng thái từng file, kèm việc cần sửa |
 
 ## Hai loại sản phẩm
