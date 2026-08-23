@@ -1,0 +1,6 @@
+# Python bytecode cache — sinh ra khi import script trong bond/tools/
+__pycache__/
+*.py[cod]
+
+# File tạm của Excel khi mở file trong bond/source/
+~$*.xls*
