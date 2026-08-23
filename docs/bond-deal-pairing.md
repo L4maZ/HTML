@@ -28,10 +28,14 @@ là một dòng tiền vào hoặc ra. Chỉ khi ghép cặp mới có "bán 100
 
 Nên bước đầu bắt buộc là **tái tạo quan hệ cặp mà hệ thống không lưu**.
 
-> **Đây là suy luận từ dữ liệu, không phải đọc từ trường có sẵn.** Nếu `MSB_RP_DM` thực
-> sự có trường đánh dấu cặp repo (deal group, reference number, hoặc cột chưa có trong
-> bản export này), trường đó phải được ưu tiên hơn cách ghép ở đây. Xin thêm cột đó rồi
-> đối chiếu — trùng khớp thì mới đóng được vấn đề hoàn toàn.
+> **Ghép tay là cách ĐÚNG, không phải giải pháp tạm.** Xác nhận của Jak (08/2026): đội kinh
+> doanh **tách một deal repo thành hai deal outright** khi nhập máy, nên trường nối cặp của hệ
+> thống bị cherry-picking — không khớp điều kiện repo/reverse repo và mapping loạn. Vì vậy
+> **không** lấy trường hệ thống làm chuẩn; ghép lại từ điều kiện nghiệp vụ như dưới đây.
+>
+> Hệ quả kép: vì mỗi chân là một lệnh outright riêng, **mỗi chân được định giá theo yield thị
+> trường của chính ngày giao dịch đó**, không theo một lãi suất repo thỏa thuận. Xem mục
+> "Giá vốn repo" cuối tài liệu — đây là điều chi phối toàn bộ cách đọc lãi/lỗ.
 
 ## Điều kiện ghép cặp
 
@@ -155,12 +159,43 @@ là bình thường, loại đi sẽ bóp méo lợi suất nhóm B. Ngưỡng p
 ### 4. `%/năm` trên deal qua đêm không dùng được
 
 Chênh lệch vài chục triệu nhân 365 ra con số hoang đường. Trong kỳ mẫu, 17 cặp 1–2 ngày
-có `|%/năm| > 8` chỉ vì làm tròn giá — không phải lỗi.
+có `|%/năm| > 8`.
 
-Ba deal như vậy (CAP_FIG, CK_SSI) làm bucket "1 ngày" hiện chi phí **25,7%/năm** trong khi
-loại chúng ra thì bucket đó **âm**. Tách thành nhóm `noise` riêng, đếm nhưng không tính là
-bất thường; so sánh đối tác phải **trong cùng nhóm kỳ hạn**, và với deal qua đêm thì đọc
-bằng **số tiền tuyệt đối**.
+**Nguyên nhân KHÔNG phải làm tròn giá** (cách đọc ban đầu, đã sửa) — mà là **chênh lệch yield
+giữa hai chân lấn át lãi repo**. Bóc cặp 49954/49955 (1 ngày, 148 tỷ):
+
+```
+Δyield chỉ +0,56bp  ->  giá giảm 39 đ/đơn vị  ->  -58,5 tr
+accrual 1 ngày                                 ->  +10,5 tr
+                                       gross chênh  -48,0 tr
+lãi repo qua đêm đúng ra @3%/năm                ~  12 tr
+```
+
+Hiệu ứng yield lớn **gấp ~5 lần** lãi repo thật. Nên trên kỳ hạn ngắn, **dấu của lãi/lỗ gần như
+do yield quyết định, không do lãi vay**. Bằng chứng: tỷ lệ cặp nhóm A "có lãi" giảm đều theo
+kỳ hạn — 47% ở 1 ngày, 34% ở 2–7 ngày, 8% ở 8–30 ngày, **0% ở 31–90 ngày**. Kỳ hạn càng dài,
+lãi repo càng lấn át nhiễu và mọi cặp đi vay đều lỗ đúng bản chất.
+
+Tương quan giữa lãi/lỗ (trên mỗi tỷ đồng) và Δyield: **0,85–0,99 ở mọi nhóm kỳ hạn**.
+
+Với deal qua đêm phải đọc bằng **số tiền tuyệt đối**, không đọc %/năm.
+
+## Giá vốn repo = chính lợi suất trái phiếu đem cầm cố
+
+Lọc 44 cặp có hai chân **cùng một mức yield** (`|Δy| < 0,05bp`) — tức chênh lệch tiền là
+accretion thuần, không lẫn biến động giá. Với nhóm này, lãi suất ngụ ý **bám sát yield của
+chính trái phiếu đó**: lệch trung vị **−0,08 điểm %**, 41/44 cặp nằm trong ±0,5 điểm %.
+
+Nghĩa là repo ở đây không định giá theo lãi suất thị trường tiền tệ, mà theo **carry của trái
+phiếu đem ra cầm cố**. Hệ quả khi đọc số:
+
+- Chi phí vay của MSB **do việc chọn mã TP quyết định**, không hẳn do đối tác. Repo bằng mã
+  yield 3% thì vay rẻ, bằng mã yield 4,5% thì vay đắt — cùng một đối tác.
+- Khi so chi phí giữa các đối tác, phải đặt cạnh **yield trung vị của mã đem repo**, nếu không
+  là quy nhầm chênh lệch cho đối tác.
+- Với 129 cặp còn lại (hai chân khác yield), **lãi suất repo thỏa thuận không khôi phục được
+  từ dữ liệu này** — nó bị chôn dưới biến động giá. Muốn biết giá vốn thật phải lấy từ hợp
+  đồng repo hoặc sổ của desk.
 
 ## Lãi đã thực hiện ≠ lãi theo hợp đồng
 
