@@ -30,10 +30,6 @@ import openpyxl
 NCOLS = 25
 SHEET = 'Sheet1'
 
-# Ngày chốt sổ với TGĐ — mốc chia "đã đáo hạn" và "còn hiệu lực".
-# Đổi khi kỳ báo cáo đổi.
-AS_OF = datetime.datetime(2026, 8, 20)
-
 # Cặp ghép CHÉO ĐỐI TÁC đã được nghiệp vụ xác nhận là repo (MSB đứng trung gian).
 # Khoá theo (bid, sid). Cặp chéo nào KHÔNG có trong đây sẽ bị cảnh báo — phải hỏi
 # lại nghiệp vụ trước khi dùng số, vì ghép chéo nhầm tạo ra cặp không có thật mà
@@ -116,12 +112,16 @@ def match_same_cpty(rows):
 
     Trả về (danh sách cặp, danh sách chân còn dư).
     """
+    # Khoá ghép theo nghiệp vụ: cùng mã TP + cùng đối tác + cùng coupon.
+    # Coupon trên thực tế suy ra được từ mã TP (42/42 mã chỉ có một coupon), nên đưa
+    # vào khoá không đổi kết quả — giữ để nếu dữ liệu sau này có mã trả nhiều coupon
+    # thì tự tách chứ không ghép nhầm.
     groups = defaultdict(lambda: {'S': [], 'B': []})
     for r in rows:
-        groups[(r['Bonds_ShortName'], r['Cpty_ShortName'])][r['DealType']].append(dict(r))
+        groups[(r['Bonds_ShortName'], r['Cpty_ShortName'], r['CouponRate'])][r['DealType']].append(dict(r))
 
     pairs, leftover = [], []
-    for (bond, cpty), g in groups.items():
+    for (bond, cpty, _cpn), g in groups.items():
         slegs = sorted(g['S'], key=lambda x: (x['SettlementDate'], x['BondsDeals_Id']))
         blegs = sorted(g['B'], key=lambda x: (x['SettlementDate'], x['BondsDeals_Id']))
         sq = [x['Quantity'] for x in slegs]
@@ -165,6 +165,47 @@ def match_same_cpty(rows):
             leftover += [{**x, 'side': side, 'rem': q[i]} for i, x in enumerate(arr) if q[i] > 1e-6]
 
     return pairs, leftover
+
+
+def merge_multi_leg(pairs):
+    """Gộp các cặp dùng chung một chân thành MỘT cặp.
+
+    Nghiệp vụ: một hợp đồng repo có thể được nhập thành 1 deal B đối ứng 2 deal S
+    (hoặc ngược lại). Lượt FIFO tách chúng thành nhiều dòng; gộp lại để mỗi hợp
+    đồng là một dòng, đúng như cách nghiệp vụ nhìn.
+
+    Chỉ gộp khi các mảnh cùng kỳ hạn — khác kỳ hạn là hai hợp đồng khác nhau.
+    """
+    def key(p, side):
+        return (side, p['bid'] if side == 'B' else str(p['sid']), p['days'])
+
+    for side in ('B', 'S'):
+        buckets = defaultdict(list)
+        for p in pairs:
+            buckets[key(p, side)].append(p)
+        out, done = [], set()
+        for p in pairs:
+            grp = buckets[key(p, side)]
+            if len(grp) == 1:
+                out.append(p)
+                continue
+            k = key(p, side)
+            if k in done:
+                continue
+            done.add(k)
+            grp = sorted(grp, key=lambda x: -x['qty'])
+            base = dict(grp[0])
+            other = 'sid' if side == 'B' else 'bid'
+            base[other] = '+'.join(str(x[other]) for x in grp)
+            base['qty'] = round(sum(x['qty'] for x in grp), 3)
+            base['cash'] = round(sum(x['cash'] for x in grp), 5)
+            base['cost'] = round(sum(x['cost'] for x in grp), 4)
+            base['rate'] = (base['cost'] / (base['cash'] * 1000) * 365 / base['days'] * 100
+                            if base['days'] > 0 and base['cash'] > 0 else 0.0)
+            base['tag'] = 'multi'
+            out.append(base)
+        pairs = out
+    return pairs
 
 
 def match_cross_cpty(leftover):
@@ -247,47 +288,57 @@ def close_dt(p):
     return max(dt(p['sset']), dt(p['bset']))
 
 
-def is_anom(p):
-    """Cờ định giá lại, CÓ TÍNH ĐẾN KỲ HẠN.
+def is_dy_big(p):
+    """Đánh dấu cặp có yield hai chân lệch lớn so với mặt bằng CÙNG KỲ HẠN.
 
-    Repo ngắn thì hai chân phải cùng một mức yield thỏa thuận; lệch ≥ 10bp nghĩa là
-    chân mua lại bị mark theo thị trường — lãi/lỗ khi đó là rủi ro giá chứ không phải
-    chi phí vốn. Kỳ hạn dài thì hai yield lệch nhau là chuyện bình thường, cùng ngưỡng
-    đó không nói lên gì và không được loại.
+    Chỉ để liệt kê ra cho dễ tra, KHÔNG loại khỏi bất kỳ con số tổng hợp nào:
+    lãi/lỗ luôn là gross chân 1 − gross chân 2, không trừ gì cả.
+
+    Mặt bằng |Δyield| theo kỳ hạn trong dữ liệu: 0,2bp ở deal ≤ 90 ngày, 3,2bp ở
+    deal > 90 ngày — nên cùng một ngưỡng 10bp mang ý nghĩa khác nhau ở hai nhóm.
     """
     return abs(p['dy']) >= 10 and p['days'] <= 30
 
 
-def wrate(ps, sign):
-    """Lãi suất ngụ ý %/năm, trọng số theo tiền × ngày."""
+def pnl_mn(p):
+    """Lãi/lỗ của một cặp, triệu VND. DƯƠNG = có lợi cho MSB, ở CẢ HAI nhóm.
+
+    Nhóm A chân 1 là tiền vào  -> lãi = gross chân 1 − gross chân 2
+    Nhóm B chân 1 là tiền ra   -> lãi = gross chân 2 − gross chân 1
+    Cả hai rút gọn về cùng một biểu thức: −cost  (vì cost = gross B − gross S).
+    """
+    return -p['cost']
+
+
+def wrate(ps):
+    """Lãi suất ngụ ý %/năm, trọng số theo tiền × ngày. Dương = MSB lãi."""
     den = sum(p['cash'] * p['days'] / 365 for p in ps)
-    return (sum(sign * p['cost'] / 1e3 for p in ps) / den * 100) if den else 0.0
+    return (sum(pnl_mn(p) / 1e3 for p in ps) / den * 100) if den else 0.0
 
 
-def blk(ps, sign):
-    cl = [p for p in ps if not is_anom(p)]
-    done = [p for p in ps if close_dt(p) <= AS_OF]
-    op = [p for p in ps if close_dt(p) > AS_OF]
+def blk(ps):
+    """Tổng hợp một nhóm cặp. KHÔNG loại trừ cặp nào — lãi/lỗ là gross − gross."""
     return {
-        'nDone': len(done), 'pnlDone': round(sum(sign * p['cost'] for p in done), 2),
-        'cashDone': round(sum(p['cash'] for p in done), 3),
-        'nOpen': len(op), 'pnlOpen': round(sum(sign * p['cost'] for p in op), 2),
-        'cashOpen': round(sum(p['cash'] for p in op), 3),
-        'n': len(ps), 'cash': round(sum(p['cash'] for p in ps), 3),
-        'pnl': round(sum(sign * p['cost'] for p in ps), 2), 'rate': wrate(ps, sign),
-        'nX': len(cl), 'pnlX': round(sum(sign * p['cost'] for p in cl), 2), 'rateX': wrate(cl, sign),
+        'n': len(ps),
+        'cash': round(sum(p['cash'] for p in ps), 3),
+        'pnl': round(sum(pnl_mn(p) for p in ps), 2),
+        'rate': wrate(ps),
         'med': statistics.median([p['days'] for p in ps]) if ps else 0,
+        'minD': min((p['days'] for p in ps), default=0),
+        'maxD': max((p['days'] for p in ps), default=0),
         'qty': round(sum(p['qty'] for p in ps), 1),
+        'nLai': sum(1 for p in ps if pnl_mn(p) > 0),
+        'nLo': sum(1 for p in ps if pnl_mn(p) < 0),
     }
 
 
-def group_by(ps, sign, key, extra=None, top=None):
+def group_by(ps, key, extra=None, top=None):
     out = []
     g = defaultdict(list)
     for p in ps:
         g[key(p)].append(p)
     for k, v in g.items():
-        b = blk(v, sign)
+        b = blk(v)
         b['k'] = k
         if extra:
             b.update(extra(v))
@@ -317,75 +368,74 @@ def build_D(pairs, unmatched, n_deals, d_from, d_to):
     A = [p for p in pairs if p['dirn'] == 'A']
     B = [p for p in pairs if p['dirn'] == 'B']
 
-    def tenor(ps, sign):
+    def tenor(ps):
         out = []
         for k, lo, hi in [('1 ngày', 1, 1), ('2–7 ngày', 2, 7), ('8–30 ngày', 8, 30),
                           ('31–90 ngày', 31, 90), ('> 90 ngày', 91, 10 ** 9)]:
             v = [p for p in ps if lo <= p['days'] <= hi]
             if v:
-                b = blk(v, sign)
+                b = blk(v)
                 b['k'] = k
                 out.append(b)
         return out
 
-    def month(ps, sign, dkey):
+    def month(ps, dkey):
         g = defaultdict(list)
         for p in ps:
             g[dt(p[dkey]).strftime('%m/%Y')].append(p)
         out = []
         for m in sorted(g, key=lambda x: (x[3:], x[:2])):
-            b = blk(g[m], sign)
+            b = blk(g[m])
             b['m'] = m
             out.append(b)
         return out
 
-    def cpty(ps, sign):
-        r = group_by(ps, sign, lambda p: p['cpty'],
-                     lambda v: {'minD': min(x['days'] for x in v), 'maxD': max(x['days'] for x in v)})
+    def cpty(ps):
+        r = group_by(ps, lambda p: p['cpty'])
         for x in r:
             x['cpty'] = x.pop('k')
         return r
 
-    def bond(ps, sign):
-        r = group_by(ps, sign, lambda p: p['bond'],
+    def bond(ps):
+        r = group_by(ps, lambda p: p['bond'],
                      lambda v: {'mat': v[0]['mat'], 'cpn': v[0]['cpn']}, top=14)
         for x in r:
             x['b'] = x.pop('k')
         return r
 
-    def folder(ps, sign):
-        r = group_by(ps, sign, lambda p: p['sf'] if p['dirn'] == 'A' else p['bf'])
+    def folder(ps):
+        r = group_by(ps, lambda p: p['sf'] if p['dirn'] == 'A' else p['bf'])
         for x in r:
             x['f'] = x.pop('k')
         return r
 
-    # anom = cần soát lại · noise = %/năm phóng đại do làm tròn giá trên deal qua đêm
+    # Hai danh sách thuần MÔ TẢ, để tra cứu. Không cái nào bị loại khỏi số tổng hợp.
     anom, noise = [], []
     for p in pairs:
         q = dict(p)
-        q['r'] = (1 if p['dirn'] == 'A' else -1) * p['rate']
-        if is_anom(p):
-            q['why'] = 'Chân mua lại được định giá lại (yield lệch ≥ 10bp, kỳ hạn ≤ 30 ngày)'
+        q['r'] = -p['rate']   # dương = MSB lãi
+        if is_dy_big(p):
+            q['why'] = 'Δyield ≥ 10bp, kỳ hạn ≤ 30 ngày'
             anom.append(q)
         elif p['days'] >= 3 and abs(q['r']) > 15:
-            q['why'] = 'Lãi suất ngụ ý lệch xa mặt bằng trên kỳ hạn ≥ 3 ngày'
+            q['why'] = '|%/năm| > 15 trên kỳ hạn ≥ 3 ngày'
             anom.append(q)
         elif p['days'] <= 2 and abs(q['r']) > 8:
-            q['why'] = 'Làm tròn giá trên deal qua đêm'
+            q['why'] = '|%/năm| > 8 trên kỳ hạn 1–2 ngày'
             noise.append(q)
     anom.sort(key=lambda x: -abs(x['cost']))
     noise.sort(key=lambda x: -abs(x['cost']))
 
     return {
         'kpi': {'nDeals': n_deals, 'nPairs': len(pairs), 'nUn': len(unmatched),
-                'A': blk(A, 1), 'B': blk(B, -1), 'dFrom': d_from, 'dTo': d_to},
-        'cptyA': cpty(A, 1), 'cptyB': cpty(B, -1),
-        'tenorA': tenor(A, 1), 'tenorB': tenor(B, -1),
-        'monthA': month(A, 1, 'sset'), 'monthB': month(B, -1, 'bset'),
-        'bondA': bond(A, 1), 'bondB': bond(B, -1),
-        'foldA': folder(A, 1), 'foldB': folder(B, -1),
+                'A': blk(A), 'B': blk(B), 'dFrom': d_from, 'dTo': d_to},
+        'cptyA': cpty(A), 'cptyB': cpty(B),
+        'tenorA': tenor(A), 'tenorB': tenor(B),
+        'monthA': month(A, 'sset'), 'monthB': month(B, 'bset'),
+        'bondA': bond(A), 'bondB': bond(B),
+        'foldA': folder(A), 'foldB': folder(B),
         'outstA': outstanding(A), 'outstB': outstanding(B),
-        'histA': [round(p['rate'], 3) for p in A if p['days'] > 0],
+        'histA': [round(-p['rate'], 3) for p in A if p['days'] > 0],
         'histB': [round(-p['rate'], 3) for p in B if p['days'] > 0],
         'anom': anom, 'noise': noise,
         'fmis': [p for p in pairs if p['sf'] != p['bf']],
@@ -410,7 +460,11 @@ def main():
     print(f'{len(rows)} chân deal · CaptureDate {d_from} → {d_to}')
 
     pairs, leftover = match_same_cpty(rows)
-    print(f'  lượt 1+2, cùng đối tác : {len(pairs)} cặp, dư {len(leftover)} chân')
+    n_raw = len(pairs)
+    pairs = merge_multi_leg(pairs)
+    n_merged = sum(1 for p in pairs if p['tag'] == 'multi')
+    print(f'  lượt 1+2, cùng đối tác : {len(pairs)} cặp, dư {len(leftover)} chân'
+          + (f'  ({n_raw} mảnh → gộp {n_merged} cặp nhiều chân)' if n_merged else ''))
     cross, unmatched_legs = match_cross_cpty(leftover)
     print(f'  ghép chéo đối tác      : {len(cross)} cặp')
     chua_xn = []
@@ -441,14 +495,13 @@ def main():
     D = build_D(pairs, unmatched, len(rows), d_from, d_to)
     A, B = D['kpi']['A'], D['kpi']['B']
     print(f"\nNhóm A · đi vay  : {A['n']:3d} cặp · {A['cash']:>10,.0f} tỷ · "
-          f"trung vị {A['med']:>5.0f} ngày · chi phí  {A['rateX']:6.2f}%/năm")
+          f"trung vị {A['med']:>5.0f} ngày · {A['pnl']:>+11,.0f} tr · {A['rate']:6.2f}%/năm "
+          f"({A['nLai']} lãi / {A['nLo']} lỗ)")
     print(f"Nhóm B · cho vay : {B['n']:3d} cặp · {B['cash']:>10,.0f} tỷ · "
-          f"trung vị {B['med']:>5.0f} ngày · lợi suất {B['rateX']:6.2f}%/năm")
-    print(f"Lãi/lỗ đã đáo hạn tính đến {AS_OF:%d/%m/%Y}: "
-          f"{(B['pnlDone'] - A['pnlDone']) / 1000:,.1f} tỷ "
-          f"· còn hiệu lực theo hợp đồng {(B['pnlOpen'] - A['pnlOpen']) / 1000:,.1f} tỷ")
-    print(f"Cần soát lại: {len(D['anom'])} cặp · nhiễu làm tròn qua đêm: {len(D['noise'])} cặp "
-          f"· lệch folder: {len(D['fmis'])} cặp")
+          f"trung vị {B['med']:>5.0f} ngày · {B['pnl']:>+11,.0f} tr · {B['rate']:6.2f}%/năm "
+          f"({B['nLai']} lãi / {B['nLo']} lỗ)")
+    print(f"\nDanh sách tra cứu: Δyield lớn {len(D['anom'])} cặp · "
+          f"%/năm lớn trên deal ngắn {len(D['noise'])} cặp · lệch folder {len(D['fmis'])} cặp")
 
     blob = json.dumps(D, ensure_ascii=False, separators=(',', ':'))
     if a.json:

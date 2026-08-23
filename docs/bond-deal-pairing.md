@@ -42,11 +42,17 @@ Nên bước đầu bắt buộc là **tái tạo quan hệ cặp mà hệ thố
 | Điều kiện | Vì sao |
 |---|---|
 | Cùng `Bonds_ShortName` | Repo là bán rồi mua lại **đúng mã đó** |
-| Cùng `Cpty_ShortName` | Hợp đồng repo là với **một** đối tác |
+| Cùng `Cpty_ShortName` | Hợp đồng repo là với **một** đối tác (trừ deal nghiệp vụ chỉ đích danh) |
+| Cùng `CouponRate` | Nghiệp vụ yêu cầu. Thực tế coupon suy ra từ mã TP (42/42 mã chỉ một coupon) nên không đổi kết quả — giữ để dữ liệu sau này có mã nhiều coupon thì tự tách |
 | Ngược chiều (một S, một B) | Bản chất của repo |
-| Cùng `Quantity` | Điều kiện khoá — chính là hiện tượng **offset khối lượng** quan sát được |
+| Cùng `Quantity` | Hiện tượng **offset khối lượng** quan sát được |
 
-Bốn điều kiện lọc rất chặt, nhưng vẫn mơ hồ khi trong cùng mã + cùng đối tác có nhiều
+**Khối lượng lệch không phải là chân lẻ.** Một hợp đồng có thể được nhập thành
+**1 deal B đối ứng 2 deal S** (hoặc ngược lại). `merge_multi_leg()` gộp các mảnh dùng chung
+một chân và cùng kỳ hạn về **một dòng**, đúng như cách nghiệp vụ nhìn. Trong kỳ mẫu có
+2 trường hợp: B 50100 ↔ S 50099 + S 50103 (CK_AB), và B 50120 ↔ S 50127 + S 50128 (KBNN).
+
+Các điều kiện trên lọc rất chặt, nhưng vẫn mơ hồ khi trong cùng mã + cùng đối tác có nhiều
 cặp trùng ngày. Nên chạy hai lượt.
 
 ### Lượt 1 — khôi phục cặp theo dấu vết book lệnh
@@ -107,18 +113,21 @@ sai kỳ hạn.
 
 ## Quy ước dấu
 
-Một công thức duy nhất cho cả hai nhóm, **không đảo dấu**:
+Lãi/lỗ là **chênh lệch Gross Amount hai chân theo thứ tự thanh toán**, không trừ gì thêm:
 
-```
-cost = tiền chân B − tiền chân S
-lãi suất ngụ ý = cost ÷ tiền chân đầu ÷ số ngày × 365
-```
+| Nhóm | Chân 1 | Lãi/lỗ |
+|---|---|---|
+| A · đi vay | tiền **vào** | Gross chân 1 − Gross chân 2 |
+| B · cho vay | tiền **ra** | Gross chân 2 − Gross chân 1 |
 
-- Nhóm A: `cost` **dương** = mua lại đắt hơn bán ra = MSB **trả lãi** (chi phí)
-- Nhóm B: `cost` **âm** = bán lại nhiều hơn mua vào = MSB **thu lãi**
+**Dương = có lợi cho MSB ở cả hai nhóm.** Hai biểu thức trên rút gọn về cùng một thứ:
+`−cost`, với `cost = gross B − gross S`. Đó là `pnl_mn()` trong script.
 
-Phía trình bày mới đổi dấu cho dễ đọc (dương = có lợi cho MSB). Giữ tính toán một chiều
-để không sai dấu ở đâu.
+Lãi suất ngụ ý = lãi/lỗ ÷ tiền chân đầu ÷ số ngày × 365, cùng dấu với lãi/lỗ. Tổng hợp theo
+nhóm dùng **trọng số tiền × ngày**, không phải trung bình cộng.
+
+> **Không loại trừ cặp nào.** Mọi con số tổng hợp tính đủ 172 cặp. Các danh sách "Δyield lớn",
+> "%/năm lớn trên deal ngắn", "lệch folder" chỉ để **tra cứu**, không phải để trừ ra.
 
 Lãi suất tổng hợp theo nhóm dùng **trọng số tiền × ngày**, không phải trung bình cộng —
 nếu không thì một deal 1 ngày 30 tỷ nặng ngang một deal 351 ngày 1.000 tỷ.
@@ -152,14 +161,14 @@ def parse_gross(v):
 
 Gốc **1899-12-30**, không phải 1900-01-01.
 
-### 3. Ngưỡng ngoại lệ phải theo kỳ hạn
+### 3. Mặt bằng Δyield khác nhau theo kỳ hạn
 
-Yield hai chân lệch ≥ 10bp trên **repo ngắn (≤ 30 ngày)** nghĩa là chân mua lại bị mark
-theo thị trường — lãi/lỗ khi đó là **rủi ro giá**, không phải chi phí vốn, phải loại khỏi
-số giá vốn. Trộn vào thì chi phí vay nhóm A đọc thành 3,80%/năm thay vì 2,66%.
+|Δyield| trung vị trong dữ liệu: **0,2bp** ở deal ≤ 90 ngày, **3,2bp** ở deal > 90 ngày. Nên
+cùng một ngưỡng 10bp mang ý nghĩa hoàn toàn khác nhau ở hai nhóm — ở deal ngắn là cách mặt
+bằng 50 lần, ở deal dài là chuyện thường.
 
-Nhưng **cùng ngưỡng đó trên deal 351 ngày là vô nghĩa** — yield lệch nhau sau gần một năm
-là bình thường, loại đi sẽ bóp méo lợi suất nhóm B. Ngưỡng phải kèm điều kiện kỳ hạn.
+Vì vậy `is_dy_big()` kèm điều kiện `days <= 30`. Đây chỉ là **tiêu chí liệt kê để tra cứu**,
+không loại khỏi bất kỳ con số tổng hợp nào.
 
 ### 4. `%/năm` trên deal qua đêm không dùng được
 
