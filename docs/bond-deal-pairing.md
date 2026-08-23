@@ -68,7 +68,7 @@ Ghép theo ngày thanh toán sẽ nối 50269 với 50272; ghép theo dấu vế
 Phần còn lại ghép theo thứ tự ngày thanh toán, tách chân lớn nếu khối lượng lệch (bán
 1 lệnh 3.000 tỷ, mua lại bằng 2 lệnh 1.500 tỷ).
 
-### Lượt 3 — ghép chéo đối tác
+### Lượt 3 — ghép chéo đối tác (chỉ cho deal đã được xác nhận)
 
 Nới điều kiện "cùng đối tác" cho phần dư cuối: cùng mã, cùng tổng khối lượng, sát ngày.
 Gắn tag `est` để tách riêng khi trình bày.
@@ -76,9 +76,14 @@ Gắn tag `est` để tách riêng khi trình bày.
 Trường hợp thực tế duy nhất trong kỳ: deal 50120 mua của **KBNN** qua kênh liên ngân hàng
 `IB-P-VSD`, bán lại cho **PGBV-HO** qua `OT-P-VSD` bằng hai lệnh 50127 + 50128.
 
-**Cặp loại này không phải repo theo nghĩa pháp lý** — MSB mua đứt rồi bán đứt, không có
-quyền đòi lại tiền. Chân bán hỏng là ôm nguyên trái phiếu trên sổ. Phải tách khỏi nhóm
-repo khi đọc rủi ro.
+**Đây VẪN LÀ REPO.** Xác nhận của Jak (08/2026): đối tác làm việc với chính phủ, MSB đứng
+**trung gian**. Hai chân khác đối tác là do vai trò trung gian, không phải mua đứt bán đứt.
+**100% deal trong file là repo** — không có ngoại lệ.
+
+> **Lượt 3 là ngoại lệ có kiểm soát, không phải quy tắc.** Quy tắc ghép là **cùng mã TP +
+> cùng đối tác**, áp cho mọi deal; chỉ nới ra với deal mà nghiệp vụ đã chỉ đích danh. Nếu kỳ
+> sau script tự ghép chéo một cặp chưa ai xác nhận thì **phải hỏi lại nghiệp vụ trước khi
+> dùng số**, vì ghép chéo nhầm sẽ tạo ra một cặp không có thật mà vẫn khớp khối lượng.
 
 ## Chia Nhóm A / Nhóm B: theo chân nào thanh toán TRƯỚC
 

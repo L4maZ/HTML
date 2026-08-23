@@ -34,6 +34,14 @@ SHEET = 'Sheet1'
 # Đổi khi kỳ báo cáo đổi.
 AS_OF = datetime.datetime(2026, 8, 20)
 
+# Cặp ghép CHÉO ĐỐI TÁC đã được nghiệp vụ xác nhận là repo (MSB đứng trung gian).
+# Khoá theo (bid, sid). Cặp chéo nào KHÔNG có trong đây sẽ bị cảnh báo — phải hỏi
+# lại nghiệp vụ trước khi dùng số, vì ghép chéo nhầm tạo ra cặp không có thật mà
+# vẫn khớp khối lượng.
+CROSS_OK = {
+    (50120, '50127+50128'),   # mua KBNN (IB-P-VSD) -> bán PGBV-HO (OT-P-VSD)
+}
+
 
 # --------------------------------------------------------------------------- đọc
 def xl2dt(v):
@@ -162,9 +170,13 @@ def match_same_cpty(rows):
 def match_cross_cpty(leftover):
     """Nới điều kiện "cùng đối tác" cho phần dư: mua của bên này, bán cho bên kia.
 
-    Đây KHÔNG phải repo theo nghĩa pháp lý — MSB mua đứt rồi bán đứt, không có
-    quyền đòi lại tiền. Gắn tag 'est' để phía báo cáo tách riêng.
-    Trường hợp thực tế: mua của KBNN (liên ngân hàng) rồi bán cho PGBV-HO (OTC).
+    VẪN LÀ REPO — hai chân khác đối tác là do MSB đứng trung gian (đối tác làm việc
+    với chính phủ). Trường hợp thực tế: mua của KBNN (liên ngân hàng) rồi bán cho
+    PGBV-HO (OTC). Gắn tag 'est' để phía báo cáo nhận ra, không phải để loại ra.
+
+    Quy tắc ghép chuẩn là cùng mã TP + cùng đối tác; lượt này là ngoại lệ chỉ dùng
+    cho deal nghiệp vụ đã xác nhận. Cặp nào script tự ghép chéo mà chưa ai xác nhận
+    thì phải hỏi lại nghiệp vụ trước khi dùng số — xem cảnh báo in ra ở cuối main().
     """
     by_bond = defaultdict(list)
     for x in leftover:
@@ -401,8 +413,19 @@ def main():
     print(f'  lượt 1+2, cùng đối tác : {len(pairs)} cặp, dư {len(leftover)} chân')
     cross, unmatched_legs = match_cross_cpty(leftover)
     print(f'  ghép chéo đối tác      : {len(cross)} cặp')
+    chua_xn = []
     for c in cross:
-        print(f'      {c["bid"]} ↔ {c["sid"]}  {c["bond"]}  {c["cpty"]}  {c["days"]}n')
+        ok = (c['bid'], str(c['sid'])) in CROSS_OK
+        print(f'      {c["bid"]} ↔ {c["sid"]}  {c["bond"]}  {c["cpty"]}  {c["days"]}n'
+              f'  {"[đã xác nhận]" if ok else "[CHƯA XÁC NHẬN]"}')
+        if not ok:
+            chua_xn.append(c)
+    if chua_xn:
+        print()
+        print(f'  !! {len(chua_xn)} cặp ghép chéo đối tác CHƯA được nghiệp vụ xác nhận.')
+        print('     Quy tắc ghép là cùng mã TP + cùng đối tác; ghép chéo chỉ áp cho deal')
+        print('     đã chỉ đích danh. HỎI LẠI NGHIỆP VỤ trước khi dùng số của các cặp này,')
+        print('     rồi thêm vào CROSS_OK ở đầu file.')
 
     pairs += cross
     unmatched = [{'id': x['BondsDeals_Id'], 'side': x['side'], 'bond': x['Bonds_ShortName'],
