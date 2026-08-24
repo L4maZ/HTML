@@ -50,6 +50,8 @@ File tốt nhất hiện có. Dùng làm mẫu cho mọi build mới.
 
 ## QC.RR.022_lampd3
 
+File: [`../vbcs/QC.RR.022/QC.RR.022_lampd3.html`](../vbcs/QC.RR.022/QC.RR.022_lampd3.html).
+
 Tài liệu văn bản, không phải dashboard. Không dùng ECharts.
 
 - Nội dung là dữ liệu: `DEF` (31 khoản Điều 4, nguyên văn) + `ARTS` (các điều), render bằng

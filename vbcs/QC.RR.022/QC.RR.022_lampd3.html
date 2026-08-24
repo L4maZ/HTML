@@ -1,0 +1,668 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QC.RR.022 — Nội dung quy chế &amp; Đánh giá GAP</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:#fdf3f0;color:#1a202c;display:flex;min-height:100vh}
+.sidebar{width:240px;background:#fff7f4;border-right:1px solid #f5c9b8;padding:22px 14px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-brand h2{font-family:'Crimson Pro',serif;color:#b83a10;font-size:20px;line-height:1.2}
+.sb-brand p{font-size:10.5px;color:#9a4020;margin-top:5px;line-height:1.5}
+.sb-lbl{font-size:9px;color:#9a4020;letter-spacing:.8px;font-weight:700;margin:22px 0 8px;text-transform:uppercase;opacity:.7}
+nav{display:flex;flex-direction:column;gap:3px}
+.ni{padding:10px 12px;border-radius:8px;color:#9a4020;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;border:none;background:none;text-align:left;font-family:inherit;line-height:1.3;width:100%}
+.ni:hover{background:#fff3ee;color:#b83a10}
+.ni.active{background:#b83a10;color:#fff}
+.ni small{display:block;font-size:9.5px;font-weight:500;opacity:.75;margin-top:2px}
+.ni .gapdot{display:inline-block;background:#9B2C2C;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:9px;margin-left:5px;vertical-align:middle}
+.ni.active .gapdot{background:#fde8de;color:#9B2C2C}
+.ni.ref{border:1px dashed #f5c9b8}
+.sb-foot{margin-top:24px;padding-top:16px;border-top:1px solid #f5c9b8;font-size:10px;color:#9a4020;line-height:1.75}
+.sb-foot b{color:#b83a10}
+main{flex:1;padding:38px 52px;overflow-x:auto;max-width:1000px;margin:0 auto}
+.page{display:none;animation:fadeUp .28s ease}.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.eyebrow{font-size:12.5px;color:#9a4020;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}
+.pt{font-family:'Crimson Pro',serif;color:#b83a10;font-size:36px;font-weight:700;margin-top:5px;line-height:1.12}
+.ps{color:#9a4020;font-size:15.5px;margin-top:9px;line-height:1.5}
+.chapline{font-size:11.5px;color:#9a4020;font-weight:700;letter-spacing:.6px;text-transform:uppercase;background:#fff7f4;border:1px solid #f5c9b8;border-left:4px solid #b83a10;border-radius:0 7px 7px 0;padding:9px 14px;margin:0 0 20px}
+.gapsum{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #f5c9b8;border-radius:20px;padding:7px 15px;font-size:13px;color:#9a4020;font-weight:600;margin-top:14px}
+.gapsum b{color:#9B2C2C}
+.gapsum.clean b{color:#276749}
+.lead{font-size:16px;line-height:1.7;color:#2d3748;margin:22px 0 16px;font-weight:500}
+.kh{background:#fff;border:1px solid #f5c9b8;border-radius:12px;margin-bottom:20px;overflow:hidden}
+.kh-hd{background:#fff7f4;border-bottom:1px solid #f5c9b8;padding:12px 20px;font-weight:700;color:#b83a10;font-size:15.5px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.knum{background:#b83a10;color:#fff;font-size:13px;font-weight:700;min-width:28px;height:28px;padding:0 8px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.kh-hd .ygap{background:#9B2C2C;color:#fff;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:11px;letter-spacing:.4px}
+.kh-bd{padding:16px 20px}
+.p0,.p1,.p2,.p3,.p4{font-size:15.5px;line-height:1.72;color:#2d3748;margin-bottom:8px}
+.p1{padding-left:24px}.p2{padding-left:48px}.p3{padding-left:70px}.p4{padding-left:92px}
+.p0:last-child,.p1:last-child,.p2:last-child,.p3:last-child,.p4:last-child{margin-bottom:0}
+.defbar{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0 2px;padding-top:12px;border-top:1px dotted #f0c4b2}
+.defbar .lb{font-size:11px;color:#9a4020;font-weight:700;letter-spacing:.5px;text-transform:uppercase;align-self:center;margin-right:2px}
+.defchip{background:#fff7f4;border:1px solid #e8a88c;color:#b83a10;font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:15px;cursor:pointer;font-family:inherit;transition:.15s}
+.defchip:hover{background:#b83a10;color:#fff;border-color:#b83a10}
+.arrow{margin-top:15px;background:#fde8de;border-left:4px solid #b83a10;border-radius:0 8px 8px 0;padding:12px 17px;font-size:15px;line-height:1.6;color:#7a2408}
+.arrow b{color:#b83a10}
+.arrow .ld{font-weight:700;color:#b83a10;margin-right:5px;font-size:17px}
+.nbox{background:#fff7ed;border:1px solid #f5c9b8;border-radius:9px;padding:13px 17px;margin-top:14px;font-size:14.5px;line-height:1.62;color:#7a2408}
+.nbox .tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:6px;padding:3px 10px;border-radius:11px;background:#fde8de;color:#b83a10}
+.nbox b{font-weight:700}
+.nbox.nb-n{padding:9px 15px;background:#f7f9f7;border-color:#d8e5da}
+.nbox.nb-n .tag{margin-bottom:0;background:#e2efe6;color:#276749}
+.ex-num{background:#f4f9f5;border:1px solid #cfe6d6;border-radius:9px;padding:12px 16px;margin-top:12px;font-size:14.5px;line-height:1.62;color:#1f4b32}
+.ex-num .tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:5px;padding:3px 10px;border-radius:11px;background:#d1e7d8;color:#276749}
+.ex-num b{font-weight:700;color:#1a5c38}
+.chart{background:#fff;border:1px solid #f5c9b8;border-radius:10px;padding:16px 18px 10px;margin:15px 0 4px}
+.chart svg{width:100%;height:auto;display:block}
+.chart-cap{font-size:13px;color:#9a4020;line-height:1.55;margin-top:8px;padding-top:8px;border-top:1px dotted #f0c4b2}
+.chart-cap b{color:#b83a10}
+/* GAP box */
+.gapbox{border:1px solid #e0a99a;background:#fffaf8;border-radius:10px;margin-top:16px;overflow:hidden}
+.gapbox-hd{background:#9B2C2C;color:#fff;padding:10px 17px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px}
+.gapbox-hd .yn{background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.4);border-radius:5px;padding:2px 9px;font-size:12px}
+.gapbox-bd{padding:15px 17px}
+.grow{margin-bottom:14px}
+.grow:last-child{margin-bottom:0}
+.glbl{font-size:10.5px;color:#9B2C2C;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:6px}
+.gtxt{font-size:14.5px;line-height:1.62;color:#2d3748}
+.tuyen{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.tcard{background:#fff;border:1px solid #f0d5c9;border-radius:8px;padding:10px 12px}
+.tcard h5{font-size:11.5px;color:#b83a10;font-weight:700;margin-bottom:5px;letter-spacing:.3px}
+.tcard p{font-size:13.5px;line-height:1.55;color:#2d3748}
+.tcard.empty p{color:#c9a99c;font-style:italic}
+.clschips{display:flex;gap:7px;flex-wrap:wrap}
+.cchip{font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:15px;border:1px solid #f0d5c9;background:#fff;color:#c9a99c}
+.cchip.on{background:#9B2C2C;border-color:#9B2C2C;color:#fff}
+.metagrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* Điều 4 search */
+.searchwrap{position:sticky;top:0;background:#fdf3f0;padding:14px 0 12px;z-index:5;margin-bottom:6px}
+.searchbox{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid #f5c9b8;border-radius:10px;padding:11px 16px;transition:.15s}
+.searchbox:focus-within{border-color:#b83a10}
+.searchbox input{flex:1;border:none;outline:none;font-family:inherit;font-size:15.5px;color:#1a202c;background:transparent}
+.searchbox input::placeholder{color:#c9a99c}
+.searchbox .ico{font-size:16px;color:#b83a10}
+.searchbox button{border:none;background:#fff7f4;color:#9a4020;border-radius:6px;padding:5px 11px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.searchbox button:hover{background:#fde8de;color:#b83a10}
+.shits{font-size:13px;color:#9a4020;margin-top:9px;font-weight:600}
+.kh.hidden{display:none}
+mark{background:#ffe08a;color:#7a2408;padding:0 2px;border-radius:2px}
+.kh.flash{animation:flash 1.8s ease}
+@keyframes flash{0%,18%{box-shadow:0 0 0 4px #f6b45e;border-color:#e8551a}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+.navfoot{display:flex;justify-content:space-between;margin-top:26px;gap:14px}
+.navbtn{flex:1;background:#fff;border:1px solid #f5c9b8;border-radius:10px;padding:14px 18px;cursor:pointer;font-family:inherit;font-size:14px;color:#9a4020;font-weight:600;transition:.15s;text-align:left}
+.navbtn.next{text-align:right}
+.navbtn:hover{background:#fde8de;border-color:#b83a10;color:#b83a10}
+.navbtn:disabled{opacity:.4;cursor:default}
+.navbtn small{display:block;font-size:11.5px;opacity:.7;font-weight:500;margin-bottom:2px}
+/* ---- Highlight ---- */
+.hl-mark{background:#ffe27a;font-weight:700;color:#4a2d00;border-radius:2px;padding:0 1.5px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+body.hl-on main{cursor:text}
+body.hl-on main ::selection{background:#ffd24a}
+body.er-on .hl-mark{cursor:pointer;outline:1px dashed #9B2C2C;outline-offset:1px}
+body.er-on .hl-mark:hover{background:#ffc4c4;text-decoration:line-through}
+.hltb{position:fixed;right:22px;bottom:22px;display:flex;gap:8px;align-items:center;background:#fff;border:1px solid #f5c9b8;border-radius:13px;padding:9px 11px;box-shadow:0 6px 22px rgba(184,58,16,.18);z-index:100}
+.hltb .tbl{font-size:10px;color:#9a4020;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.65;margin-right:2px}
+.hlbtn{border:1px solid #f5c9b8;background:#fff7f4;color:#9a4020;border-radius:9px;padding:9px 13px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap}
+.hlbtn:hover{background:#fde8de;border-color:#b83a10;color:#b83a10}
+.hlbtn.on{background:#b83a10;border-color:#b83a10;color:#fff}
+.hlbtn.er.on{background:#9B2C2C;border-color:#9B2C2C;color:#fff}
+.hlbtn.ghost{background:none;border-color:transparent;font-weight:600;color:#9a4020}
+.hlbtn.ghost:hover{background:#fff7f4;color:#b83a10}
+.hlhint{position:fixed;right:22px;bottom:78px;background:#b83a10;color:#fff;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:9px;z-index:100;box-shadow:0 4px 14px rgba(184,58,16,.25);display:none}
+.hlhint.show{display:block}
+@media print{.sidebar,.navfoot,.searchwrap,.hltb,.hlhint{display:none}.page{display:block!important;page-break-after:always}main{max-width:none;margin:0}.kh{break-inside:avoid}
+.hl-mark{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<aside class="sidebar">
+<div class="sb-brand"><h2>QC.RR.022</h2>
+<p>Quy chế Quản lý Rủi ro thị trường<br>Nội dung &amp; Đánh giá GAP<br>PIC: Lâm (lampd3)</p></div>
+<div class="sb-lbl">Nội dung quy chế</div>
+<nav id="nav1"></nav>
+<div class="sb-lbl">Tra cứu</div>
+<nav id="nav2"></nav>
+<div class="sb-foot" id="sbfoot"></div>
+</aside>
+<main id="main"></main>
+<div class="hlhint" id="hlhint"></div>
+<div class="hltb">
+  <span class="tbl">Đánh dấu</span>
+  <button class="hlbtn" id="btnHL" onclick="toggleHL()">🖍 Bôi vàng</button>
+  <button class="hlbtn er" id="btnER" onclick="toggleER()">🧽 Tẩy</button>
+  <button class="hlbtn ghost" onclick="clearHL()">Xóa tất cả</button>
+</div>
+<script>
+const P=(l,t)=>({l,t});
+
+/* ============ ĐỊNH NGHĨA ĐIỀU 4 (31 khoản, nguyên văn) ============ */
+const DEF=[
+{n:'1',t:'Rủi ro thị trường (RRTT)',paras:[
+P(0,'1. Rủi ro thị trường (RRTT): Là rủi ro do biến động bất lợi của lãi suất, tỷ giá, giá vàng, giá chứng khoán và giá hàng hóa trên thị trường. Rủi ro thị trường bao gồm:'),
+P(1,'a) Rủi ro lãi suất: Là rủi ro do biến động bất lợi của lãi suất trên thị trường đối với giá trị của giấy tờ có giá, công cụ tài chính có lãi suất, sản phẩm phái sinh lãi suất trên sổ kinh doanh của MSB;'),
+P(1,'b) Rủi ro ngoại hối: Là rủi ro do biến động bất lợi của tỷ giá, giá vàng trên thị trường khi MSB có trạng thái ngoại tệ, trạng thái vàng;'),
+P(1,'c) Rủi ro giá cổ phiếu: Là rủi ro do biến động bất lợi của giá cổ phiếu trên thị trường đối với giá trị của cổ phiếu, giá trị chứng khoán phái sinh trên sổ kinh doanh (nếu có) của MSB;'),
+P(1,'d) Rủi ro giá hàng hóa: Là rủi ro do biến động bất lợi của giá hàng hóa trên thị trường đối với giá trị của sản phẩm phái sinh hàng hóa, giá trị của sản phẩm trong giao dịch giao ngay chịu rủi ro giá hàng hóa của MSB.')],
+arrow:'biến động bất lợi 5 loại giá (lãi suất / tỷ giá / vàng / cổ phiếu / hàng hóa), chia <b>4 cấu phần</b>: lãi suất · ngoại hối (gồm vàng) · giá cổ phiếu · giá hàng hóa.'},
+
+{n:'2',t:'Rủi ro tập trung',paras:[
+P(0,'2. Rủi ro tập trung đối với hoạt động giao dịch tự doanh theo sản phẩm (sau đây gọi là rủi ro tập trung): Là rủi ro do MSB có hoạt động kinh doanh tập trung vào một sản phẩm ở mức độ có tác động đáng kể theo quy định nội bộ MSB đến thu nhập, trạng thái rủi ro của MSB.')],
+arrow:'dồn quá nhiều vào một sản phẩm tự doanh tới mức tác động đáng kể đến thu nhập / trạng thái rủi ro; ngưỡng "đáng kể" theo quy định nội bộ.'},
+
+{n:'3',t:'Rủi ro lãi suất chung (GIRR)',paras:[
+P(0,'3. Rủi ro lãi suất chung (general interest rate risk - GIRR): là rủi ro phát sinh do biến động của các yếu tố lãi suất chung/lãi suất phi rủi ro/lãi suất tham chiếu trên thị trường, bao gồm mức lãi suất, đường cong lãi suất, chênh lệch giữa các đường cong lãi suất và độ biến động lãi suất, làm thay đổi bất lợi giá trị công cụ, giao dịch hoặc danh mục của MSB.')],
+arrow:'rủi ro từ lãi suất "phi rủi ro / tham chiếu" chung của thị trường, gồm <b>4 chiều</b>: mức · đường cong · chênh lệch đường cong · độ biến động.'},
+
+{n:'4',t:'Rủi ro chênh lệch tín dụng (CSR)',paras:[
+P(0,'4. Rủi ro chênh lệch tín dụng (credit spread risk - CSR): là rủi ro phát sinh từ biến động bất lợi của chênh lệch tín dụng (credit spread) do tác động của thay đổi xếp hạng tín nhiệm, chất lượng tín dụng hoặc kỳ vọng thị trường về rủi ro tín dụng của tổ chức phát hành hoặc đối tác, biến động này làm thay đổi giá trị thị trường của công cụ tài chính thuộc phạm vi quản lý rủi ro thị trường.')],
+arrow:'rủi ro khi phần bù tín dụng (spread) của tổ chức phát hành / đối tác giãn ra do hạ xếp hạng / xấu chất lượng tín dụng / kỳ vọng thị trường, làm rớt giá công cụ.'},
+
+{n:'5',t:'Rủi ro cơ sở (basis risk)',paras:[
+P(0,'5. Rủi ro cơ sở (basis risk): là rủi ro phát sinh từ sự biến động không đồng nhất hoặc không tương quan hoàn hảo giữa các yếu tố thị trường có liên quan, bao gồm nhưng không giới hạn các chỉ số tham chiếu, đường cong, kỳ hạn, đồng tiền, công cụ, thị trường hoặc giữa đối tượng được phòng ngừa và công cụ phòng ngừa, dẫn đến biến động bất lợi đối với giá trị công cụ, giao dịch, danh mục hoặc hiệu quả phòng ngừa rủi ro (ví dụ chênh lệch biến động giữa lãi suất VNIBOR và lãi suất trái phiếu Chính phủ, giữa hai kỳ hạn trên cùng đường cong lãi suất, giữa trái phiếu và hợp đồng phòng ngừa liên quan, hoặc giữa giao dịch gốc và giao dịch hedge không cùng chỉ số/kỳ hạn/đồng tiền).')],
+chart:'<svg viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg"><line x1="64" y1="225.9" x2="540" y2="225.9" style="stroke:#f0dcd3;stroke-width:1;fill:none"/><text x="56" y="229.9" text-anchor="end" style="fill:#9a4020;font:500 12px sans-serif">4.0%</text><line x1="64" y1="189.0" x2="540" y2="189.0" style="stroke:#f0dcd3;stroke-width:1;fill:none"/><text x="56" y="193.0" text-anchor="end" style="fill:#9a4020;font:500 12px sans-serif">4.5%</text><line x1="64" y1="152.1" x2="540" y2="152.1" style="stroke:#f0dcd3;stroke-width:1;fill:none"/><text x="56" y="156.1" text-anchor="end" style="fill:#9a4020;font:500 12px sans-serif">5.0%</text><line x1="64" y1="115.2" x2="540" y2="115.2" style="stroke:#f0dcd3;stroke-width:1;fill:none"/><text x="56" y="119.2" text-anchor="end" style="fill:#9a4020;font:500 12px sans-serif">5.5%</text><line x1="64" y1="78.3" x2="540" y2="78.3" style="stroke:#f0dcd3;stroke-width:1;fill:none"/><text x="56" y="82.3" text-anchor="end" style="fill:#9a4020;font:500 12px sans-serif">6.0%</text><line x1="64" y1="34" x2="64" y2="248" style="stroke:#c9a99c;stroke-width:1.5;fill:none"/><line x1="64" y1="248" x2="540" y2="248" style="stroke:#c9a99c;stroke-width:1.5;fill:none"/><path d="M64.0,189.0 L111.6,185.3 L159.2,181.6 L206.8,172.7 L254.4,159.4 L302.0,143.2 L349.6,122.6 L397.2,100.4 L444.8,78.3 L492.4,63.5 L540.0,56.1" style="fill:none;stroke:#b83a10;stroke-width:2.6"/><path d="M64.0,225.9 L111.6,224.4 L159.2,222.2 L206.8,220.0 L254.4,217.0 L302.0,214.1 L349.6,211.1 L397.2,208.2 L444.8,205.2 L492.4,202.2 L540.0,200.0" style="fill:none;stroke:#e8551a;stroke-width:2.6"/><line x1="540.0" y1="56.1" x2="540.0" y2="200.0" style="stroke:#9a2f0e;stroke-width:1.4;stroke-dasharray:3 3"/><text x="532.0" y="128.1" text-anchor="end" style="fill:#9a2f0e;font:700 12px sans-serif">spread giãn ↑</text><circle cx="82" cy="40" r="4" style="fill:#b83a10"/><text x="91" y="44" style="fill:#9a4020;font:500 12px sans-serif">VNIBOR</text><circle cx="184" cy="40" r="4" style="fill:#e8551a"/><text x="193" y="44" style="fill:#9a4020;font:500 12px sans-serif">Lãi suất TPCP</text><text x="302.0" y="276" text-anchor="middle" style="fill:#9a4020;font:600 13px sans-serif">Thời gian →</text></svg>',
+chartCap:'Hai lãi suất lẽ ra biến động cùng chiều, nhưng chênh lệch (spread) giữa chúng giãn dần — đó là <b>basis risk</b>.',
+ex:'MSB dùng hợp đồng gắn <b>VNIBOR</b> để phòng ngừa một danh mục <b>TPCP</b>. Khi spread VNIBOR–TPCP giãn từ 0,5% lên 1,4%, vị thế phòng ngừa không còn khớp → phát sinh lỗ dù cả hai lãi suất đều cùng xu hướng tăng.',
+arrow:'hai thứ đáng lẽ chạy cùng nhau lại lệch nhau (khác chỉ số / kỳ hạn / đồng tiền / công cụ), khiến hedge không khớp hoặc danh mục lỗ.'},
+
+{n:'6',t:'Rủi ro đường cong (curve risk)',paras:[
+P(0,'6. Rủi ro đường cong (curve risk): là rủi ro phát sinh từ sự thay đổi hình dạng, độ dốc hoặc cấu trúc kỳ hạn của các đường cong thị trường liên quan, bao gồm đường cong lãi suất, đường cong chênh lệch tín dụng hoặc các đường cong định giá/yếu tố rủi ro khác, dẫn đến biến động bất lợi đối với giá trị công cụ, giao dịch hoặc danh mục.')],
+chart:'<svg viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg"><line x1="64" y1="214.0" x2="540" y2="214.0" style="stroke:#f0dcd3;stroke-width:1;fill:none"/><text x="56" y="218.0" text-anchor="end" style="fill:#9a4020;font:500 12px sans-serif">3.5%</text><line x1="64" y1="180.0" x2="540" y2="180.0" style="stroke:#f0dcd3;stroke-width:1;fill:none"/><text x="56" y="184.0" text-anchor="end" style="fill:#9a4020;font:500 12px sans-serif">4.0%</text><line x1="64" y1="146.0" x2="540" y2="146.0" style="stroke:#f0dcd3;stroke-width:1;fill:none"/><text x="56" y="150.0" text-anchor="end" style="fill:#9a4020;font:500 12px sans-serif">4.5%</text><line x1="64" y1="112.0" x2="540" y2="112.0" style="stroke:#f0dcd3;stroke-width:1;fill:none"/><text x="56" y="116.0" text-anchor="end" style="fill:#9a4020;font:500 12px sans-serif">5.0%</text><line x1="64" y1="78.0" x2="540" y2="78.0" style="stroke:#f0dcd3;stroke-width:1;fill:none"/><text x="56" y="82.0" text-anchor="end" style="fill:#9a4020;font:500 12px sans-serif">5.5%</text><line x1="64" y1="44" x2="64" y2="248" style="stroke:#c9a99c;stroke-width:1.5;fill:none"/><line x1="64" y1="248" x2="540" y2="248" style="stroke:#c9a99c;stroke-width:1.5;fill:none"/><path d="M64.0,234.4 L143.3,200.4 L222.7,173.2 L302.0,152.8 L381.3,118.8 L460.7,91.6 L540.0,64.4" style="fill:none;stroke:#276749;stroke-width:2.6"/><path d="M64.0,234.4 L143.3,210.6 L222.7,193.6 L302.0,183.4 L381.3,169.8 L460.7,163.0 L540.0,159.6" style="fill:none;stroke:#b83a10;stroke-width:2.9"/><circle cx="64.0" cy="234.4" r="4" style="fill:#276749"/><text x="70.0" y="250.4" style="fill:#9a4020;font:500 12px sans-serif">điểm xoay</text><line x1="540.0" y1="64.4" x2="540.0" y2="159.6" style="stroke:#9a2f0e;stroke-width:1.4;stroke-dasharray:3 3"/><text x="534.0" y="112.0" text-anchor="end" style="fill:#9a2f0e;font:700 12px sans-serif">đầu dài</text><text x="534.0" y="126.0" text-anchor="end" style="fill:#9a2f0e;font:700 12px sans-serif">tụt xuống</text><text x="64.0" y="266" text-anchor="middle" style="fill:#9a4020;font:500 12px sans-serif">3M</text><text x="143.3" y="266" text-anchor="middle" style="fill:#9a4020;font:500 12px sans-serif">1Y</text><text x="222.7" y="266" text-anchor="middle" style="fill:#9a4020;font:500 12px sans-serif">2Y</text><text x="302.0" y="266" text-anchor="middle" style="fill:#9a4020;font:500 12px sans-serif">3Y</text><text x="381.3" y="266" text-anchor="middle" style="fill:#9a4020;font:500 12px sans-serif">5Y</text><text x="460.7" y="266" text-anchor="middle" style="fill:#9a4020;font:500 12px sans-serif">7Y</text><text x="540.0" y="266" text-anchor="middle" style="fill:#9a4020;font:500 12px sans-serif">10Y</text><line x1="64" y1="14" x2="84" y2="14" style="fill:none;stroke:#276749;stroke-width:2.6"/><text x="89" y="18" style="fill:#9a4020;font:500 12px sans-serif">Đường cong gốc (dốc lên)</text><line x1="294" y1="14" x2="314" y2="14" style="fill:none;stroke:#b83a10;stroke-width:2.9"/><text x="319" y="18" style="fill:#9a4020;font:500 12px sans-serif">Bẹt đi (flattening)</text><text x="302.0" y="280" text-anchor="middle" style="fill:#9a4020;font:600 13px sans-serif">Kỳ hạn →</text></svg>',
+chartCap:'Đường cong đang <b>dốc lên</b> bị <b>bẹt đi</b> (flattening): đầu ngắn giữ nguyên, đầu dài tụt xuống — mức trung bình gần như không đổi nhưng <b>hình dạng</b> đổi. Đó là curve risk.',
+ex:'Danh mục TPCP của MSB tập trung kỳ hạn dài (7Y–10Y). Khi đường cong <b>bẹt đi</b> — đầu ngắn giữ nguyên nhưng đầu dài tụt ~1% — chênh lệch lợi suất dài/ngắn thu hẹp, ảnh hưởng trực tiếp giá trị danh mục kỳ hạn dài dù mức lãi suất trung bình gần như không đổi.',
+arrow:'rủi ro khi bản thân <b>hình dạng đường cong</b> đổi (dốc lên / bẹt / xoắn), không phải toàn bộ lãi suất dịch song song.'},
+
+{n:'7',t:'Rủi ro delta',paras:[
+P(0,'7. Rủi ro delta: là rủi ro phát sinh do giá trị công cụ, giao dịch hoặc danh mục thay đổi khi yếu tố rủi ro thị trường cơ sở thay đổi, phản ánh tác động tuyến tính/bậc một của yếu tố rủi ro.')],
+ex:'MSB giữ trạng thái <b>long 1 triệu USD</b>. Tỷ giá USD/VND tăng 100đ → lãi ~100 triệu VND; giảm 100đ → lỗ tương ứng. Delta ở đây ≈ 1 triệu USD.',
+arrow:'độ nhạy bậc một — yếu tố cơ sở nhích 1 đơn vị thì giá trị đổi tuyến tính bấy nhiêu.'},
+
+{n:'8',t:'Rủi ro vega',paras:[
+P(0,'8. Rủi ro vega: là rủi ro phát sinh do giá trị công cụ, giao dịch hoặc danh mục thay đổi khi độ biến động hàm ý (Implied volatility) của yếu tố rủi ro thị trường thay đổi.')],
+note:{tag:'Lưu ý thuật ngữ',html:'<b>Độ biến động hàm ý</b> = mức dao động thị trường đang <b>ngầm định</b>, suy ngược từ giá quyền chọn đang giao dịch (nhìn về tương lai) — khác với biến động lịch sử tính từ giá quá khứ. Giá cơ sở đứng yên nhưng thị trường kỳ vọng sắp dao động mạnh hơn → implied vol tăng → quyền chọn đắt lên → phát sinh lỗ/lãi vega, độc lập với delta.'},
+ex:'MSB <b>bán</b> một quyền chọn USD/VND. Thị trường căng thẳng, implied vol nhảy từ <b>3% lên 6%</b> dù tỷ giá giao ngay không đổi → quyền chọn được định giá lại cao hơn → MSB (đang short vega) ghi nhận lỗ.',
+arrow:'độ nhạy với <b>kỳ vọng biến động</b> của thị trường (chủ yếu ở quyền chọn), không phải với bản thân giá cơ sở.'},
+
+{n:'9',t:'Rủi ro curvature',paras:[
+P(0,'9. Rủi ro curvature: là rủi ro phát sinh do giá trị công cụ thay đổi phi tuyến khi yếu tố rủi ro thị trường cơ sở biến động (tức phần rủi ro không được phản ánh đầy đủ bởi delta).')],
+ex:'Với một quyền chọn, khi USD/VND biến động nhỏ, Delta ước tính khá đúng. Nhưng khi tỷ giá biến động mạnh, lãi/lỗ thực tế lớn hơn ước tính tuyến tính — phần chênh là curvature (tương ứng gamma).',
+arrow:'độ cong bậc hai — phần delta bỏ sót khi biến động lớn (tương ứng gamma trong bộ Greeks).'},
+
+{n:'10',t:'Yếu tố rủi ro thị trường',paras:[
+P(0,'10. Yếu tố rủi ro thị trường là các biến số thị trường có thể ảnh hưởng đến giá trị công cụ, giao dịch hoặc danh mục, bao gồm nhưng không giới hạn lãi suất, đường cong lãi suất, tỷ giá, giá vàng, giá chứng khoán, giá hàng hóa, chênh lệch tín dụng, chênh lệch cơ sở, độ biến động, tương quan và các yếu tố thị trường khác phù hợp với sản phẩm, danh mục và phương pháp đo lường được áp dụng.')]},
+
+{n:'11',t:'Sổ kinh doanh',paras:[
+P(0,'11. Sổ kinh doanh là danh mục ghi nhận các trạng thái của:'),
+P(1,'a) Giao dịch tự doanh;'),
+P(1,'b) Giao dịch để thực hiện nghiệp vụ bảo lãnh phát hành công cụ tài chính;'),
+P(1,'c) Giao dịch sản phẩm phái sinh để phòng ngừa rủi ro của các giao dịch tự doanh của MSB;'),
+P(1,'d) Giao dịch mua bán ngoại tệ, vàng, tài sản tài chính để phục vụ nhu cầu của khách hàng, đối tác và các giao dịch để đối ứng với các giao dịch này.')],
+arrow:'nơi ghi <b>4 nhóm trạng thái</b>: tự doanh · bảo lãnh phát hành · hedge cho tự doanh · phục vụ khách hàng + đối ứng. (Tiêu chí phân loại chi tiết ở Điều 9.)'},
+
+{n:'12',t:'Giao dịch tự doanh',paras:[
+P(0,'12. Giao dịch tự doanh: Là giao dịch mua, bán, trao đổi do MSB, công ty con của MSB thực hiện theo quy định của Pháp luật với mục đích mua, bán, trao đổi trong thời hạn không quá 01 năm để thu lợi từ chênh lệch giá trị thị trường cho MSB đối với các công cụ tài chính, bao gồm:'),
+P(1,'a) Các công cụ tài chính trên thị trường tiền tệ;'),
+P(1,'b) Các loại tiền tệ (bao gồm cả vàng);'),
+P(1,'c) Chứng khoán trên thị trường vốn;'),
+P(1,'d) Các sản phẩm phái sinh;'),
+P(1,'e) Các công cụ tài chính khác được giao dịch trên thị trường chính thức.')],
+arrow:'mua bán ngắn hạn (≤1 năm) ăn chênh giá thị trường, trên <b>5 nhóm công cụ</b>.'},
+
+{n:'13',t:'Công cụ tài chính',paras:[
+P(0,'13. Công cụ tài chính: Là hợp đồng làm tăng tài sản tài chính của một bên và nợ phải trả tài chính hoặc công cụ vốn chủ sở hữu của bên khác. Trong đó, công cụ vốn chủ sở hữu là hợp đồng chứng minh được những lợi ích còn lại về tài sản của đơn vị sau khi trừ đi toàn bộ nghĩa vụ của đơn vị đó.')],
+arrow:'hợp đồng tạo tài sản tài chính bên này ↔ nợ tài chính / vốn chủ bên kia (theo chuẩn mực kế toán).'},
+
+{n:'14',t:'Trạng thái rủi ro',paras:[
+P(0,'14. Trạng thái rủi ro: Là mức độ rủi ro thị trường của MSB tại một thời điểm thể hiện thông qua giá trị rủi ro thị trường sau khi đã được quy đổi theo rủi ro của tài sản có rủi ro, nợ phải trả có rủi ro, khoản mục ngoại bảng có rủi ro thị trường.')],
+arrow:'mức RRTT tại một thời điểm, đo bằng giá trị đã quy đổi theo rủi ro (gồm cả nội & ngoại bảng).'},
+
+{n:'15',t:'VaR (Value at Risk)',paras:[
+P(0,'15. VaR (Value at Risk): là mức lỗ tiềm ẩn tối đa trong một khoảng thời gian với độ tin cậy nhất định.')],
+chart:'<svg viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg"><path d="M54.0,242.0 L54.0,241.9 L57.5,241.9 L61.0,241.9 L64.5,241.9 L68.0,241.9 L71.5,241.8 L75.0,241.8 L78.5,241.7 L82.0,241.7 L85.5,241.6 L89.0,241.5 L92.5,241.4 L96.0,241.2 L99.5,241.1 L102.9,240.9 L106.4,240.7 L109.9,240.4 L113.4,240.1 L116.9,239.8 L120.4,239.4 L123.9,238.9 L127.4,238.3 L130.9,237.7 L134.4,237.0 L137.9,236.2 L141.4,235.2 L144.9,234.2 L148.4,233.0 L151.9,231.6 L155.4,230.1 L158.9,228.4 L162.4,226.5 L165.9,224.5 L169.4,222.2 L172.9,219.7 L172.9,242.0 Z" style="fill:#f0b8a4;opacity:0.8;stroke:none"/><line x1="54" y1="242" x2="540" y2="242" style="stroke:#c9a99c;stroke-width:1.5;fill:none"/><path d="M54.0,241.9 L57.5,241.9 L61.0,241.9 L64.5,241.9 L68.0,241.9 L71.5,241.8 L75.0,241.8 L78.5,241.7 L82.0,241.7 L85.5,241.6 L89.0,241.5 L92.5,241.4 L96.0,241.2 L99.5,241.1 L102.9,240.9 L106.4,240.7 L109.9,240.4 L113.4,240.1 L116.9,239.8 L120.4,239.4 L123.9,238.9 L127.4,238.3 L130.9,237.7 L134.4,237.0 L137.9,236.2 L141.4,235.2 L144.9,234.2 L148.4,233.0 L151.9,231.6 L155.4,230.1 L158.9,228.4 L162.4,226.5 L165.9,224.5 L169.4,222.2 L172.9,219.7 L176.4,216.9 L179.9,213.9 L183.4,210.7 L186.9,207.2 L190.4,203.4 L193.9,199.4 L197.4,195.1 L200.8,190.6 L204.3,185.7 L207.8,180.7 L211.3,175.4 L214.8,169.9 L218.3,164.2 L221.8,158.3 L225.3,152.3 L228.8,146.1 L232.3,139.9 L235.8,133.6 L239.3,127.3 L242.8,121.1 L246.3,114.9 L249.8,108.9 L253.3,103.0 L256.8,97.4 L260.3,92.0 L263.8,87.0 L267.3,82.3 L270.8,78.0 L274.3,74.2 L277.8,70.8 L281.3,67.9 L284.8,65.6 L288.3,63.9 L291.8,62.7 L295.3,62.1 L298.7,62.1 L302.2,62.7 L305.7,63.9 L309.2,65.6 L312.7,67.9 L316.2,70.8 L319.7,74.2 L323.2,78.0 L326.7,82.3 L330.2,87.0 L333.7,92.0 L337.2,97.4 L340.7,103.0 L344.2,108.9 L347.7,114.9 L351.2,121.1 L354.7,127.3 L358.2,133.6 L361.7,139.9 L365.2,146.1 L368.7,152.3 L372.2,158.3 L375.7,164.2 L379.2,169.9 L382.7,175.4 L386.2,180.7 L389.7,185.7 L393.2,190.6 L396.6,195.1 L400.1,199.4 L403.6,203.4 L407.1,207.2 L410.6,210.7 L414.1,213.9 L417.6,216.9 L421.1,219.7 L424.6,222.2 L428.1,224.5 L431.6,226.5 L435.1,228.4 L438.6,230.1 L442.1,231.6 L445.6,233.0 L449.1,234.2 L452.6,235.2 L456.1,236.2 L459.6,237.0 L463.1,237.7 L466.6,238.3 L470.1,238.9 L473.6,239.4 L477.1,239.8 L480.6,240.1 L484.1,240.4 L487.6,240.7 L491.1,240.9 L494.5,241.1 L498.0,241.2 L501.5,241.4 L505.0,241.5 L508.5,241.6 L512.0,241.7 L515.5,241.7 L519.0,241.8 L522.5,241.8 L526.0,241.9 L529.5,241.9 L533.0,241.9 L536.5,241.9 L540.0,241.9" style="fill:none;stroke:#b83a10;stroke-width:2.8"/><line x1="172.9" y1="62" x2="172.9" y2="242" style="stroke:#9a2f0e;stroke-width:2.2"/><text x="172.9" y="56" text-anchor="middle" style="fill:#9a2f0e;font:700 13px sans-serif">VaR (99%)</text><line x1="134.4" y1="242" x2="134.4" y2="237.0" style="stroke:#276749;stroke-width:2.2;stroke-dasharray:4 3"/><text x="136.4" y="227.0" text-anchor="start" style="fill:#276749;font:700 12px sans-serif">ES</text><text x="100.0" y="208" text-anchor="middle" style="fill:#9a2f0e;font:700 12px sans-serif">đuôi lỗ (1%)</text><text x="540" y="262" text-anchor="end" style="fill:#9a4020;font:600 13px sans-serif">Lãi / Lỗ danh mục →</text></svg>',
+chartCap:'Phân phối lãi/lỗ danh mục. <b>VaR</b> = ngưỡng cắt ở phân vị tin cậy (vd 99%). <b>ES</b> = tổn thất trung bình của phần đuôi <b>vượt</b> VaR (xem Khoản 16).',
+ex:'VaR 1 ngày 99% = <b>50 tỷ</b>: 99% số ngày lỗ không quá 50 tỷ; trong 1% ngày xấu nhất, lỗ có thể lớn hơn. ES trả lời khi đã vượt 50 tỷ thì trung bình lỗ bao nhiêu — vd <b>68 tỷ</b>.',
+arrow:'lỗ tối đa dự kiến trong khoảng thời gian & độ tin cậy cho trước (vd 1 ngày, 99%).'},
+
+{n:'16',t:'ES (Expected Shortfall)',paras:[
+P(0,'16. ES (Expected Shortfall): là thước đo tổn thất kỳ vọng trung bình của danh mục trong các trường hợp tổn thất vượt quá mức VaR tại một mức độ tin cậy xác định.')],
+arrow:'lỗ trung bình ở phần đuôi vượt VaR — nặng hơn, "sâu đuôi" hơn VaR.'},
+
+{n:'17',t:'Vi phạm hạn mức',paras:[
+P(0,'17. Vi phạm hạn mức: Là trường hợp giá trị của một chỉ tiêu quản lý rủi ro thị trường nằm ngoài giới hạn do NHNN và/hoặc MSB quy định.')],
+arrow:'chỉ tiêu vượt ngưỡng của NHNN và/hoặc MSB.'},
+
+{n:'18',t:'Trường hợp ngoại lệ',paras:[
+P(0,'18. Trường hợp ngoại lệ: là trường hợp vi phạm hạn mức được cấp có thẩm quyền chấp thuận theo quy định của pháp luật và quy định nội bộ của MSB.')],
+arrow:'vi phạm hạn mức nhưng đã được cấp thẩm quyền phê duyệt.'},
+
+{n:'19',t:'Ma trận rủi ro toàn diện',paras:[
+P(0,'19. Ma trận rủi ro toàn diện: Là bảng ma trận mô tả chi tiết những rủi ro trọng yếu mà MSB đang phải đối mặt trong các giao dịch, hoạt động kinh doanh.')],
+arrow:'bảng liệt kê chi tiết các rủi ro trọng yếu.'},
+
+{n:'20',t:'Kiểm tra sức chịu đựng (stress-test)',paras:[
+P(0,'20. Kiểm tra sức chịu đựng (stress-test): Là công cụ quản lý rủi ro mang tính dự báo để đánh giá tác động tiềm ẩn của biến động, thay đổi bất lợi, qua đó xác định khả năng chịu đựng rủi ro của MSB.')],
+arrow:'công cụ dự báo, đo sức chịu đựng trước kịch bản bất lợi.'},
+
+{n:'21',t:'Đơn vị tự doanh (Trading Desks)',paras:[
+P(0,'21. Đơn vị tự doanh (Trading Desks) là các đơn vị, bộ phận thuộc Ngân hàng Định chế tài chính được MSB giao thực hiện hoạt động kinh doanh, giao dịch tự doanh, tạo lập thị trường, giao dịch đối ứng hoặc các hoạt động kinh doanh sản phẩm tài chính khác làm phát sinh rủi ro thị trường theo quy định nội bộ của MSB trong từng thời kỳ.')],
+arrow:'các desk thuộc NH ĐCTC được giao hoạt động tự doanh / tạo lập / đối ứng phát sinh RRTT.'},
+
+{n:'22',t:'Đơn vị kinh doanh (ĐVKD)',paras:[
+P(0,'22. Đơn vị kinh doanh (ĐVKD): Là các trung tâm kinh doanh hoặc phòng, bộ phận kinh doanh tại các NHCD.')],
+arrow:'đơn vị kinh doanh tại các NHCD.'},
+
+{n:'23',t:'Cấp có thẩm quyền',paras:[
+P(0,'23. Cấp có thẩm quyền bao gồm: Hội đồng Quản trị (HĐQT), Tổng Giám đốc (TGĐ) và các cấp được phân cấp, ủy quyền theo quy định nội bộ của MSB trong từng thời kỳ.')],
+arrow:'HĐQT · TGĐ · các cấp được ủy quyền.'},
+
+{n:'24',t:'NHNN',paras:[P(0,'24. NHNN: Ngân hàng Nhà nước Việt Nam.')]},
+{n:'25',t:'MSB',paras:[P(0,'25. MSB: Ngân hàng TMCP Hàng hải Việt Nam.')]},
+{n:'26',t:'HĐQT',paras:[P(0,'26. HĐQT: Hội đồng Quản trị.')]},
+{n:'27',t:'TGĐ',paras:[P(0,'27. TGĐ: Tổng Giám đốc.')]},
+{n:'28',t:'QLRRTT',paras:[P(0,'28. QLRRTT: Quản lý Rủi ro thị trường.')]},
+
+{n:'29',t:'Bộ phận QLRRTT',paras:[
+P(0,'29. Bộ phận QLRRTT: là bộ phận QLRRTT thuộc Chức năng Quản lý rủi ro thị trường – Phòng Quản lý Rủi ro thị trường và thanh khoản, Khối Quản lý rủi ro (K.QLRR).')]},
+{n:'30',t:'Phòng QTDL&MHRR',paras:[
+P(0,'30. Phòng QTDL&MHRR: Phòng Quản trị cơ sở dữ liệu và mô hình rủi ro – Trung tâm Phát triển mô hình công cụ & quản trị cơ sở dữ liệu rủi ro – Khối QLRR')]},
+{n:'31',t:'TT.TT&PCRT',paras:[
+P(0,'31. TT.TT&PCRT: Trung tâm Tuân thủ và Phòng chống rửa tiền – Khối Quản lý rủi ro.')]}
+];
+
+/* ============ CÁC ĐIỀU NỘI DUNG ============ */
+const ARTS=[
+{id:'d1',tab:'Điều 1',sub:'Mục đích ban hành',chap:'Chương I. QUY ĐỊNH CHUNG',
+ eyebrow:'Điều 1',title:'Mục đích ban hành',lead:'Quy chế này được ban hành nhằm:',gapCount:0,
+ kh:[{n:'1–3',t:'Mục đích ban hành',paras:[
+   P(0,'1. Thiết lập khung quản lý rủi ro thị trường (RRTT) và rủi ro tập trung đối với hoạt động giao dịch tự doanh theo sản phẩm thống nhất và toàn diện trong toàn Ngân hàng;'),
+   P(0,'2. Làm cơ sở để triển khai xuyên suốt công tác quản lý RRTT tới các đơn vị kinh doanh, đơn vị hỗ trợ và các đơn vị có liên quan;'),
+   P(0,'3. Bảo đảm việc nhận diện, đo lường, theo dõi, giám sát, kiểm soát và giảm thiểu RRTT được thực hiện nhất quán, phù hợp với Khẩu vị rủi ro, Chiến lược quản lý rủi ro, Khung quản lý rủi ro và quy định của pháp luật trong từng thời kỳ.')],
+  defs:[['1','RRTT'],['2','Rủi ro tập trung'],['12','Giao dịch tự doanh']],
+  arrow:'(1) khung QLRRTT + rủi ro tập trung tự doanh thống nhất toàn hàng · (2) cơ sở triển khai tới các đơn vị · (3) đảm bảo nhận diện–đo lường–giám sát–kiểm soát nhất quán với Khẩu vị / Chiến lược / Khung RR & pháp luật.',
+  gap:{status:'N'}}]},
+
+{id:'d2',tab:'Điều 2',sub:'Phạm vi điều chỉnh',chap:'Chương I. QUY ĐỊNH CHUNG',
+ eyebrow:'Điều 2',title:'Phạm vi điều chỉnh',gapCount:0,
+ kh:[
+ {n:'1',t:'Nội dung điều chỉnh',paras:[
+   P(0,'1. Quy chế này quy định các nguyên tắc quản lý, cơ chế quản trị, giám sát và kiểm soát, phân cấp trách nhiệm và các yêu cầu tối thiểu đối với công tác quản lý rủi ro thị trường tại Ngân hàng.')],
+  gap:{status:'N'}},
+ {n:'2',t:'Phạm vi quản lý rủi ro thị trường',paras:[
+   P(0,'2. Phạm vi quản lý rủi ro thị trường bao gồm:'),
+   P(1,'a) Các khoản mục tài sản, nợ phải trả, khoản mục ngoại bảng hoặc hoạt động khác thuộc Sổ kinh doanh;'),
+   P(1,'b) Các khoản mục tài sản, nợ phải trả, khoản mục ngoại bảng hoặc hoạt động khác không thuộc Sổ kinh doanh nhưng có phát sinh rủi ro thị trường theo quy định nội bộ của MSB và quy định pháp luật trong từng thời kỳ;'),
+   P(1,'c) Rủi ro tập trung theo sản phẩm giao dịch phát sinh đối với hoạt động tự doanh.')],
+  defs:[['11','Sổ kinh doanh'],['2','Rủi ro tập trung'],['12','Giao dịch tự doanh']],
+  note:{tag:'Lưu ý khi trình bày',html:'Điểm b là <b>điều khoản quét</b>: cố tình mở rộng để bắt cả khoản mục ngoài Sổ kinh doanh mà vẫn phát sinh RRTT. Đây là thiết kế <b>chặt hơn</b> nhằm không bỏ sót rủi ro — không phải điểm mơ hồ, <b>không phải GAP</b>.'},
+  arrow:'đối tượng RRTT gồm <b>(a)</b> trong Sổ KD, <b>(b)</b> ngoài Sổ KD nhưng phát sinh RRTT, <b>(c)</b> rủi ro tập trung sản phẩm tự doanh.',
+  gap:{status:'N'}},
+ {n:'3',t:'Cơ sở thực hiện',paras:[
+   P(0,'3. Công tác quản lý RRTT được thực hiện trên cơ sở:'),
+   P(1,'a) Riêng lẻ đối với MSB và các đơn vị thuộc phạm vi quản lý theo quy định nội bộ và pháp luật;'),
+   P(1,'b) Hợp nhất đối với toàn hệ thống theo quy định của pháp luật và chính sách quản lý RRTT của MSB trong từng thời kỳ.')],
+  arrow:'thực hiện trên cả cơ sở <b>riêng lẻ</b> và <b>hợp nhất</b>.',
+  gap:{status:'N'}}]},
+
+{id:'d3',tab:'Điều 3',sub:'Đối tượng áp dụng',chap:'Chương I. QUY ĐỊNH CHUNG',
+ eyebrow:'Điều 3',title:'Đối tượng áp dụng',gapCount:0,
+ kh:[{n:'—',t:'Đối tượng áp dụng',paras:[
+   P(0,'Quy chế này áp dụng đối với toàn hệ thống MSB và các đơn vị thuộc phạm vi quản lý hợp nhất của MSB có liên quan đến công tác quản lý rủi ro thị trường theo quy định tại Quy chế này.')],
+  defs:[['25','MSB']],
+  arrow:'toàn hệ thống MSB + đơn vị thuộc phạm vi hợp nhất có liên quan RRTT.',
+  gap:{status:'N'}}]},
+
+/* ---------------- ĐIỀU 9 ---------------- */
+{id:'d9',tab:'Điều 9',sub:'Phân tách sổ NH và sổ KD',chap:'Chương II. HỆ THỐNG QUẢN LÝ RỦI RO THỊ TRƯỜNG',
+ eyebrow:'Điều 9',title:'Nguyên tắc phân tách sổ ngân hàng và sổ kinh doanh',gapCount:2,
+ kh:[
+ {n:'1',t:'Mục đích phân tách',paras:[
+   P(0,'1. MSB thực hiện phân loại, quản lý và kiểm soát các khoản mục giữa Sổ ngân hàng và Sổ kinh doanh nhằm:'),
+   P(1,'a) Bảo đảm ranh giới quản lý giữa RRTT và Rủi ro lãi suất trên sổ ngân hàng được xác định rõ ràng, nhất quán và phù hợp với mục đích quản trị rủi ro của MSB;'),
+   P(1,'b) Phản ánh đúng bản chất kinh doanh, mục đích nắm giữ và phương thức quản trị rủi ro của từng khoản mục;'),
+   P(1,'c) Tránh chồng chéo, bỏ sót hoặc làm sai lệch việc đo lường, giám sát và kiểm soát rủi ro.')],
+  defs:[['11','Sổ kinh doanh'],['1','RRTT']],
+  arrow:'phân tách nhằm: <b>(a)</b> ranh giới RRTT ↔ RRLS sổ ngân hàng rõ ràng · <b>(b)</b> phản ánh đúng bản chất & mục đích nắm giữ · <b>(c)</b> tránh chồng chéo / bỏ sót / sai lệch đo lường.',
+  gap:{status:'N'}},
+
+ {n:'2',t:'Nguyên tắc phân tách theo mục đích nắm giữ',paras:[
+   P(0,'2. Việc phân tách lần đầu và bước đầu dựa trên mục đích nắm giữ, trong đó:'),
+   P(1,'a) Các khoản mục thuộc Sổ kinh doanh được nắm giữ với mục đích kinh doanh ngắn hạn, tự doanh tạo lợi nhuận từ biến động giá thị trường, hoặc phục vụ tạo lập thị trường, phòng ngừa rủi ro cho các vị thế thuộc Sổ kinh doanh hoặc phục vụ nhu cầu của đối tác, khách hàng;'),
+   P(1,'b) Các khoản mục thuộc Sổ ngân hàng được nắm giữ chủ yếu phục vụ hoạt động ngân hàng truyền thống, quản trị bảng cân đối, quản trị thanh khoản và rủi ro thanh khoản, đầu tư nắm giữ hoặc phòng ngừa rủi ro cho các khoản mục thuộc Sổ ngân hàng.')],
+  defs:[['11','Sổ kinh doanh'],['12','Giao dịch tự doanh']],
+  arrow:'trục phân tách là <b>mục đích nắm giữ</b>: ăn chênh giá ngắn hạn / tạo lập / hedge cho Sổ KD / phục vụ khách hàng → <b>Sổ KD</b>; nghiệp vụ ngân hàng, quản trị bảng cân đối, thanh khoản, đầu tư nắm giữ → <b>Sổ NH</b>.',
+  gap:{status:'Y',ref:'Điều 9 Khoản 2b',
+   t1:'Phân loại khoản mục vào đúng sổ tại thời điểm ghi nhận giao dịch theo tiêu chí được ban hành',
+   t2:'Xây dựng, diễn giải và duy trì tiêu chí phân tách 2 sổ; kiểm soát độc lập việc phân loại',
+   t3:'Rà soát, đánh giá độc lập tính nhất quán của việc phân loại',
+   gapT2:'Khái niệm <b>"hoạt động ngân hàng truyền thống"</b> được dùng làm tiêu chí phân loại Sổ ngân hàng nhưng <b>không được định nghĩa</b> tại Điều 4 hay bất kỳ điều nào khác; cũng không có định nghĩa pháp lý trực tiếp cho chữ "truyền thống".',
+   naT2:'Làm rõ phạm vi "hoạt động ngân hàng truyền thống" trong quy định chi tiết.',
+   cls:{vb:true,bc:false,ht:false},
+   unit:'Bộ phận QLRRTT',
+   pic:'Lâm (lampd3)'}},
+
+ {n:'3',t:'Kiểm soát việc chuyển đổi giữa hai sổ',paras:[
+   P(0,'3. Ngân hàng kiểm soát chặt chẽ và hạn chế việc chuyển đổi các khoản mục giữa Sổ kinh doanh và Sổ ngân hàng nhằm tránh việc làm sai lệch trạng thái rủi ro, kết quả kinh doanh hoặc yêu cầu vốn/rủi ro của Ngân hàng.'),
+   P(0,'Việc chuyển đổi từ Sổ kinh doanh sang Sổ ngân hàng chỉ được thực hiện trong các trường hợp thực sự cần thiết, có cơ sở hợp lý, phản ánh bản chất rủi ro, khoản mục đó không còn đáp ứng được điều kiện, tiêu chí thuộc Sổ kinh doanh theo quy định, được đánh giá đầy đủ tác động rủi ro, yêu cầu về vốn và phê duyệt theo thẩm quyền quy định nội bộ của MSB phù hợp với quy định của pháp luật trong từng thời kỳ.')],
+  defs:[['14','Trạng thái rủi ro'],['23','Cấp có thẩm quyền'],['11','Sổ kinh doanh']],
+  arrow:'chuyển đổi bị <b>hạn chế</b>; chiều KD→NH chỉ khi thực sự cần thiết, có cơ sở, không còn đạt tiêu chí Sổ KD, <b>đã đánh giá tác động rủi ro & vốn</b> và được phê duyệt đúng thẩm quyền.',
+  gap:{status:'Y',ref:'Điều 9 Khoản 3',
+   t1:'Thực hiện chuyển đổi khoản mục đúng điều kiện; thông báo QLRRTT khi phát sinh',
+   t2:'Theo dõi, đánh giá tác động của việc chuyển đổi tới trạng thái rủi ro thị trường',
+   t3:'Rà soát độc lập việc tuân thủ nguyên tắc chuyển đổi',
+   gapT1:'Đã phát sinh trường hợp ĐVKD thay đổi sổ ghi nhận thông qua giao dịch với <b>bên thứ ba</b> nhưng <b>không thông báo Bộ phận QLRRTT</b>; QLRRTT phải tự phát hiện và theo dõi.',
+   gapT2:'Khoản 3 và Khoản 4 chỉ điều chỉnh việc chuyển đổi sổ nội bộ một cách <b>trực tiếp</b>. Trường hợp thông qua giao dịch bán/mua lại với <b>bên thứ ba</b> chưa được đề cập → QLRRTT không nắm được thay đổi trạng thái rủi ro phát sinh từ nhóm giao dịch này.',
+   naT1:'ĐVKD thông báo Bộ phận QLRRTT khi phát sinh giao dịch với bên thứ ba làm thay đổi sổ ghi nhận.',
+   naT2:'QLRRTT tiếp nhận thông báo, ghi nhận và theo dõi.',
+   cls:{vb:false,bc:true,ht:false},
+   unit:'Bộ phận QLRRTT · ĐVKD (NH ĐCTC)',
+   pic:'Lâm (lampd3)',
+   qa:'(1) Cơ chế thông báo áp dụng theo hình thức nào (ngay khi phát sinh / định kỳ)? (2) Cơ chế chỉ dừng ở thông báo – theo dõi, không có cơ sở văn bản ràng buộc — cần thống nhất với ĐVKD để đảm bảo được thực hiện.'}},
+
+ {n:'4',t:'Cấm chuyển từ Sổ ngân hàng sang Sổ kinh doanh',paras:[
+   P(0,'4. MSB không được chuyển các công cụ tài chính từ Sổ ngân hàng sang Sổ kinh doanh.')],
+  defs:[['13','Công cụ tài chính'],['11','Sổ kinh doanh']],
+  arrow:'cấm tuyệt đối chiều <b>Sổ NH → Sổ KD</b>.',
+  gap:{status:'N',reason:'Quy tắc cấm tuyệt đối, chặt hơn thông lệ Basel (vốn cho phép tái phân loại trong trường hợp đặc biệt). Chặt hơn không phải GAP. Quy chế cũng không đặt nghĩa vụ phải có chốt chặn trên hệ thống nên không flag hệ thống tại đây.'}},
+
+ {n:'5',t:'TGĐ ban hành quy định chi tiết',paras:[
+   P(0,'5. TGĐ ban hành các quy định chi tiết về:'),
+   P(1,'a) Điều kiện, tiêu chí các khoản mục được phân loại vào Sổ kinh doanh;'),
+   P(1,'b) Danh mục các khoản mục phân loại mặc định thuộc Sổ kinh doanh và Sổ ngân hàng;'),
+   P(1,'c) Điều kiện, tiêu chí phân tách Sổ kinh doanh và Sổ ngân hàng đảm bảo khả năng nhận diện trên hệ thống ghi nhận giao dịch;'),
+   P(1,'d) Nguyên tắc phân loại lại và chuyển các khoản mục giữa Sổ kinh doanh và Sổ ngân hàng phù hợp với Quy chế này và quy định của pháp luật trong từng thời kỳ;'),
+   P(1,'e) Cơ chế kiểm soát độc lập của bộ phận quản lý rủi ro đối với việc phân loại, duy trì và rà soát định kỳ ranh giới giữa hai Sổ;'),
+   P(1,'f) Quy định cụ thể các bộ phận kinh doanh trực tiếp thực hiện giao dịch và trách nhiệm của bộ phận Kiểm toán nội bộ đối với công tác rà soát, đánh giá phân tách các khoản mục trên Sổ kinh doanh và Sổ ngân hàng.')],
+  defs:[['27','TGĐ'],['11','Sổ kinh doanh'],['29','Bộ phận QLRRTT']],
+  arrow:'giao TGĐ ban hành <b>6 nội dung chi tiết</b>: tiêu chí vào Sổ KD (a) · danh mục mặc định (b) · tiêu chí phân tách nhận diện được trên hệ thống (c) · nguyên tắc chuyển đổi (d) · kiểm soát độc lập của QLRR (e) · trách nhiệm bộ phận KD & KTNB (f).',
+  gap:{status:'N',reason:'Thẩm quyền ban hành VBNB đã được quy định tại Điều 7; cụm "TGĐ ban hành" là phân cấp, không tạo nghĩa vụ mới. Sáu nội dung a→f hiện đã được quy định tại văn bản nội bộ khác (theo xác nhận hiện trạng).'}}]},
+
+/* ---------------- ĐIỀU 10 ---------------- */
+{id:'d10',tab:'Điều 10',sub:'Nhận dạng rủi ro thị trường',chap:'Chương III. QUY TRÌNH QUẢN LÝ RỦI RO THỊ TRƯỜNG',
+ chapNote:'Quy trình quản lý rủi ro thị trường bao gồm: Nhận dạng rủi ro – Đo lường và đánh giá rủi ro – Kiểm soát và giảm thiểu rủi ro – Giám sát và Báo cáo. MSB thực hiện nhận dạng, đo lường, theo dõi và kiểm soát RRTT đáp ứng tối thiểu các yêu cầu sau đây:',
+ eyebrow:'Điều 10',title:'Nhận dạng rủi ro thị trường',gapCount:0,
+ kh:[
+ {n:'1',t:'Nội dung nhận dạng RRTT',paras:[
+  P(0,'1. Nội dung nhận dạng RRTT'),
+  P(0,'MSB thực hiện nhận diện rủi ro thị trường phát sinh đối với sản phẩm, giao dịch, danh mục, trading desk, hoạt động nghiệp vụ hoặc khoản mục có liên quan theo các nhóm rủi ro và yếu tố rủi ro phù hợp với quy định pháp luật, chuẩn mực quản trị rủi ro và nhu cầu quản trị của MSB trong từng thời kỳ.'),
+  P(0,'Nội dung nhận dạng bao gồm tối thiểu:'),
+  P(1,'a) Xác định sản phẩm, giao dịch, danh mục hoặc khoản mục thuộc Sổ kinh doanh theo quy định nội bộ của MSB;'),
+  P(1,'b) Phân loại rủi ro thị trường'),
+  P(2,'i) Theo bản chất rủi ro chính (risk class):'),
+  P(3,'- Rủi ro lãi suất;'),
+  P(3,'- Rủi ro ngoại hối;'),
+  P(3,'- Rủi ro giá cổ phiếu;'),
+  P(3,'- Rủi ro giá hàng hóa;'),
+  P(2,'ii) Theo đặc tính đo lường rủi ro dựa trên độ nhạy, phù hợp với phương pháp đo lường dựa trên độ nhạy (Sensitivities-based Method - SBM) theo chuẩn mực Basel, áp dụng đối với từng nhóm rủi ro thị trường (risk class) phù hợp:'),
+  P(3,'- Rủi ro delta:'),
+  P(4,'+ Rủi ro phát sinh do giá trị công cụ, giao dịch hoặc danh mục thay đổi khi yếu tố rủi ro thị trường cơ sở thay đổi, phản ánh tác động tuyến tính/bậc một của yếu tố rủi ro;'),
+  P(4,'+ Phát sinh ở hầu hết sản phẩm tài chính: spot, forward, swap, trái phiếu, cổ phiếu, hàng hóa, phái sinh và quyền chọn;'),
+  P(4,'+ Ví dụ: Tỷ giá USD/VND tăng làm thay đổi giá trị trạng thái ngoại tệ; lãi suất tăng làm giảm giá trái phiếu.'),
+  P(3,'- Rủi ro vega:'),
+  P(4,'+ Rủi ro phát sinh do giá trị công cụ thay đổi khi độ biến động hàm ý (Implied volatility) của yếu tố rủi ro thị trường thay đổi;'),
+  P(4,'+ Chủ yếu phát sinh từ quyền chọn hoặc công cụ có đặc tính quyền chọn: FX option, interest rate option, bond option, structured product, callable/putable instruments;'),
+  P(4,'+ Ví dụ: Implied volatility của USD/VND tăng làm giá trị FX option thay đổi dù tỷ giá giao ngay chưa thay đổi.'),
+  P(3,'- Rủi ro curvature:'),
+  P(4,'+ Rủi ro phát sinh do giá trị công cụ thay đổi phi tuyến khi yếu tố rủi ro thị trường cơ sở biến động (tức phần rủi ro không được phản ánh đầy đủ bởi delta);'),
+  P(4,'+ Chủ yếu phát sinh ở sản phẩm quyền chọn/có đặc tính quyền chọn hoặc công cụ có độ lồi/quan hệ giá trị phi tuyến trọng yếu: options, callable/putable bonds, structured notes, mortgage-related products, trái phiếu kỳ hạn dài;'),
+  P(4,'+ Ví dụ: Khi tỷ giá USD/VND tăng mạnh, giá quyền chọn thay đổi nhiều hơn mức ước tính tuyến tính theo delta; trái phiếu dài hạn có thể thay đổi giá phi tuyến khi lãi suất biến động lớn.'),
+  P(2,'iii) Tùy mục tiêu đo lường, giám sát, kiểm soát rủi ro trong từng thời kỳ, MSB có thể nhận dạng và phân loại RRTT bổ sung các loại rủi ro thành phần sau:'),
+  P(3,'- Rủi ro lãi suất chung (general interest rate risk – GIRR);'),
+  P(3,'- Rủi ro chênh lệch tín dụng (credit spread risk – CSR);'),
+  P(3,'- Rủi ro đường cong lãi suất (curve risk);'),
+  P(3,'- Rủi ro cơ sở (basis risk);'),
+  P(2,'iv) Các phân loại rủi ro thị trường khác theo quy định của pháp luật và nhu cầu quản trị của MSB từng thời kỳ;'),
+  P(1,'c) Nhận dạng rủi ro tập trung đối với hoạt động giao dịch tự doanh, áp dụng với các khoản mục được hạch toán là khoản mục nội bảng, khoản mục ngoại bảng của MSB và các khoản mục chưa được hạch toán theo quy định của pháp luật về kế toán.'),
+  P(1,'d) Yếu tố rủi ro thị trường tác động đến sản phẩm, giao dịch hoặc danh mục, bao gồm nhưng không giới hạn: đường cong lãi suất, tỷ giá, giá vàng, giá chứng khoán, giá hàng hóa, chênh lệch tín dụng (credit spread), chênh lệch cơ sở (basis), độ biến động (volatility), tương quan (correlation) và các yếu tố rủi ro khác khi phù hợp;'),
+  P(1,'e) Xác định hệ thống ghi nhận giao dịch, hệ thống dữ liệu lưu trữ và nguồn thông tin phục vụ quản lý, đo lường, giám sát và báo cáo RRTT;'),
+  P(1,'f) Đánh giá khả năng định giá, nguồn giá, dữ liệu thị trường, mô hình định giá, mức độ thanh khoản thị trường và các yếu tố có thể làm gia tăng sai lệch giá trị ghi nhận hoặc lãi/lỗ đánh giá lại;'),
+  P(1,'g) Đánh giá khả năng có thể phòng ngừa rủi ro cho các rủi ro thị trường được nhận dạng.')],
+ defs:[['11','Sổ kinh doanh'],['1','RRTT'],['7','Rủi ro delta'],['8','Rủi ro vega'],['9','Rủi ro curvature'],['3','GIRR'],['4','CSR'],['6','Curve risk'],['5','Basis risk'],['2','Rủi ro tập trung'],['10','Yếu tố RRTT'],['21','Trading Desks']],
+ arrow:'nội dung nhận dạng tối thiểu: xác định khoản mục Sổ KD (a) · phân loại rủi ro theo <b>risk class</b> và theo <b>độ nhạy delta/vega/curvature (SBM Basel)</b>, bổ sung GIRR/CSR/curve/basis khi cần (b) · nhận dạng rủi ro tập trung tự doanh gồm cả khoản mục chưa hạch toán (c) · yếu tố RRTT (d) · hệ thống & nguồn dữ liệu (e) · khả năng định giá và nguồn giá (f) · khả năng phòng ngừa (g).',
+ gap:{status:'N',reason:'Nội dung nhận dạng đã bám theo chuẩn Basel (risk class + SBM delta/vega/curvature + nhóm rủi ro thành phần). Không phát sinh nghĩa vụ chưa được đáp ứng. Năng lực đo lường thực tế thuộc phạm vi Điều 11.'}},
+
+ {n:'2',t:'Phương thức thực hiện nhận dạng RRTT',paras:[
+  P(0,'2. Phương thức thực hiện nhận dạng RRTT'),
+  P(0,'MSB thực hiện nhận dạng RRTT thông qua việc kết hợp các phương thức, kênh thông tin và hoạt động quản lý rủi ro phù hợp nhằm phát hiện kịp thời các nguồn rủi ro hiện hữu, rủi ro tiềm ẩn và rủi ro mới phát sinh. Việc nhận dạng RRTT được thực hiện đồng thời với việc xác định các chỉ tiêu, phương pháp đo lường và cơ chế giám sát phù hợp.'),
+  P(1,'a) Nhận dạng thông qua rà soát sản phẩm, giao dịch, danh mục, trading desk, nghiệp vụ kinh doanh trọng yếu và các hoạt động có phát sinh yếu tố RRTT theo phạm vi quản lý RRTT của MSB và Bảng ma trận rủi ro toàn diện tại Phụ lục số PL01/QC.RR.008.'),
+  P(1,'b) Nhận dạng trong quá trình xây dựng kế hoạch kinh doanh, thiết lập khẩu vị rủi ro, hạn mức rủi ro, chiến lược danh mục, kế hoạch giao dịch, kế hoạch phòng ngừa rủi ro hoặc các định hướng kinh doanh có khả năng làm phát sinh hoặc thay đổi đáng kể trạng thái RRTT;'),
+  P(1,'c) Nhận dạng trong quá trình phê duyệt, triển khai hoặc thay đổi trọng yếu đối với sản phẩm mới, nghiệp vụ mới, thị trường mới, mô hình định giá, nguồn dữ liệu, hệ thống ghi nhận giao dịch, quy trình vận hành hoặc cơ chế kiểm soát liên quan đến RRTT.'),
+  P(1,'d) Nhận dạng trong quá trình theo dõi và kiểm soát rủi ro được thực hiện theo Điều 14 Quy chế này, bao gồm:'),
+  P(2,'i) Theo dõi diễn biến thị trường và các sự kiện bất thường có khả năng làm phát sinh, gia tăng hoặc lan truyền rủi ro thị trường;'),
+  P(2,'ii) Cập nhật các sự kiện vĩ mô, chính sách và thị trường có thể gây biến động trọng yếu;'),
+  P(2,'iii) Giám sát hệ thống chỉ số cảnh báo sớm.'),
+  P(1,'e) Nhận dạng rủi ro thông qua kiểm tra sức chịu đựng; phân tích rủi ro trong các kịch bản giả định và điều kiện thị trường bất lợi nhằm nhận diện rủi ro tiềm ẩn tác động đến khả năng chịu đựng về vốn và thu nhập; mức độ thanh khoản (khối lượng và thời gian thoát vị thế) của tài sản tài chính tương ứng với các kịch bản thanh khoản thị trường;'),
+  P(1,'f) Nhận dạng thông qua rà soát kết quả đo lường (backtesting), giám sát/kiểm tra giá độc lập (IPV), đánh giá mô hình (validation), sự kiện vi phạm hạn mức, tổn thất thực tế hoặc các ngoại lệ phát sinh trong quá trình quản lý RRTT.'),
+  P(1,'g) Nhận dạng thông qua thông tin, báo cáo, cảnh báo hoặc khuyến nghị từ các đơn vị kinh doanh, đơn vị vận hành, đơn vị quản lý rủi ro khác có liên quan, tài chính, kế toán, kiểm toán nội bộ và các đơn vị liên quan khác trong quá trình thực hiện chức năng, nhiệm vụ được giao.'),
+  P(1,'h) Nhận dạng thông qua đánh giá mức độ tương tác chéo với các loại rủi ro trọng yếu khác theo Khung QLRR của MSB từng thời kỳ nhằm nhận diện đầy đủ cơ chế phát sinh, lan truyền và khuếch đại rủi ro đối với trạng thái rủi ro, thu nhập, vốn và khả năng tuân thủ hạn mức, bao gồm:'),
+  P(2,'i) Rủi ro thanh khoản: sự suy giảm thanh khoản nguồn vốn hoặc thanh khoản thị trường có thể làm giảm khả năng đóng/mở trạng thái, mở rộng bid-ask spread, tăng haircut, làm giảm giá trị tài sản tài chính hoặc dẫn đến việc phải bán/đóng trạng thái trong điều kiện bất lợi;'),
+  P(2,'ii) Rủi ro tín dụng đối tác và rủi ro thanh toán: việc đối tác không thực hiện hoặc không có khả năng thực hiện nghĩa vụ theo giao dịch có thể làm phát sinh, thay đổi hoặc kéo dài trạng thái rủi ro thị trường ngoài dự kiến, đặc biệt đối với giao dịch phái sinh, ngoại hối, giao dịch repo, chứng khoán và các giao dịch chưa hoàn tất thanh toán;'),
+  P(2,'iii) Rủi ro tín dụng, rủi ro tổ chức phát hành và chênh lệch tín dụng: sự suy giảm chất lượng tín dụng, thay đổi xếp hạng tín nhiệm, mở rộng credit spread hoặc sự kiện default của tổ chức phát hành/đối tác có thể làm giảm giá trị công cụ tài chính và làm gia tăng lỗ đánh giá lại hoặc lỗ thực hiện;'),
+  P(2,'iv) Rủi ro mô hình, dữ liệu và định giá: sai lệch trong dữ liệu thị trường, nguồn giá, giả định, phương pháp định giá hoặc mô hình đo lường rủi ro có thể dẫn đến việc đánh giá không đầy đủ hoặc không chính xác giá trị danh mục, lãi/lỗ, mức độ rủi ro và mức độ tuân thủ hạn mức'),
+  P(2,'v) Rủi ro hoạt động, pháp lý và tuân thủ: sai sót trong nhập liệu, xác nhận giao dịch, hạch toán, định giá, quản lý tài sản bảo đảm, giám sát hạn mức, phê duyệt sản phẩm/giao dịch hoặc việc không tuân thủ quy định có thể làm phát sinh tổn thất, tranh chấp hoặc trạng thái rủi ro thị trường ngoài dự kiến;'),
+  P(2,'vi) Rủi ro lãi suất trên sổ ngân hàng: biến động lãi suất trên sổ ngân hàng có thể tác động gián tiếp đến RRTT thông qua chi phí vốn, thanh khoản, hành vi cơ cấu danh mục, nhu cầu phòng ngừa rủi ro hoặc khả năng phải đóng trạng thái trong điều kiện thị trường bất lợi;'),
+  P(2,'vii) Các rủi ro trọng yếu khác: các rủi ro khác có khả năng ảnh hưởng đến sản phẩm, giao dịch, danh mục hoặc hoạt động thuộc phạm vi quản lý RRTT được xem xét thông qua phân tích kịch bản, stress testing hoặc các đánh giá rủi ro phù hợp')],
+ defs:[['19','Ma trận rủi ro toàn diện'],['20','Stress-test'],['17','Vi phạm hạn mức'],['18','Trường hợp ngoại lệ'],['21','Trading Desks']],
+ arrow:'<b>8 kênh nhận dạng</b>: rà soát theo ma trận rủi ro toàn diện (a) · kế hoạch KD & khẩu vị / hạn mức (b) · phê duyệt sản phẩm–mô hình–hệ thống mới (c) · theo dõi & kiểm soát theo Điều 14, gồm cảnh báo sớm (d) · stress test & thanh khoản thoát vị thế (e) · backtesting / IPV / validation / vi phạm hạn mức / tổn thất (f) · thông tin từ các đơn vị gồm KTNB (g) · tương tác chéo với 7 nhóm rủi ro khác (h).',
+ gap:{status:'N'}},
+
+ {n:'3',t:'Cơ chế phối hợp thực hiện',paras:[
+  P(0,'3. Cơ chế phối hợp thực hiện'),
+  P(0,'Việc nhận dạng RRTT được thực hiện theo mô hình ba tuyến bảo vệ, phù hợp với chức năng, nhiệm vụ và thẩm quyền của từng đơn vị:'),
+  P(1,'a) Tuyến 1 – NH ĐCTC (Các đơn vị tự doanh)'),
+  P(2,'i) Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý;'),
+  P(2,'ii) Nhận dạng RRTT ngay từ giai đoạn xây dựng kế hoạch kinh doanh, phát triển sản phẩm mới, nghiệp vụ mới, thị trường mới hoặc thay đổi trọng yếu có liên quan;'),
+  P(2,'iii) Xác định nguồn gốc phát sinh rủi ro, yếu tố rủi ro thị trường tác động và cơ chế ảnh hưởng đến sản phẩm, giao dịch, danh mục hoặc hoạt động nghiệp vụ;'),
+  P(2,'iv) Cung cấp đầy đủ, kịp thời thông tin cần thiết phục vụ nhận dạng RRTT theo yêu cầu của Tuyến 2.'),
+  P(1,'b) Tuyến 2 - Khối QLRR (Bộ phận QLRRTT)'),
+  P(2,'i) Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT;'),
+  P(2,'ii) Đánh giá độc lập và thách thức tính đầy đủ, phù hợp của việc nhận dạng RRTT do Tuyến 1 thực hiện;'),
+  P(2,'iii) Nhận dạng, cập nhật các rủi ro mới phát sinh, rủi ro tiềm ẩn hoặc rủi ro chưa được nhận diện đầy đủ thông qua theo dõi thị trường, chỉ số cảnh báo sớm, kết quả đo lường, kiểm tra giá độc lập, stress testing và các sự kiện rủi ro liên quan;'),
+  P(2,'iv) Phân tích mức độ tương tác chéo giữa RRTT với các rủi ro trọng yếu khác;'),
+  P(2,'v) Tổng hợp các vấn đề trọng yếu trong nhận dạng RRTT để phục vụ các bước đo lường, giám sát, kiểm soát và báo cáo theo quy định.')],
+ defs:[['21','Trading Desks'],['29','Bộ phận QLRRTT']],
+ arrow:'<b>Tuyến 1</b> (đơn vị tự doanh): chủ động nhận dạng, nhận dạng sớm từ khâu kế hoạch/sản phẩm mới, xác định nguồn gốc rủi ro, cung cấp thông tin cho Tuyến 2 · <b>Tuyến 2</b> (Bộ phận QLRRTT): thiết lập phương pháp & tiêu chí, đánh giá độc lập và thách thức Tuyến 1, cập nhật rủi ro mới, phân tích tương tác chéo, tổng hợp cho bước đo lường – giám sát – báo cáo.',
+ gap:{status:'N'}}]}
+];
+
+/* ================= RENDER ================= */
+function paraHTML(p){return `<div class="p${p.l}">${p.t}</div>`;}
+
+function defbarHTML(defs){
+  if(!defs||!defs.length) return '';
+  return `<div class="defbar"><span class="lb">Định nghĩa liên quan</span>`+
+    defs.map(d=>`<button class="defchip" onclick="goDef('${d[0]}')">Đ4 K${d[0]} · ${d[1]} ↗</button>`).join('')+`</div>`;
+}
+function gapHTML(g){
+  if(!g) return '';
+  if(g.status==='N'){
+    return `<div class="nbox nb-n"><span class="tag">Đánh giá GAP — N</span></div>`;
+  }
+  const t=(lbl,v)=>`<div class="tcard${v?'':' empty'}"><h5>${lbl}</h5><p>${v||'—'}</p></div>`;
+  const has=(x)=>x?x:'';
+  let s=`<div class="gapbox"><div class="gapbox-hd"><span class="yn">GAP = Y</span> ${g.ref||'GAP'}</div><div class="gapbox-bd">`;
+  s+=`<div class="grow"><div class="glbl">Trách nhiệm thực hiện / phối hợp</div><div class="tuyen">
+      ${t('Tuyến 1',g.t1)}${t('Tuyến 2',g.t2)}${t('Tuyến 3',g.t3)}</div></div>`;
+  const gaps=[['Tuyến 1',g.gapT1],['Tuyến 2',g.gapT2],['Tuyến 3',g.gapT3]].filter(x=>x[1]);
+  s+=`<div class="grow"><div class="glbl">GAP / Hiện trạng</div>`+
+     gaps.map(x=>`<div class="gtxt" style="margin-bottom:7px"><b style="color:#9B2C2C">${x[0]}:</b> ${x[1]}</div>`).join('')+`</div>`;
+  const nas=[['Tuyến 1',g.naT1],['Tuyến 2',g.naT2],['Tuyến 3',g.naT3]].filter(x=>x[1]);
+  s+=`<div class="grow"><div class="glbl">Next action</div>`+
+     nas.map(x=>`<div class="gtxt" style="margin-bottom:7px"><b style="color:#9B2C2C">${x[0]}:</b> ${x[1]}</div>`).join('')+`</div>`;
+  s+=`<div class="grow"><div class="glbl">Phân loại Action (MLIR)</div><div class="clschips">
+      <span class="cchip${g.cls&&g.cls.vb?' on':''}">Cần bổ sung quy định</span>
+      <span class="cchip${g.cls&&g.cls.bc?' on':''}">Cần bổ sung báo cáo</span>
+      <span class="cchip${g.cls&&g.cls.ht?' on':''}">Cần nâng cấp hệ thống</span></div></div>`;
+  s+=`<div class="grow metagrid">
+      <div><div class="glbl">Đơn vị phối hợp</div><div class="gtxt">${has(g.unit)}</div></div>
+      <div><div class="glbl">PIC</div><div class="gtxt">${has(g.pic)}</div></div></div>`;
+  if(g.qa) s+=`<div class="grow"><div class="glbl">Note Q&amp;A</div><div class="gtxt">${g.qa}</div></div>`;
+  s+=`</div></div>`;
+  return s;
+}
+function khHTML(k,isDef){
+  let inner=k.paras.map(paraHTML).join('');
+  if(k.chart) inner+=`<div class="chart">${k.chart}${k.chartCap?`<div class="chart-cap">${k.chartCap}</div>`:''}</div>`;
+  if(k.note) inner+=`<div class="nbox"><span class="tag">${k.note.tag}</span><div>${k.note.html}</div></div>`;
+  if(k.ex) inner+=`<div class="ex-num"><span class="tag">Ví dụ minh họa</span><div>${k.ex}</div></div>`;
+  if(k.defs) inner+=defbarHTML(k.defs);
+  if(k.arrow) inner+=`<div class="arrow"><span class="ld">→</span>${k.arrow}</div>`;
+  if(k.gap) inner+=gapHTML(k.gap);
+  const yflag=(k.gap&&k.gap.status==='Y')?`<span class="ygap">GAP</span>`:'';
+  const id=isDef?` id="k4-${k.n}"`:'';
+  return `<div class="kh"${id} data-n="${k.n}"><div class="kh-hd"><span class="knum">${k.n}</span> ${k.t}${yflag}</div><div class="kh-bd">${inner}</div></div>`;
+}
+
+function artPage(a,i,all){
+  let s=`<section class="page" id="${a.id}">`;
+  s+=`<div class="chapline">${a.chap}</div>`;
+  s+=`<div class="eyebrow">${a.eyebrow}</div><h1 class="pt">${a.title}</h1>`;
+  if(a.chapNote) s+=`<p class="ps">${a.chapNote}</p>`;
+  const gs=a.gapCount>0
+    ? `<div class="gapsum"><b>${a.gapCount} GAP</b> được ghi nhận tại điều này</div>`
+    : `<div class="gapsum clean"><b>Không phát sinh GAP</b> tại điều này</div>`;
+  s+=gs;
+  if(a.lead) s+=`<div class="lead">${a.lead}</div>`; else s+=`<div style="height:18px"></div>`;
+  s+=a.kh.map(k=>khHTML(k,false)).join('');
+  const prev=i>0?`<button class="navbtn" onclick="go('${all[i-1].id}')"><small>← Trước</small>${all[i-1].tab} · ${all[i-1].sub}</button>`:`<button class="navbtn" disabled><small>←</small>Đầu chuỗi</button>`;
+  const next=i<all.length-1?`<button class="navbtn next" onclick="go('${all[i+1].id}')"><small>Tiếp →</small>${all[i+1].tab} · ${all[i+1].sub}</button>`:`<button class="navbtn next" disabled><small>→</small>Hết phần đã thực hiện</button>`;
+  s+=`<div class="navfoot">${prev}${next}</div>`;
+  s+=`</section>`;
+  return s;
+}
+function defPage(){
+  let s=`<section class="page" id="d4">`;
+  s+=`<div class="chapline">Chương I. QUY ĐỊNH CHUNG</div>`;
+  s+=`<div class="eyebrow">Điều 4 · 31 khoản · Tra cứu</div><h1 class="pt">Giải thích từ ngữ</h1>`;
+  s+=`<p class="ps">Trong Quy chế này, các từ ngữ dưới đây được hiểu như sau. Dùng ô tìm kiếm để lọc nhanh theo thuật ngữ hoặc nội dung.</p>`;
+  s+=`<div class="searchwrap"><div class="searchbox"><span class="ico">🔍</span>
+      <input id="q" type="text" placeholder="Tìm thuật ngữ hoặc nội dung… (vd: vega, sổ kinh doanh, hạn mức)" oninput="doSearch()">
+      <button onclick="clearSearch()">Xóa</button></div>
+      <div class="shits" id="shits"></div></div>`;
+  s+=`<div id="deflist">`+DEF.map(k=>khHTML(k,true)).join('')+`</div>`;
+  s+=`</section>`;
+  return s;
+}
+
+const NAV1=ARTS.map(a=>({id:a.id,tab:a.tab,sub:a.sub,gap:a.gapCount}));
+function renderNav(){
+  document.getElementById('nav1').innerHTML=NAV1.map(n=>
+    `<button class="ni" data-id="${n.id}" onclick="go('${n.id}')">${n.tab}${n.gap?`<span class="gapdot">${n.gap} GAP</span>`:''}<small>${n.sub}</small></button>`).join('');
+  document.getElementById('nav2').innerHTML=
+    `<button class="ni ref" data-id="d4" onclick="go('d4')">Điều 4<small>Giải thích từ ngữ · có tìm kiếm</small></button>`;
+  const tot=ARTS.reduce((s,a)=>s+a.gapCount,0);
+  document.getElementById('sbfoot').innerHTML=
+    `Đã thực hiện: <b>Điều 1, 2, 3, 9, 10</b><br>Tổng GAP ghi nhận: <b>${tot}</b><br>Định nghĩa: <b>31 khoản</b> (Điều 4)`;
+}
+function renderMain(){
+  document.getElementById('main').innerHTML=ARTS.map((a,i)=>artPage(a,i,ARTS)).join('')+defPage();
+}
+function go(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById(id); if(pg) pg.classList.add('active');
+  const nb=document.querySelector(`.ni[data-id="${id}"]`); if(nb) nb.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function goDef(n){
+  go('d4');
+  clearSearch();
+  setTimeout(()=>{
+    const el=document.getElementById('k4-'+n);
+    if(!el) return;
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+  },160);
+}
+function stripD(s){return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase();}
+function doSearch(){
+  const q=document.getElementById('q').value.trim();
+  const list=document.querySelectorAll('#deflist .kh');
+  if(!q){list.forEach(k=>k.classList.remove('hidden'));document.getElementById('shits').textContent='';return;}
+  const qq=stripD(q); let hit=0;
+  list.forEach(k=>{
+    const txt=stripD(k.textContent);
+    if(txt.includes(qq)){k.classList.remove('hidden');hit++;}else{k.classList.add('hidden');}
+  });
+  document.getElementById('shits').textContent=hit?`Tìm thấy ${hit} khoản khớp "${q}"`:`Không có khoản nào khớp "${q}"`;
+}
+function clearSearch(){const i=document.getElementById('q'); if(i){i.value='';} const l=document.querySelectorAll('#deflist .kh'); l.forEach(k=>k.classList.remove('hidden')); const h=document.getElementById('shits'); if(h) h.textContent='';}
+
+/* ================= HIGHLIGHT ================= */
+let hlMode=false, erMode=false;
+function hint(msg){
+  const h=document.getElementById('hlhint');
+  if(!msg){h.classList.remove('show');return;}
+  h.textContent=msg; h.classList.add('show');
+}
+function syncHL(){
+  document.body.classList.toggle('hl-on',hlMode);
+  document.body.classList.toggle('er-on',erMode);
+  document.getElementById('btnHL').classList.toggle('on',hlMode);
+  document.getElementById('btnER').classList.toggle('on',erMode);
+  if(hlMode) hint('Bôi đen đoạn chữ muốn đánh dấu');
+  else if(erMode) hint('Bấm vào vùng vàng để xóa đánh dấu');
+  else hint('');
+}
+function toggleHL(){hlMode=!hlMode; if(hlMode) erMode=false; syncHL();}
+function toggleER(){erMode=!erMode; if(erMode) hlMode=false; syncHL();}
+
+function inMain(node){
+  const m=document.getElementById('main'); if(!m) return false;
+  const el=(node.nodeType===3)?node.parentNode:node;
+  return !!el && m.contains(el) && !el.closest('svg');
+}
+function wrapRange(r){
+  const sp=document.createElement('span'); sp.className='hl-mark';
+  try{ r.surroundContents(sp); return true; }catch(e){ return false; }
+}
+function highlightSelection(){
+  const sel=window.getSelection();
+  if(!sel || sel.rangeCount===0 || sel.isCollapsed) return;
+  const range=sel.getRangeAt(0);
+  if(!inMain(range.startContainer) || !inMain(range.endContainer)) return;
+  if(range.startContainer===range.endContainer && range.startContainer.nodeType===3){
+    wrapRange(range.cloneRange()); sel.removeAllRanges(); return;
+  }
+  const nodes=[];
+  const walker=document.createTreeWalker(range.commonAncestorContainer,NodeFilter.SHOW_TEXT,null);
+  let n;
+  while(n=walker.nextNode()){
+    if(!n.nodeValue || !n.nodeValue.trim()) continue;
+    if(!inMain(n)) continue;
+    try{ if(!range.intersectsNode(n)) continue; }catch(e){ continue; }
+    nodes.push(n);
+  }
+  nodes.forEach(node=>{
+    let s=0, e=node.nodeValue.length;
+    if(node===range.startContainer) s=range.startOffset;
+    if(node===range.endContainer)   e=range.endOffset;
+    if(s>=e) return;
+    const r=document.createRange();
+    try{ r.setStart(node,s); r.setEnd(node,e); }catch(err){ return; }
+    wrapRange(r);
+  });
+  sel.removeAllRanges();
+}
+function unwrapMark(m){
+  const p=m.parentNode;
+  while(m.firstChild) p.insertBefore(m.firstChild,m);
+  p.removeChild(m); p.normalize();
+}
+document.addEventListener('mouseup',e=>{
+  if(!hlMode) return;
+  if(e.target.closest && e.target.closest('.hltb')) return;
+  setTimeout(highlightSelection,0);
+});
+document.addEventListener('click',e=>{
+  if(!erMode) return;
+  const m=e.target.closest && e.target.closest('.hl-mark');
+  if(m) unwrapMark(m);
+});
+function clearHL(){
+  const pg=document.querySelector('.page.active')||document.getElementById('main');
+  const ms=pg.querySelectorAll('.hl-mark');
+  if(!ms.length){ hint('Trang này chưa có đánh dấu nào'); setTimeout(()=>{if(!hlMode&&!erMode)hint('')},1600); return; }
+  if(!confirm('Xóa toàn bộ '+ms.length+' vùng đã đánh dấu trên trang này?')) return;
+  ms.forEach(unwrapMark);
+}
+
+renderNav(); renderMain(); go('d1');
+</script></body></html>
