@@ -12,6 +12,7 @@ Nội dung quy chế (Điều 4 — 31 khoản định nghĩa, nguyên văn) + �
 (khối `.gapbox` đánh dấu GAP có/không, tuyến phòng thủ liên quan). Tone terracotta `#b83a10`.
 Chi tiết kỹ thuật đã có trong [`../docs/projects.md`](../docs/projects.md#qcrr022_lampd3).
 
-Bản đánh giá GAP gốc (`Danh gia GAP QC.RR.022.xlsx`) nằm trên ổ mạng nội bộ MSB
-(`\\filesrv01.msb.com.vn\...\05.Danh gia GAP\`), chưa đưa vào repo — chỉ có shortcut, không
-đọc được nội dung.
+Bản đánh giá GAP gốc: `QC.RR.022/source/Danh_gia_GAP_QC.RR.022.xlsx` (sheet `QC.RR.022_MR` +
+`Gap`). Kết quả đối chiếu Excel ↔ HTML: [`QC.RR.022/THAM_DINH_GAP.md`](QC.RR.022/THAM_DINH_GAP.md)
+— 6 mục GAP thật (Điều 5, 7) chưa được build vào HTML; ngược lại 2 GAP mới HTML phát hiện ở
+Điều 9 chưa được ghi ngược vào Excel. Hai nguồn GAP hiện **chưa đồng bộ**.
