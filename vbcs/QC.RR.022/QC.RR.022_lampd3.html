@@ -57,6 +57,20 @@ main{flex:1;padding:38px 52px;overflow-x:auto;max-width:1000px;margin:0 auto}
 .chart svg{width:100%;height:auto;display:block}
 .chart-cap{font-size:13px;color:#9a4020;line-height:1.55;margin-top:8px;padding-top:8px;border-top:1px dotted #f0c4b2}
 .chart-cap b{color:#b83a10}
+
+/* Tổng hợp thẩm định GAP cho khoản không phát sinh GAP */
+.reviewbox{border:1px solid #d8e5da;background:#fbfdfb;border-radius:10px;margin-top:16px;overflow:hidden}
+.reviewbox-hd{background:#276749;color:#fff;padding:11px 17px;font-size:14px;font-weight:700}
+.reviewitem{padding:15px 17px;border-top:1px solid #e3ece5}
+.reviewitem:first-of-type{border-top:none}
+.reviewtitle{font-size:14.5px;font-weight:700;color:#1f4b32;margin-bottom:7px}
+.reviewsummary{font-size:14px;line-height:1.6;color:#2d3748;margin-bottom:10px}
+.reviewgap{display:inline-block;margin-top:10px;padding:4px 10px;border-radius:12px;background:#e2efe6;color:#276749;font-size:11.5px;font-weight:700;letter-spacing:.35px;text-transform:uppercase}
+.reviewbox .tuyen{margin-top:5px}
+.reviewbox .tcard{border-color:#d8e5da}
+.reviewbox .tcard h5{color:#276749}
+@media(max-width:760px){.reviewbox .tuyen{grid-template-columns:1fr}}
+
 /* GAP box */
 .gapbox{border:1px solid #e0a99a;background:#fffaf8;border-radius:10px;margin-top:16px;overflow:hidden}
 .gapbox-hd{background:#9B2C2C;color:#fff;padding:10px 17px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px}
@@ -416,6 +430,7 @@ const ARTS=[
   P(1,'g) Đánh giá khả năng có thể phòng ngừa rủi ro cho các rủi ro thị trường được nhận dạng.')],
  defs:[['11','Sổ kinh doanh'],['1','RRTT'],['7','Rủi ro delta'],['8','Rủi ro vega'],['9','Rủi ro curvature'],['3','GIRR'],['4','CSR'],['6','Curve risk'],['5','Basis risk'],['2','Rủi ro tập trung'],['10','Yếu tố RRTT'],['21','Trading Desks']],
  arrow:'nội dung nhận dạng tối thiểu: xác định khoản mục Sổ KD (a) · phân loại rủi ro theo <b>risk class</b> và theo <b>độ nhạy delta/vega/curvature (SBM Basel)</b>, bổ sung GIRR/CSR/curve/basis khi cần (b) · nhận dạng rủi ro tập trung tự doanh gồm cả khoản mục chưa hạch toán (c) · yếu tố RRTT (d) · hệ thống & nguồn dữ liệu (e) · khả năng định giá và nguồn giá (f) · khả năng phòng ngừa (g).',
+ review:[{"ref":"a","title":"Xác định khoản mục thuộc Sổ kinh doanh","summary":"Xác định đúng sản phẩm, giao dịch, danh mục hoặc khoản mục thuộc Sổ kinh doanh theo quy định nội bộ; bảo đảm ghi nhận đúng sản phẩm và folders.","t1":"Xác định và ghi nhận đúng sản phẩm, giao dịch, danh mục hoặc khoản mục thuộc Sổ kinh doanh; bảo đảm giao dịch được ghi nhận đúng sản phẩm và folders.","t2":"Rà soát việc phân loại Sổ kinh doanh, bảo đảm phạm vi nhận dạng RRTT đầy đủ và phù hợp với quy định nội bộ.","t3":"Đánh giá độc lập việc tuân thủ quy định về phân loại Sổ kinh doanh trong phạm vi kiểm toán.","gap":"N"},{"ref":"b(i)","title":"Phân loại theo risk class","summary":"Phân loại RRTT phát sinh theo bốn nhóm: lãi suất, ngoại hối, giá cổ phiếu và giá hàng hóa; không yêu cầu MSB phải phát sinh hoạt động ở cả bốn nhóm.","t1":"Nhận dạng và phân loại sản phẩm, giao dịch, danh mục theo nhóm RRTT phát sinh; cung cấp đầy đủ thông tin phục vụ phân loại.","t2":"Rà soát việc phân loại, bảo đảm sản phẩm và giao dịch được xếp đúng, đầy đủ vào nhóm rủi ro tương ứng.","t3":"Đánh giá độc lập việc tuân thủ khung phân loại RRTT trong phạm vi kiểm toán.","gap":"N"},{"ref":"b(ii)","title":"Phân loại theo Delta, Vega và Curvature","summary":"Sử dụng Delta, Vega và Curvature làm hệ quy chiếu nhận dạng theo phương pháp luận SBM; không tự ràng buộc MSB phải triển khai đầy đủ phép tính SBM. Cách phân loại khác được chấp nhận nếu vẫn bao phủ đúng bản chất rủi ro.","t1":"Xác định đặc tính sản phẩm, giao dịch và cung cấp thông tin cần thiết để nhận dạng Delta, Vega và Curvature.","t2":"Xây dựng hoặc áp dụng tiêu chí phân loại tương đương; rà soát việc nhận dạng các đặc tính độ nhạy đối với từng risk class.","t3":"Đánh giá độc lập việc tuân thủ tiêu chí phân loại theo độ nhạy trong phạm vi kiểm toán.","gap":"N"},{"ref":"b(iii)","title":"Phân loại bổ sung GIRR, CSR, Curve risk và Basis risk","summary":"Cụm từ “có thể” trao quyền phân loại bổ sung theo nhu cầu quản trị, không tạo nghĩa vụ bắt buộc phải triển khai đồng thời cả bốn nhóm.","t1":"Cung cấp thông tin về sản phẩm, giao dịch và yếu tố rủi ro phục vụ phân loại bổ sung khi được áp dụng.","t2":"Căn cứ nhu cầu quản trị để đề xuất và thực hiện phân loại bổ sung phù hợp.","t3":"Đánh giá việc tuân thủ phương pháp phân loại bổ sung trong phạm vi kiểm toán khi MSB áp dụng.","gap":"N"},{"ref":"b(iv)","title":"Các phân loại RRTT khác","summary":"Điều khoản mở cho phép cập nhật cách phân loại theo pháp luật và nhu cầu quản trị từng thời kỳ; không bắt buộc hình thành ngay một nhóm phân loại mới.","t1":"Cung cấp thông tin về sản phẩm, giao dịch và rủi ro mới phát sinh để phục vụ cập nhật phân loại.","t2":"Theo dõi thay đổi pháp luật và nhu cầu quản trị; đề xuất bổ sung cách phân loại khi cần thiết.","t3":"Đánh giá việc cập nhật và tuân thủ các phân loại bổ sung trong phạm vi kiểm toán.","gap":"N"},{"ref":"c","title":"Nhận dạng rủi ro tập trung trong hoạt động tự doanh","summary":"Nhận dạng rủi ro tập trung trên đầy đủ khoản mục nội bảng, ngoại bảng và khoản mục chưa được hạch toán; các phạm vi này đã được xác định đầy đủ trên báo cáo hiện tại.","t1":"Nhận dạng và cung cấp đầy đủ thông tin về giao dịch tự doanh trên cả ba phạm vi ghi nhận.","t2":"Xây dựng tiêu chí nhận dạng rủi ro tập trung; tổng hợp và rà soát trạng thái tự doanh trên đầy đủ ba phạm vi.","t3":"Đánh giá độc lập tính đầy đủ của phương pháp, dữ liệu và việc nhận dạng rủi ro tập trung trong phạm vi kiểm toán.","gap":"N"},{"ref":"d","title":"Nhận dạng các yếu tố rủi ro thị trường","summary":"Nhận dạng đầy đủ các yếu tố thị trường tác động đến sản phẩm, giao dịch hoặc danh mục; không có yếu tố rủi ro trọng yếu nào đang bị bỏ sót.","t1":"Xác định và cung cấp thông tin về các yếu tố thị trường tác động đến sản phẩm, giao dịch và danh mục thuộc phạm vi phụ trách.","t2":"Xây dựng, rà soát và cập nhật việc ánh xạ sản phẩm, giao dịch với các yếu tố rủi ro phù hợp.","t3":"Đánh giá độc lập tính đầy đủ của việc nhận dạng các yếu tố RRTT trong phạm vi kiểm toán.","gap":"N"},{"ref":"e","title":"Xác định hệ thống, dữ liệu và nguồn thông tin","summary":"Xác định và truy vết hệ thống ghi nhận giao dịch, hệ thống lưu trữ dữ liệu và nguồn thông tin phục vụ quản lý, đo lường, giám sát và báo cáo RRTT.","t1":"Xác định và cung cấp thông tin về hệ thống ghi nhận giao dịch, dữ liệu và nguồn thông tin thuộc phạm vi hoạt động.","t2":"Tổng hợp và rà soát các hệ thống, kho dữ liệu và nguồn thông tin sử dụng trong quản lý RRTT.","t3":"Đánh giá độc lập tính đầy đủ và khả năng truy vết của hệ thống, dữ liệu và nguồn thông tin trong phạm vi kiểm toán.","gap":"N"},{"ref":"f","title":"Đánh giá khả năng định giá","summary":"Đánh giá khả năng định giá, nguồn giá, dữ liệu thị trường, mô hình, thanh khoản và các yếu tố có thể gây sai lệch giá trị hoặc P&L đánh giá lại.","t1":"Cung cấp đầy đủ đặc tính sản phẩm, thông tin giao dịch, nguồn giá và dữ liệu phục vụ định giá; nhận diện trường hợp khó định giá hoặc thanh khoản thấp.","t2":"Rà soát khả năng định giá, nguồn giá, dữ liệu, mô hình, thanh khoản và các yếu tố có thể gây sai lệch giá trị.","t3":"Đánh giá độc lập tính phù hợp của cơ chế kiểm soát định giá và dữ liệu liên quan trong phạm vi kiểm toán.","gap":"N"},{"ref":"g","title":"Đánh giá khả năng phòng ngừa rủi ro","summary":"Đánh giá liệu các RRTT đã nhận dạng có thể được phòng ngừa hay không; không bắt buộc mọi rủi ro phải được phòng ngừa hoặc loại bỏ hoàn toàn.","t1":"Xác định khả năng sử dụng công cụ hoặc giao dịch phòng ngừa đối với rủi ro phát sinh từ hoạt động phụ trách.","t2":"Rà soát khả năng phòng ngừa, các giới hạn và rủi ro còn lại sau phòng ngừa.","t3":"Đánh giá độc lập cơ chế kiểm soát hoạt động phòng ngừa rủi ro trong phạm vi kiểm toán.","gap":"N"}],
  gap:{status:'N',reason:'Nội dung nhận dạng đã bám theo chuẩn Basel (risk class + SBM delta/vega/curvature + nhóm rủi ro thành phần). Không phát sinh nghĩa vụ chưa được đáp ứng. Năng lực đo lường thực tế thuộc phạm vi Điều 11.'}},
 
  {n:'2',t:'Phương thức thực hiện nhận dạng RRTT',paras:[
@@ -470,6 +485,21 @@ function defbarHTML(defs){
   return `<div class="defbar"><span class="lb">Định nghĩa liên quan</span>`+
     defs.map(d=>`<button class="defchip" onclick="goDef('${d[0]}')">Đ4 K${d[0]} · ${d[1]} ↗</button>`).join('')+`</div>`;
 }
+
+function reviewHTML(items){
+  if(!items||!items.length) return '';
+  const t=(lbl,v)=>`<div class="tcard"><h5>${lbl}</h5><p>${v}</p></div>`;
+  let s=`<div class="reviewbox"><div class="reviewbox-hd">Tổng hợp thẩm định GAP — Khoản 1</div>`;
+  items.forEach(x=>{
+    s+=`<div class="reviewitem"><div class="reviewtitle">${x.ref} · ${x.title}</div>`;
+    s+=`<div class="reviewsummary">${x.summary}</div>`;
+    s+=`<div class="glbl" style="color:#276749">Trách nhiệm thực hiện / phối hợp</div><div class="tuyen">`;
+    s+=t('Tuyến 1',x.t1)+t('Tuyến 2',x.t2)+t('Tuyến 3',x.t3);
+    s+=`</div><span class="reviewgap">Đánh giá GAP — ${x.gap||'N'}</span></div>`;
+  });
+  return s+`</div>`;
+}
+
 function gapHTML(g){
   if(!g) return '';
   if(g.status==='N'){
@@ -504,6 +534,7 @@ function khHTML(k,isDef){
   if(k.ex) inner+=`<div class="ex-num"><span class="tag">Ví dụ minh họa</span><div>${k.ex}</div></div>`;
   if(k.defs) inner+=defbarHTML(k.defs);
   if(k.arrow) inner+=`<div class="arrow"><span class="ld">→</span>${k.arrow}</div>`;
+  if(k.review) inner+=reviewHTML(k.review);
   if(k.gap) inner+=gapHTML(k.gap);
   const yflag=(k.gap&&k.gap.status==='Y')?`<span class="ygap">GAP</span>`:'';
   const id=isDef?` id="k4-${k.n}"`:'';
@@ -666,3 +697,4 @@ function clearHL(){
 
 renderNav(); renderMain(); go('d1');
 </script></body></html>
+
