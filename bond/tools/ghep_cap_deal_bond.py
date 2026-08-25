@@ -90,7 +90,10 @@ def emit(s, b, qty, split, bond, cpty, out):
     rate = (cost_mn / (cash_bn * 1000) * 365 / days * 100) if days > 0 and cash_bn > 0 else 0.0
     out.append({
         'sid': s['BondsDeals_Id'], 'bid': b['BondsDeals_Id'], 'bond': bond, 'cpty': cpty,
+        # qty = nghìn đơn vị TP. face = MỆNH GIÁ quy ra tỷ VND (đơn vị × FaceValue).
+        # Luôn dùng 'face' khi hiển thị — quy đổi từ 'qty' rất dễ nhầm hệ số.
         'qty': round(qty / 1000, 3),
+        'face': round(qty * s['FaceValue'] / 1e9, 4),
         'sset': s['SettlementDate'].strftime('%Y-%m-%d'),
         'bset': b['SettlementDate'].strftime('%Y-%m-%d'), 'days': days,
         'cash': round(cash_bn, 5), 'cost': round(cost_mn, 4), 'rate': rate,
@@ -198,6 +201,7 @@ def merge_multi_leg(pairs):
             other = 'sid' if side == 'B' else 'bid'
             base[other] = '+'.join(str(x[other]) for x in grp)
             base['qty'] = round(sum(x['qty'] for x in grp), 3)
+            base['face'] = round(sum(x['face'] for x in grp), 4)
             base['cash'] = round(sum(x['cash'] for x in grp), 5)
             base['cost'] = round(sum(x['cost'] for x in grp), 4)
             base['rate'] = (base['cost'] / (base['cash'] * 1000) * 365 / base['days'] * 100
@@ -261,6 +265,7 @@ def match_cross_cpty(leftover):
                 'bid': b['BondsDeals_Id'], 'bond': bond,
                 'cpty': f"{b['Cpty_ShortName']}→{s0['Cpty_ShortName']}",
                 'qty': round(total / 1000, 3),
+                'face': round(total * b['FaceValue'] / 1e9, 4),
                 'sset': sset.strftime('%Y-%m-%d'), 'bset': bset.strftime('%Y-%m-%d'), 'days': days,
                 'cash': round(cash_bn, 5), 'cost': round(cost_mn, 4),
                 'rate': (cost_mn / (cash_bn * 1000) * 365 / days * 100) if days > 0 and cash_bn > 0 else 0.0,
@@ -327,6 +332,7 @@ def blk(ps):
         'minD': min((p['days'] for p in ps), default=0),
         'maxD': max((p['days'] for p in ps), default=0),
         'qty': round(sum(p['qty'] for p in ps), 1),
+        'face': round(sum(p['face'] for p in ps), 2),
         'nLai': sum(1 for p in ps if pnl_mn(p) > 0),
         'nLo': sum(1 for p in ps if pnl_mn(p) < 0),
     }
@@ -435,7 +441,9 @@ def build_D(pairs, unmatched, n_deals, d_from, d_to):
         'bondA': bond(A), 'bondB': bond(B),
         'foldA': folder(A), 'foldB': folder(B),
         'outstA': outstanding(A), 'outstB': outstanding(B),
-        'histA': [round(-p['rate'], 3) for p in A if p['days'] > 0],
+        # Nhóm A trình bày là CHI PHÍ VAY (dương = MSB trả), nhóm B là LỢI SUẤT
+        # CHO VAY (dương = MSB thu). Hai nhóm cùng dương ở trạng thái bình thường.
+        'histA': [round(p['rate'], 3) for p in A if p['days'] > 0],
         'histB': [round(-p['rate'], 3) for p in B if p['days'] > 0],
         'anom': anom, 'noise': noise,
         'fmis': [p for p in pairs if p['sf'] != p['bf']],
