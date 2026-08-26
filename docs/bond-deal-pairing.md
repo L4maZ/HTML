@@ -225,3 +225,28 @@ Số thứ hai là **cam kết**, ghi nhận dần tới khi chân sau thanh to�
 `blk()` trong script trả cả `pnlDone` lẫn `pnlOpen` để không lẫn hai thứ.
 
 Mốc chia nằm ở hằng số `AS_OF` — **đổi khi kỳ báo cáo đổi**.
+
+
+## Phụ lục — FIBond (CD / trái phiếu doanh nghiệp)
+
+Script: [`bond/tools/ghep_cap_deal_fibond.py`](../bond/tools/ghep_cap_deal_fibond.py)
+Dữ liệu: `bond/source/List_deal_ps_FIBond_2026.08.24.xlsx` (805 dòng)
+
+Schema khác hẳn file TPCP — ba bẫy: `QUANTITY` vô dụng (682/805 dòng = 1, khối
+lượng thật ở `FACE_AMOUNT`), `ACCRUED` không phải tiền (chỉ nhận 0–6, là SỐ
+NGÀY), `PRICE` không tái tạo được `GROSS_AMOUNT` (luôn lấy thẳng cột này).
+
+**Điều kiện ghép = repo/reverse repo:** cùng mã giấy tờ + cùng đối tác + ngược
+chiều + cùng `FACE_AMOUNT`. **Không loại trừ theo `CAPTURE_DATE`** — xác nhận
+của Jak (08/2026): BO có thể nhập hai chân cùng một hợp đồng cách xa ngày
+nhau, không có nghĩa là không phải repo. `CAPTURE_DATE` lệch xa chỉ tách
+riêng một sheet để soát BO, không loại khỏi kết quả.
+
+Bug đã sửa: lượt ghép phần dư từng sắp theo `|lệch mã deal|` — tiêu chí chỉ
+đúng cho lượt ưu tiên (cùng ngày nhập). Áp nhầm sang phần dư đẩy một chân về
+cuối hàng đợi, ghép với đối tượng cách xa ngày giả tạo (ví dụ
+VPBCD080427/TCBV-HO: đáng lẽ cách 14 ngày, bị đẩy thành 84 ngày). Đã sửa:
+lượt phần dư ghép theo **thứ tự ngày thanh toán** (FIFO), không theo mã deal.
+
+Kết quả kỳ 24/08/2026: 330 cặp Repo/Reverse Repo (54 cùng ngày nhập, 276 khác
+ngày nhập), 133 chân không ghép được.

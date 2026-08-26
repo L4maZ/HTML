@@ -7,8 +7,14 @@ Schema KHÁC HẲN file TPCP (MSB_RP_DM) — ba bẫy phải nhớ:
   3. PRICE không tái tạo GROSS: FACE x PRICE/100 + ACCRUED chỉ khớp 69/805 dòng.
      GROSS_AMOUNT đã gồm lãi dồn tích -> luôn lấy thẳng GROSS_AMOUNT.
 
-Điều kiện phân biệt REPO với mua-bán thường: HAI CHÂN NHẬP CÙNG NGÀY (CAPTURE_DATE).
-Thiếu điều kiện đó thì chỉ là mua rồi bán lại sau -> xếp vào nhóm `loose`.
+Điều kiện ghép cặp = repo/reverse repo: cùng mã giấy tờ + cùng đối tác +
+ngược chiều (S/B) + cùng FACE_AMOUNT. KHÔNG loại trừ theo CAPTURE_DATE —
+xác nhận của Jak (08/2026): BO (back office) có thể nhập hai chân của cùng
+một hợp đồng cách xa ngày nhau, việc đó không có nghĩa là không phải deal
+repo. Toàn bộ cặp khớp đủ 4 điều kiện trên đều tính là Repo/Reverse Repo.
+
+CAPTURE_DATE hai chân lệch xa nhau chỉ dùng để TÁCH RIÊNG một sheet cho dễ
+soát BO (`gap_cap`), không dùng để loại trừ khỏi kết quả.
 """
 import openpyxl
 from collections import defaultdict, Counter
@@ -19,25 +25,21 @@ H = [ws.cell(row=1, column=c).value for c in range(1, 20)]
 R = [dict(zip(H, [ws.cell(row=r, column=c).value for c in range(1, 20)])) for r in range(2, ws.max_row + 1)]
 R = [x for x in R if x['DEAL_ID'] is not None and x['TRANSACTION_STATUS'] != 'N']
 
-# Khoá ghép, theo đúng quy tắc nghiệp vụ đã chốt ở file TPCP:
-#   cùng mã giấy tờ + cùng đối tác + ngược chiều + cùng khối lượng
-# Ở file FIBond, khối lượng là FACE_AMOUNT (QUANTITY = 1 ở 682/805 dòng).
-# Điều kiện phân biệt REPO với mua-bán thường: hai chân được NHẬP CÙNG NGÀY.
 g = defaultdict(lambda: {'B': [], 'S': []})
 for x in R:
     g[(x['PAPER_CODE'], x['CPTY_CODE'], x['FACE_AMOUNT'])][x['DEAL_TYPE']].append(x)
 
-repo, loose = [], []
+matched = []
 for (paper, cpty, face), v in g.items():
     S = sorted(v['S'], key=lambda x: (x['VALUE_DATE'], x['DEAL_ID']))
     B = sorted(v['B'], key=lambda x: (x['VALUE_DATE'], x['DEAL_ID']))
     us, ub = set(), set()
 
-    def emit(s, b, out):
+    def emit(s, b):
         first, second = (s, b) if s['VALUE_DATE'] <= b['VALUE_DATE'] else (b, s)
         dirn = 'A' if first is s else 'B'
         gap_cap = abs((s['CAPTURE_DATE'] - b['CAPTURE_DATE']).days)
-        rec = dict(
+        matched.append(dict(
             paper=paper, cpty=cpty, prod=s['PRODUCT_CODE'], face=face,
             sid=s['DEAL_ID'], bid=b['DEAL_ID'], dirn=dirn,
             days=(second['VALUE_DATE'] - first['VALUE_DATE']).days,
@@ -48,11 +50,14 @@ for (paper, cpty, face), v in g.items():
                 else (second['GROSS_AMOUNT'] - first['GROSS_AMOUNT']),
             sy=s['YIELD'], by=b['YIELD'], st=s['TRANSACTION_STATUS'] + b['TRANSACTION_STATUS'],
             scap=s['CAPTURE_DATE'], bcap=b['CAPTURE_DATE'])
-        out.append(rec)
+        )
 
-    # Lượt 1 — cùng ngày nhập máy (CAPTURE_DATE): dấu vết book cùng lúc, đúng là
-    # repo. Sắp theo |lệch mã deal| ở ĐÂY hợp lý — hai chân một hợp đồng được
-    # nhập kề nhau nên deal-id gần nhau.
+    # Lượt 1 — ưu tiên ghép hai chân CÙNG NGÀY NHẬP MÁY trước: khi một nhóm có
+    # nhiều hơn 2 chân, đây là cách chọn ĐÚNG cặp trong số nhiều khả năng (dấu
+    # vết book cùng lúc là bằng chứng mạnh nhất về việc hai chân thuộc cùng một
+    # hợp đồng). Sắp theo |lệch mã deal| ở đây hợp lý vì hai chân một hợp đồng
+    # được nhập kề số hiệu. Đây chỉ là THỨ TỰ ƯU TIÊN GHÉP — không phải điều
+    # kiện loại trừ, nên vẫn tính là Repo dù capture date lệch xa ở lượt sau.
     cands = sorted((abs(s['DEAL_ID'] - b['DEAL_ID']), i, j)
                    for i, s in enumerate(S) for j, b in enumerate(B)
                    if s['CAPTURE_DATE'] == b['CAPTURE_DATE'])
@@ -60,17 +65,22 @@ for (paper, cpty, face), v in g.items():
         if i in us or j in ub:
             continue
         us.add(i); ub.add(j)
-        emit(S[i], B[j], repo)
+        emit(S[i], B[j])
 
-    # Lượt 2 — phần dư, KHÔNG cùng ngày nhập. Phải ghép theo THỨ TỰ NGÀY
-    # THANH TOÁN (FIFO), không phải theo mã deal: sắp theo |lệch mã deal| ở đây
-    # từng đẩy một chân xa hẳn về cuối hàng đợi khi nhóm có ≥3 chân mỗi bên,
-    # tạo ra "repo" dài giả tạo (ví dụ VPBCD080427/TCBV-HO: S 29/05 lẽ ra ghép
-    # với B 12/06 cách 14 ngày, bị đẩy đi ghép với B 21/08 — thành 84 ngày).
-    # Khớp theo thứ tự thời gian mô phỏng đúng một chu kỳ repo xoay vòng.
+    # Lượt 2 — phần dư (không cùng ngày nhập máy). Ghép theo THỨ TỰ NGÀY THANH
+    # TOÁN (FIFO), không theo mã deal: sắp theo |lệch mã deal| ở đây từng đẩy
+    # một chân xa hẳn về cuối hàng đợi khi nhóm có ≥3 chân mỗi bên, tạo ra
+    # "repo" dài giả tạo (ví dụ VPBCD080427/TCBV-HO: S 29/05 lẽ ra ghép với
+    # B 12/06 cách 14 ngày, bị đẩy đi ghép với B 21/08 — thành 84 ngày). Khớp
+    # theo thứ tự thời gian mô phỏng đúng một chu kỳ repo xoay vòng.
+    # VẪN LÀ REPO — chỉ là BO nhập hai chân khác ngày, không loại trừ.
     rs = [s for i, s in enumerate(S) if i not in us]
     rb = [b for j, b in enumerate(B) if j not in ub]
     for s, b in zip(rs, rb):
-        emit(s, b, loose)
+        emit(s, b)
 
-left = [x for x in R if not any(x['DEAL_ID'] in (p['sid'], p['bid']) for p in repo + loose)]
+# Tách riêng để soát BO, KHÔNG dùng để loại trừ khỏi kết quả:
+repo_same_cap = [p for p in matched if p['gap_cap'] == 0]
+repo_diff_cap = [p for p in matched if p['gap_cap'] > 0]
+
+left = [x for x in R if not any(x['DEAL_ID'] in (p['sid'], p['bid']) for p in matched)]
