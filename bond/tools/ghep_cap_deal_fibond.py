@@ -32,29 +32,45 @@ for (paper, cpty, face), v in g.items():
     S = sorted(v['S'], key=lambda x: (x['VALUE_DATE'], x['DEAL_ID']))
     B = sorted(v['B'], key=lambda x: (x['VALUE_DATE'], x['DEAL_ID']))
     us, ub = set(), set()
-    for same_cap in (True, False):          # lượt 1 chặt, lượt 2 nới
-        cands = sorted((abs(s['DEAL_ID'] - b['DEAL_ID']), i, j)
-                       for i, s in enumerate(S) for j, b in enumerate(B)
-                       if (s['CAPTURE_DATE'] == b['CAPTURE_DATE']) == same_cap)
-        for _, i, j in cands:
-            if i in us or j in ub:
-                continue
-            us.add(i); ub.add(j)
-            s, b = S[i], B[j]
-            first, second = (s, b) if s['VALUE_DATE'] <= b['VALUE_DATE'] else (b, s)
-            dirn = 'A' if first is s else 'B'
-            gap_cap = abs((s['CAPTURE_DATE'] - b['CAPTURE_DATE']).days)
-            rec = dict(
-                paper=paper, cpty=cpty, prod=s['PRODUCT_CODE'], face=face,
-                sid=s['DEAL_ID'], bid=b['DEAL_ID'], dirn=dirn,
-                days=(second['VALUE_DATE'] - first['VALUE_DATE']).days,
-                d1=first['VALUE_DATE'], d2=second['VALUE_DATE'],
-                cash=first['GROSS_AMOUNT'], gap_cap=gap_cap,
-                # dương = có lợi cho MSB, đúng quy ước file TPCP
-                pnl=(first['GROSS_AMOUNT'] - second['GROSS_AMOUNT']) if dirn == 'A'
-                    else (second['GROSS_AMOUNT'] - first['GROSS_AMOUNT']),
-                sy=s['YIELD'], by=b['YIELD'], st=s['TRANSACTION_STATUS'] + b['TRANSACTION_STATUS'],
-                scap=s['CAPTURE_DATE'], bcap=b['CAPTURE_DATE'])
-            (repo if same_cap else loose).append(rec)
+
+    def emit(s, b, out):
+        first, second = (s, b) if s['VALUE_DATE'] <= b['VALUE_DATE'] else (b, s)
+        dirn = 'A' if first is s else 'B'
+        gap_cap = abs((s['CAPTURE_DATE'] - b['CAPTURE_DATE']).days)
+        rec = dict(
+            paper=paper, cpty=cpty, prod=s['PRODUCT_CODE'], face=face,
+            sid=s['DEAL_ID'], bid=b['DEAL_ID'], dirn=dirn,
+            days=(second['VALUE_DATE'] - first['VALUE_DATE']).days,
+            d1=first['VALUE_DATE'], d2=second['VALUE_DATE'],
+            cash=first['GROSS_AMOUNT'], gap_cap=gap_cap,
+            # dương = có lợi cho MSB, đúng quy ước file TPCP
+            pnl=(first['GROSS_AMOUNT'] - second['GROSS_AMOUNT']) if dirn == 'A'
+                else (second['GROSS_AMOUNT'] - first['GROSS_AMOUNT']),
+            sy=s['YIELD'], by=b['YIELD'], st=s['TRANSACTION_STATUS'] + b['TRANSACTION_STATUS'],
+            scap=s['CAPTURE_DATE'], bcap=b['CAPTURE_DATE'])
+        out.append(rec)
+
+    # Lượt 1 — cùng ngày nhập máy (CAPTURE_DATE): dấu vết book cùng lúc, đúng là
+    # repo. Sắp theo |lệch mã deal| ở ĐÂY hợp lý — hai chân một hợp đồng được
+    # nhập kề nhau nên deal-id gần nhau.
+    cands = sorted((abs(s['DEAL_ID'] - b['DEAL_ID']), i, j)
+                   for i, s in enumerate(S) for j, b in enumerate(B)
+                   if s['CAPTURE_DATE'] == b['CAPTURE_DATE'])
+    for _, i, j in cands:
+        if i in us or j in ub:
+            continue
+        us.add(i); ub.add(j)
+        emit(S[i], B[j], repo)
+
+    # Lượt 2 — phần dư, KHÔNG cùng ngày nhập. Phải ghép theo THỨ TỰ NGÀY
+    # THANH TOÁN (FIFO), không phải theo mã deal: sắp theo |lệch mã deal| ở đây
+    # từng đẩy một chân xa hẳn về cuối hàng đợi khi nhóm có ≥3 chân mỗi bên,
+    # tạo ra "repo" dài giả tạo (ví dụ VPBCD080427/TCBV-HO: S 29/05 lẽ ra ghép
+    # với B 12/06 cách 14 ngày, bị đẩy đi ghép với B 21/08 — thành 84 ngày).
+    # Khớp theo thứ tự thời gian mô phỏng đúng một chu kỳ repo xoay vòng.
+    rs = [s for i, s in enumerate(S) if i not in us]
+    rb = [b for j, b in enumerate(B) if j not in ub]
+    for s, b in zip(rs, rb):
+        emit(s, b, loose)
 
 left = [x for x in R if not any(x['DEAL_ID'] in (p['sid'], p['bid']) for p in repo + loose)]
