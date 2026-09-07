@@ -32,8 +32,9 @@ Bản đầu (09/2026) từng dùng CaptureDate cho cả hai việc và HỎNG: 
 CaptureDate hai chân trùng ngày, nên trục trước/sau bị quyết định bởi tie-break tùy tiện
 (197 "Sell trước" / 1 "Buy trước") và kỳ hạn luôn bằng 0. Chốt lại với Jak 09/2026.
 
-KỲ HẠN tính CẢ HAI ĐẦU MÚT: `|SettlementDate(B) − SettlementDate(S)| + 1`, không phân
-biệt chiều. Ví dụ của Jak: Sell 12/06, Buy 15/06 -> 4 ngày (12,13,14,15).
+KỲ HẠN = SỐ NGÀY TRÔI QUA giữa hai `SettlementDate`, không phân biệt chiều:
+`|SettlementDate(B) − SettlementDate(S)|`. Sell 12/06, Buy 15/06 -> 3 ngày; deal qua
+đêm -> 1 ngày. (Jak chốt 09/2026: bỏ quy ước cộng thêm 1 ngày đầu mút.)
 
 PHÂN LOẠI 4 NHÓM = (MSB đưa TÀI SẢN nào ra) x (chịu chi phí hay hưởng lãi).
 Chiều quyết định tài sản, dấu quyết định vai trò — nguyên tắc của Jak: "đi vay thì chịu
@@ -110,9 +111,10 @@ def emit(s, b, qty, out):
     """
     first, second = (s, b) if s['SettlementDate'] <= b['SettlementDate'] else (b, s)
     dirn = 'A' if first is s else 'B'   # A = Sell truoc (repo), B = Buy truoc (reverse repo)
-    # Ky han = khoang cach SettlementDate hai chan, TINH CA HAI DAU MUT (+1).
-    # Vi du cua Jak: Sell 12/06, Buy 15/06 -> 4 ngay (12,13,14,15).
-    days = abs((b['SettlementDate'] - s['SettlementDate']).days) + 1
+    # Ky han = SO NGAY TROI QUA giua hai SettlementDate, khong phan biet chieu.
+    # Sell 12/06, Buy 15/06 -> 3 ngay. Deal qua dem -> 1 ngay. Khong cap nao co
+    # hai chan trung ngay thanh toan nen days >= 1, khong bao gio chia cho 0.
+    days = abs((b['SettlementDate'] - s['SettlementDate']).days)
     s_cash = s['GrossAmount'] * (qty / s['Quantity'])
     b_cash = b['GrossAmount'] * (qty / b['Quantity'])
     first_cash = s_cash if first is s else b_cash
