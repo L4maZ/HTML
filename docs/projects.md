@@ -82,9 +82,13 @@ mục "Phụ lục — GovBond RPBOD_B002".
 đè `bond/Phan_tich_GD_Bond_20260608_20260904.html` (KHÔNG sửa in-place như bản cũ; file
 này dựng lại toàn bộ từ template mỗi lần).
 
-- 6 trang: Tổng quan · **Buy trước** (Cho vay tiền | Vay bond, 2 cột con) · **Sell trước**
-  (Vay tiền | Cho vay bond, 2 cột con) · Đối tác (4 nhóm) · Tra cứu · Chi tiết cặp deal.
-  Thay hẳn cấu trúc nhị phân Nhóm A/Nhóm B của bản cũ.
+- 5 trang: Tổng quan · **Repo** (Vay tiền | Cho vay bond) · **Reverse Repo** (Cho vay tiền |
+  Vay bond) · Tra cứu · Chi tiết cặp deal. Thay hẳn cấu trúc nhị phân Nhóm A/Nhóm B cũ.
+  Repo = chân bán thanh toán trước (MSB đưa bond ra); Reverse repo = chân mua trước.
+- Mỗi trang 2 cột con đầy đủ, mỗi cột: KPI → Kỳ hạn → **Đối tác** → Top mã TP → Folder.
+  Không còn trang Đối tác riêng — đã đẩy vào từng nhóm để so sánh tại chỗ.
+- File đối chiếu: `bond/Doi_chieu_GD_Bond_20260608_20260904.xlsx`
+  (`bond/tools/mk_govbond_pairs_xlsx.py`) — 3 sheet, có công thức sống tie hai chiều.
 - `CaptureDate` chỉ để **ghép cặp**; `SettlementDate` để đọc chiều trước/sau và kỳ hạn.
   Bản đầu dùng CaptureDate cho cả hai nên hỏng — xem `bond-deal-pairing.md`.
 - 198 cặp: 102 Vay tiền, 59 Cho vay bond, 37 Cho vay tiền, 0 Vay bond.

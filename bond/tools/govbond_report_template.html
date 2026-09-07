@@ -129,11 +129,10 @@ border-top:1px solid var(--border);line-height:1.6}
   <nav class="sb-nav">
     <div class="sb-lbl">NAVIGATION</div>
     <div class="sb-item active" onclick="goPage('p1',this)"><span>📌</span> Tổng quan</div>
-    <div class="sb-item" onclick="goPage('p2',this)"><span>🏦</span> Buy trước</div>
-    <div class="sb-item" onclick="goPage('p3',this)"><span>💰</span> Sell trước</div>
-    <div class="sb-item" onclick="goPage('p4',this)"><span>🤝</span> Đối tác</div>
-    <div class="sb-item" onclick="goPage('p5',this)"><span>🔎</span> Tra cứu</div>
-    <div class="sb-item" onclick="goPage('p6',this)"><span>📋</span> Chi tiết cặp deal</div>
+    <div class="sb-item" onclick="goPage('p2',this)"><span>🏦</span> Repo</div>
+    <div class="sb-item" onclick="goPage('p3',this)"><span>💰</span> Reverse Repo</div>
+    <div class="sb-item" onclick="goPage('p4',this)"><span>🔎</span> Tra cứu</div>
+    <div class="sb-item" onclick="goPage('p5',this)"><span>📋</span> Chi tiết cặp deal</div>
   </nav>
   <div class="sb-bot">
     <button onclick="toggleTheme()">🌓 Đổi giao diện</button>
@@ -186,26 +185,12 @@ border-top:1px solid var(--border);line-height:1.6}
   </div>
 </section>
 
-<!-- ============ P2 — Buy trước ============ -->
+<!-- ============ P2 — Repo (chân bán thanh toán trước) ============ -->
 <section id="p2" class="page">
   <div class="ph">
-    <h1>Buy trước — MSB đưa TIỀN ra</h1>
-    <p>Chân mua thanh toán trước, chân bán lại thanh toán sau (reverse repo): MSB bỏ tiền ra nhận
-      bond vào làm bảo đảm. MSB <b>hưởng lãi</b> → <b>Cho vay tiền</b>; MSB <b>chịu chi phí</b> →
-      <b>Vay bond</b> (trả phí để mượn bond).</p>
-  </div>
-  <div class="subcols">
-    <div class="subcol" id="colCVT"></div>
-    <div class="subcol" id="colVB"></div>
-  </div>
-</section>
-
-<!-- ============ P3 — Sell trước ============ -->
-<section id="p3" class="page">
-  <div class="ph">
-    <h1>Sell trước — MSB đưa BOND ra</h1>
-    <p>Chân bán thanh toán trước, chân mua lại thanh toán sau (repo): MSB giao bond đi, nhận tiền
-      về. MSB <b>chịu chi phí</b> → <b>Vay tiền</b> (trả lãi vay); MSB <b>hưởng lãi</b> →
+    <h1>Repo — MSB đưa BOND ra</h1>
+    <p>Chân bán thanh toán trước, chân mua lại thanh toán sau: MSB giao bond đi, nhận tiền về.
+      MSB <b>chịu chi phí</b> → <b>Vay tiền</b> (trả lãi vay); MSB <b>hưởng lãi</b> →
       <b>Cho vay bond</b> (được trả phí cho mượn bond).</p>
   </div>
   <div class="subcols">
@@ -214,21 +199,22 @@ border-top:1px solid var(--border);line-height:1.6}
   </div>
 </section>
 
-<!-- ============ P4 ============ -->
-<section id="p4" class="page">
+<!-- ============ P3 — Reverse Repo (chân mua thanh toán trước) ============ -->
+<section id="p3" class="page">
   <div class="ph">
-    <h1>Đối tác</h1>
-    <p>Tiền, kỳ hạn và lãi/lỗ theo từng đối tác, tách theo 4 nhóm.</p>
+    <h1>Reverse Repo — MSB đưa TIỀN ra</h1>
+    <p>Chân mua thanh toán trước, chân bán lại thanh toán sau: MSB bỏ tiền ra nhận bond vào làm
+      bảo đảm. MSB <b>hưởng lãi</b> → <b>Cho vay tiền</b>; MSB <b>chịu chi phí</b> →
+      <b>Vay bond</b> (trả phí để mượn bond).</p>
   </div>
-  <div class="grid g2" id="cptyGrid"></div>
-  <div class="sec">
-    <h3>Ghi chú</h3>
-    <div class="note" id="noteCpty"></div>
+  <div class="subcols">
+    <div class="subcol" id="colCVT"></div>
+    <div class="subcol" id="colVB"></div>
   </div>
 </section>
 
-<!-- ============ P5 ============ -->
-<section id="p5" class="page">
+<!-- ============ P4 ============ -->
+<section id="p4" class="page">
   <div class="ph">
     <h1>Danh sách tra cứu</h1>
     <p>Các nhóm cặp deal tách riêng cho dễ tra. <b>Không nhóm nào bị loại khỏi số tổng hợp.</b></p>
@@ -274,8 +260,8 @@ border-top:1px solid var(--border);line-height:1.6}
   </div>
 </section>
 
-<!-- ============ P6 ============ -->
-<section id="p6" class="page">
+<!-- ============ P5 ============ -->
+<section id="p5" class="page">
   <div class="ph">
     <h1>Chi tiết từng cặp deal</h1>
     <p>Toàn bộ 198 cặp S↔B đã ghép. Lọc theo nhóm, đối tác, mã trái phiếu hoặc số hiệu deal.</p>
@@ -526,6 +512,12 @@ function groupCol(container, g) {
       <div id="warn${pfx}"></div>
     </div>
     <div class="sec">
+      <h3 style="font-size:14px">Đối tác</h3>
+      <div class="ch4sub" id="cptySub${pfx}"></div>
+      <div id="chCpty${pfx}" class="ch sm"></div>
+      <div class="tw"><table id="tbCpty${pfx}"></table></div>
+    </div>
+    <div class="sec">
       <h3 style="font-size:14px">Top mã trái phiếu</h3>
       <div id="chBond${pfx}" class="ch sm"></div>
       <div class="tw"><table id="tbBond${pfx}"></table></div>
@@ -583,6 +575,43 @@ function groupCol(container, g) {
        ${num(sAll - sBig, 0)} tr.</div>`;
   }
 
+  // ----- Đối tác (trước đây là một trang riêng, nay nằm trong từng nhóm) -----
+  const arr = gd.cpty, tot = arr.reduce((s, c) => s + c.cash, 0);
+  const top = arr.slice(0, 12);
+  document.getElementById(`cptySub${pfx}`).innerHTML =
+    `${arr.length} đối tác · lớn nhất ${esc(arr[0].cpty)} chiếm
+     ${(arr[0].cash / tot * 100).toFixed(0)}%` +
+    (arr.length > 12 ? ` · biểu đồ hiện 12 lớn nhất, bảng đủ ${arr.length}` : '');
+  // Thanh ngang chứ không phải bánh: một nhóm có tới 20 đối tác, vẽ bánh thì nhãn
+  // chồng lên nhau không đọc được.
+  chart(`chCpty${pfx}`, () => base({
+    tooltip: {
+      trigger: 'item', formatter: p => {
+        const r = top[p.dataIndex];
+        return `<b>${esc(r.cpty)}</b><br>${r.n} cặp · ${num(r.cash / 1000, 2)} nghìn tỷ
+          (${(r.cash / tot * 100).toFixed(1)}%)<br>Lãi/lỗ ${num(r.pnl, 0)} tr`;
+      }
+    },
+    legend: { show: false },
+    grid: { left: 8, right: 46, top: 10, bottom: 6, containLabel: true },
+    // data đã ở nghìn tỷ (cash/1000) nên formatter KHÔNG chia thêm lần nữa.
+    xAxis: { type: 'value', axisLabel: Object.assign(axL(), { formatter: v => num(v, 1) }), splitLine: splL() },
+    yAxis: { type: 'category', data: top.map(c => c.cpty).reverse(), axisLabel: Object.assign(axL(), { fontSize: 10 }), axisLine: axS() },
+    series: [{
+      type: 'bar', barWidth: '64%', data: top.map(c => +(c.cash / 1000).toFixed(3)).reverse(),
+      itemStyle: { color: cssv(meta.color) },
+      label: { show: true, position: 'right', formatter: p => num(p.value, 2), color: cssv('--chart-text'), fontSize: 10 }
+    }]
+  }));
+  document.getElementById(`tbCpty${pfx}`).innerHTML = table([
+    { t: 'Đối tác', f: r => esc(r.cpty) },
+    { t: 'Cặp', n: 1, f: r => num(r.n, 0) },
+    { t: 'Tiền (nghìn tỷ)', n: 1, f: r => num(r.cash / 1000, 2) },
+    { t: 'Kỳ hạn (ngày)', n: 1, f: r => r.minD === r.maxD ? r.minD : `${r.minD}–${r.maxD}` },
+    { t: 'Lãi/lỗ (tr)', n: 1, f: r => num(r.pnl, 0), c: r => sgn(r.pnl) },
+    { t: '%/năm', n: 1, f: r => pct(r.rate), c: r => sgn(r.rate) }
+  ], arr);
+
   if (gd.bond.length) {
     chart(`chBond${pfx}`, () => base({
       tooltip: { trigger: 'item', formatter: p => {
@@ -627,61 +656,7 @@ groupCol(document.getElementById('colVT'), 'VT');     // p3 — Sell trước
 groupCol(document.getElementById('colCVB'), 'CVB');
 
 /* =======================================================================
-   PAGE 4 — counterparties
-   ======================================================================= */
-(function () {
-  const grid = document.getElementById('cptyGrid');
-  grid.innerHTML = GCODES.map(g => `
-    <div class="card">
-      <h4><span class="tag ${GRP[g].tag}">${GRP[g].label}</span> — theo đối tác</h4>
-      <div class="ch4sub">${GRP[g].side} · ${KG[g].n} cặp · ${num(KG[g].cash / 1000, 2)} nghìn tỷ${
-        D.groups[g].cpty.length > 12 ? ` · biểu đồ hiện 12/${D.groups[g].cpty.length} đối tác lớn nhất, bảng đủ` : ''}</div>
-      ${KG[g].n ? `<div id="chCpty${g}" class="ch sm"></div>
-      <div class="tw"><table id="tbCpty${g}"></table></div>`
-      : '<div class="empty">Không có cặp nào thuộc nhóm này trong kỳ.</div>'}
-    </div>`).join('');
-  GCODES.forEach(g => {
-    const arr = D.groups[g].cpty;
-    if (!arr.length) return;
-    // Thanh ngang chứ không phải bánh: một nhóm có tới 20 đối tác, vẽ bánh thì
-    // nhãn chồng lên nhau không đọc được.
-    const top = arr.slice(0, 12), tot = arr.reduce((s, c) => s + c.cash, 0);
-    chart(`chCpty${g}`, () => base({
-      tooltip: {
-        trigger: 'item', formatter: p => {
-          const r = top[p.dataIndex];
-          return `<b>${esc(r.cpty)}</b><br>${r.n} cặp · ${num(r.cash / 1000, 2)} nghìn tỷ
-            (${(r.cash / tot * 100).toFixed(1)}%)<br>Lãi/lỗ ${num(r.pnl, 0)} tr`;
-        }
-      },
-      legend: { show: false },
-      grid: { left: 8, right: 46, top: 10, bottom: 6, containLabel: true },
-      // data đã ở nghìn tỷ (cash/1000) nên formatter KHÔNG chia thêm lần nữa.
-      xAxis: { type: 'value', axisLabel: Object.assign(axL(), { formatter: v => num(v, 1) }), splitLine: splL() },
-      yAxis: { type: 'category', data: top.map(c => c.cpty).reverse(), axisLabel: Object.assign(axL(), { fontSize: 10 }), axisLine: axS() },
-      series: [{
-        type: 'bar', barWidth: '64%', data: top.map(c => +(c.cash / 1000).toFixed(3)).reverse(),
-        itemStyle: { color: cssv(GRP[g].color) },
-        label: { show: true, position: 'right', formatter: p => num(p.value, 2), color: cssv('--chart-text'), fontSize: 10 }
-      }]
-    }));
-    document.getElementById(`tbCpty${g}`).innerHTML = table([
-      { t: 'Đối tác', f: r => esc(r.cpty) },
-      { t: 'Cặp', n: 1, f: r => num(r.n, 0) },
-      { t: 'Tiền (nghìn tỷ)', n: 1, f: r => num(r.cash / 1000, 2) },
-      { t: 'Lãi/lỗ (tr)', n: 1, f: r => num(r.pnl, 0), c: r => sgn(r.pnl) }
-    ], arr);
-  });
-  const notes = GCODES.filter(g => D.groups[g].cpty.length).map(g => {
-    const arr = D.groups[g].cpty, top = arr[0], b = KG[g];
-    return `<li><b>${GRP[g].label}:</b> ${arr.length} đối tác. Lớn nhất ${esc(top.cpty)} chiếm
-      ${(top.cash / b.cash * 100).toFixed(0)}%.</li>`;
-  }).join('');
-  document.getElementById('noteCpty').innerHTML = `<ul>${notes}</ul>`;
-})();
-
-/* =======================================================================
-   PAGE 5 — lookup lists
+   PAGE 4 — lookup lists
    ======================================================================= */
 document.getElementById('kpiX').innerHTML =
   kpi('neu', 'Δyield / %/năm lớn', num(D.anom.length, 0), 'cặp', `Lãi/lỗ ${num(D.anom.reduce((s, r) => s + r.pnl, 0), 0)} triệu VND`) +
@@ -759,7 +734,7 @@ document.getElementById('tbFmis').innerHTML = table([
 ], D.fmis);
 
 /* =======================================================================
-   PAGE 6 — pair explorer
+   PAGE 5 — pair explorer
    ======================================================================= */
 let GFILT = 'all';
 function setGrp(g, el) {
