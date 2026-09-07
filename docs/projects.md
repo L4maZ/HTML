@@ -9,7 +9,7 @@ Cập nhật sau khi đọc trực tiếp 6 file (14/08/2026).
 | `BaoCao_RRTT_Bond_key_v7` | Report 5 trang, key system | Wine `#7B2D3B` + paper | ECharts inline | Chuẩn tham chiếu |
 | `VBMA_Weekly_20260807` | Weekly 6 trang | Wine `#8B2332` | ECharts inline | Chạy tốt |
 | `Phan_tich_GD_Bond_20260608_20260810` | Phân tích deal 5 trang | Navy/gold + dark mode | ECharts inline | Bản cũ, thay bằng bản 20/08 |
-| `Phan_tich_GD_Bond_20260608_20260820` | Phân tích deal 6 trang, 2 nhóm A/B | Navy/gold + dark mode | ECharts inline | Bản cũ (MSB_RP_DM), thay bằng bản 04/09 |
+| `Phan_tich_GD_Bond_20260608_20260820` | Phân tích deal 6 trang, 2 nhóm A/B | Navy/gold + dark mode | ECharts inline | **Đã xoá** (MSB_RP_DM), thay bằng bản 04/09 |
 | `Phan_tich_GD_Bond_20260608_20260904` | Phân tích deal 6 trang, 4 nhóm phân loại | Navy/gold + dark mode | ECharts inline | Bản hiện hành (RPBOD_B002) |
 | `QC.RR.022_lampd3` | Quy chế + đánh giá GAP | Terracotta `#b83a10` | SVG viết tay | Chạy tốt |
 | `Peer_Bond_Dashboard_AutoReport_ByGemini_` | Dashboard 5 tab | Terracotta `#b84a32` | **CDN** | **Không dùng được offline** |
