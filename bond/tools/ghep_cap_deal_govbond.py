@@ -22,24 +22,34 @@ rồi bán lại qua một tổ chức khác cùng ngày book, xem `docs/bond-de
     mã TD2636023, cùng CaptureDate 24/06/2026, cùng tổng khối lượng 6,000,000.
 Bất kỳ cặp chéo đối tác nào KHÁC không có trong đây phải hỏi lại nghiệp vụ trước khi tính.
 
-QUAN TRỌNG — thứ tự trước/sau và kỳ hạn dùng CAPTURE_DATE (ngày BO ghi nhận giao dịch),
-KHÔNG dùng SettlementDate. Đây là khác biệt so với `ghep_cap_deal_bond.py` (MSB_RP_DM) và
-`ghep_cap_deal_fibond.py` (dùng VALUE_DATE) — xác nhận riêng của Jak cho pipeline này
-(09/2026): "logic là lấy capture date, ngày ghi nhận giao dịch". KHÔNG áp dụng ngược lại
-cho hai pipeline kia trừ khi có yêu cầu riêng.
+HAI CỘT NGÀY, HAI VAI TRÒ KHÁC NHAU — đừng lẫn:
+  * `CaptureDate` (ngày BO ghi nhận) chỉ dùng để GHÉP CẶP: chân nào đi với chân nào.
+    Hai chân của cùng một hợp đồng được book cùng lúc nên đây là bằng chứng mạnh nhất
+    khi một nhóm có nhiều hơn 2 chân.
+  * `SettlementDate` dùng để đọc NGHIỆP VỤ của cặp đã ghép: chân nào thanh toán trước
+    (repo hay reverse repo) và kỳ hạn bao nhiêu ngày.
+Bản đầu (09/2026) từng dùng CaptureDate cho cả hai việc và HỎNG: 196/198 cặp có
+CaptureDate hai chân trùng ngày, nên trục trước/sau bị quyết định bởi tie-break tùy tiện
+(197 "Sell trước" / 1 "Buy trước") và kỳ hạn luôn bằng 0. Chốt lại với Jak 09/2026.
 
-PHÂN LOẠI 4 NHÓM — giống hệt quy tắc đã chốt cho FIBond, theo (chân nào CaptureDate
-TRƯỚC) x (Gross bên nào LỚN HƠN). pnl = Gross(S) − Gross(B) luôn luôn, bất kể chân nào
-trước — xem chứng minh trong `emit()`.
+KỲ HẠN tính CẢ HAI ĐẦU MÚT: `|SettlementDate(B) − SettlementDate(S)| + 1`, không phân
+biệt chiều. Ví dụ của Jak: Sell 12/06, Buy 15/06 -> 4 ngày (12,13,14,15).
 
-    Buy trước, Sell sau, Gross(S) > Gross(B)  ->  Cho vay tien
-    Buy trước, Sell sau, Gross(S) < Gross(B)  ->  Vay bond
-    Sell trước, Buy sau, Gross(S) > Gross(B)  ->  Di vay tien
-    Sell trước, Buy sau, Gross(S) < Gross(B)  ->  Cho vay bond
+PHÂN LOẠI 4 NHÓM = (MSB đưa TÀI SẢN nào ra) x (chịu chi phí hay hưởng lãi).
+Chiều quyết định tài sản, dấu quyết định vai trò — nguyên tắc của Jak: "đi vay thì chịu
+chi phí vay, cho vay thì hưởng lãi". pnl = Gross(S) − Gross(B) luôn luôn, bất kể chân
+nào trước (hai nhánh dirn rút gọn về cùng biểu thức — xem `emit()`).
 
-Kết quả kỳ 24/08/2026 (601 dòng gốc -> 374 dòng sau lọc Folders_ShortName): 198 cặp
-Repo/Reverse Repo (197 cùng đối tác + 1 CROSS_OK), 0 chân dư. Phân bổ: 104 Cho vay bond,
-93 Di vay tien, 1 Cho vay tien, 0 Vay bond.
+    Sell trước (MSB đưa BOND ra), pnl < 0 (chịu chi phí)  ->  Vay tien
+    Sell trước (MSB đưa BOND ra), pnl > 0 (hưởng lãi)     ->  Cho vay bond
+    Buy trước  (MSB đưa TIỀN ra), pnl > 0 (hưởng lãi)     ->  Cho vay tien
+    Buy trước  (MSB đưa TIỀN ra), pnl < 0 (chịu chi phí)  ->  Vay bond
+
+Một cặp bán-trước KHÔNG THỂ là "vay bond" — MSB đã đưa bond ra rồi; dấu chỉ nói ai trả
+tiền cho ai, không đổi được ai giữ bond.
+
+Kỳ 08/06–04/09/2026 (601 dòng gốc -> 374 dòng sau lọc Folders_ShortName): 198 cặp
+Repo/Reverse Repo (197 cùng đối tác + 1 CROSS_OK), 0 chân dư.
 """
 import datetime
 from collections import defaultdict, Counter
@@ -98,24 +108,32 @@ def emit(s, b, qty, out):
     dirn rút gọn về cùng biểu thức này (đã chứng minh trong pipeline FIBond, xem
     docs/bond-deal-pairing.md).
     """
-    first, second = (s, b) if s['CaptureDate'] <= b['CaptureDate'] else (b, s)
-    dirn = 'A' if first is s else 'B'   # A = Sell truoc, B = Buy truoc
-    days = abs((b['CaptureDate'] - s['CaptureDate']).days)
+    first, second = (s, b) if s['SettlementDate'] <= b['SettlementDate'] else (b, s)
+    dirn = 'A' if first is s else 'B'   # A = Sell truoc (repo), B = Buy truoc (reverse repo)
+    # Ky han = khoang cach SettlementDate hai chan, TINH CA HAI DAU MUT (+1).
+    # Vi du cua Jak: Sell 12/06, Buy 15/06 -> 4 ngay (12,13,14,15).
+    days = abs((b['SettlementDate'] - s['SettlementDate']).days) + 1
     s_cash = s['GrossAmount'] * (qty / s['Quantity'])
     b_cash = b['GrossAmount'] * (qty / b['Quantity'])
     first_cash = s_cash if first is s else b_cash
     pnl = s_cash - b_cash
-    if dirn == 'B':
-        loai = 'Cho vay tien' if pnl > 0 else 'Vay bond'
+    # Phan loai 4 nhom = (tai san nao MSB dua ra) x (chiu chi phi hay huong lai).
+    # Chieu quyet dinh tai san: ban truoc = MSB dua BOND ra; mua truoc = dua TIEN ra.
+    # Dau quyet dinh vai tro: pnl < 0 = MSB chiu chi phi -> DI VAY;
+    #                         pnl > 0 = MSB huong lai    -> CHO VAY.
+    # pnl == 0 (2 cap trong ky, lai repo nho hon buoc lam tron GrossAmount) xep vao
+    # "Cho vay bond" theo cau truc: chan ban truoc thi MSB da dua bond ra, chi phi = 0.
+    if dirn == 'A':
+        loai = 'Vay tien' if pnl < 0 else 'Cho vay bond'
     else:
-        loai = 'Di vay tien' if pnl > 0 else 'Cho vay bond'
-    # rate %/nam: chenh lech tien / tien chan dau / so ngay * 365 * 100.
-    rate = ((b_cash - s_cash) / first_cash * 365 / days * 100) if days > 0 and first_cash else 0.0
+        loai = 'Vay bond' if pnl < 0 else 'Cho vay tien'
+    # rate %/nam, dau THONG NHAT voi pnl: duong = MSB huong lai, am = MSB chiu chi phi.
+    rate = (pnl / first_cash * 365 / days * 100) if days > 0 and first_cash else 0.0
     out.append(dict(
         paper=s['Bonds_ShortName'], cpty=s['Cpty_ShortName'],
         face=round(qty * s['FaceValue'] / 1e9, 4),
         sid=s['BondsDeals_Id'], bid=b['BondsDeals_Id'], dirn=dirn, loai=loai,
-        days=days, d1=first['CaptureDate'], d2=second['CaptureDate'],
+        days=days, d1=first['SettlementDate'], d2=second['SettlementDate'],
         sset=s['SettlementDate'], bset=b['SettlementDate'],
         cash=first_cash, pnl=pnl, rate=rate,
         sy=s['Yield'], by=b['Yield'], cpn=s['CouponRate'], dy=(b['Yield'] - s['Yield']) * 100,
