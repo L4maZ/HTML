@@ -19,7 +19,10 @@ from collections import defaultdict
 
 from ghep_cap_deal_govbond import matched, left, R
 
-GROUP_CODE = {'Cho vay tien': 'CVT', 'Vay bond': 'VB', 'Di vay tien': 'DVT', 'Cho vay bond': 'CVB'}
+# Thứ tự này quyết định thứ tự hiển thị: hai nhóm bán-trước (repo) rồi hai nhóm
+# mua-trước (reverse repo).
+GCODES = ['VT', 'CVB', 'CVT', 'VB']
+GROUP_CODE = {'Vay tien': 'VT', 'Cho vay bond': 'CVB', 'Cho vay tien': 'CVT', 'Vay bond': 'VB'}
 GROUP_LABEL = {v: k for k, v in GROUP_CODE.items()}
 
 
@@ -28,7 +31,8 @@ def scale(p):
     q = dict(p)
     q['cash'] = p['cash'] / 1e9
     q['pnl'] = p['pnl'] / 1e6
-    del q['d1'], q['d2']
+    q['d1'] = p['d1'].strftime('%Y-%m-%d')   # settlement chân đầu
+    q['d2'] = p['d2'].strftime('%Y-%m-%d')   # settlement chân sau
     return q
 
 
@@ -123,9 +127,10 @@ def tenor(ps):
 
 
 def month(ps):
+    """Gom theo tháng của chân THANH TOÁN TRƯỚC — thời điểm dòng tiền bắt đầu."""
     g = defaultdict(list)
     for p in ps:
-        g[dt(p['scap']).strftime('%m/%Y')].append(p)
+        g[dt(p['d1']).strftime('%m/%Y')].append(p)
     out = []
     for m in sorted(g, key=lambda x: (x[3:], x[:2])):
         b = blk(g[m])
@@ -157,7 +162,7 @@ def folder(ps):
 
 
 groups = {}
-for code in ('CVT', 'VB', 'DVT', 'CVB'):
+for code in GCODES:
     ps = [p for p in PAIRS if p['grp'] == code]
     groups[code] = {
         'cpty': cpty(ps), 'tenor': tenor(ps), 'month': month(ps),
@@ -165,7 +170,7 @@ for code in ('CVT', 'VB', 'DVT', 'CVB'):
         'hist': [round(p['rate'], 3) for p in ps if p['days'] > 0],
     }
 
-kpi_groups = {code: blk([p for p in PAIRS if p['grp'] == code]) for code in GROUP_CODE.values()}
+kpi_groups = {code: blk([p for p in PAIRS if p['grp'] == code]) for code in GCODES}
 
 anom, noise = [], []
 for p in PAIRS:
@@ -194,7 +199,9 @@ D = {
     'anom': anom, 'noise': noise,
     'fmis': [p for p in PAIRS if p['sf'] != p['bf']],
     'cmis': [p for p in PAIRS if p['sclr'] != p['bclr']],
-    'zero': [p for p in PAIRS if p['days'] == 0],
+    # Cặp có lãi/lỗ đúng bằng 0: lãi repo ngụ ý nhỏ hơn bước làm tròn của GrossAmount
+    # (10.000đ) nên biến mất. Liệt kê ra để soát, xếp nhóm theo cấu trúc (Cho vay bond).
+    'zero': [p for p in PAIRS if p['pnl'] == 0],
     'pairs': PAIRS,
     'unmatched': [{'id': x['BondsDeals_Id'], 'bond': x['Bonds_ShortName'], 'cpty': x['Cpty_ShortName'],
                    'cap': x['CaptureDate'].strftime('%Y-%m-%d'), 'qty': x['Quantity']} for x in left],

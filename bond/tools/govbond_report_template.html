@@ -88,11 +88,13 @@ td.pos,span.pos{color:#15803d}td.neg,span.neg{color:#b91c1c}
 .tag{display:inline-block;padding:2px 7px;border-radius:5px;font-size:10.5px;font-weight:600;
 border:1px solid var(--border)}
 .tag.cvt{background:rgba(212,168,67,.18);color:#8a6512}
-.tag.vb{background:rgba(248,113,113,.16);color:#b91c1c}
-.tag.dvt{background:rgba(62,146,204,.14);color:#1d5c85}
+.tag.vb{background:rgba(251,146,60,.18);color:#9a4a10}
+.tag.vt{background:rgba(248,113,113,.16);color:#b91c1c}
 .tag.cvb{background:rgba(167,139,250,.18);color:#5b3fa0}
-[data-theme="dark"] .tag.cvt{color:var(--gold)}[data-theme="dark"] .tag.vb{color:var(--red)}
-[data-theme="dark"] .tag.dvt{color:var(--cyan)}[data-theme="dark"] .tag.cvb{color:var(--violet)}
+[data-theme="dark"] .tag.cvt{color:var(--gold)}[data-theme="dark"] .tag.vb{color:var(--orange)}
+[data-theme="dark"] .tag.vt{color:var(--red)}[data-theme="dark"] .tag.cvb{color:var(--violet)}
+.empty{padding:26px 14px;text-align:center;color:var(--text-dim);font-size:12.5px;
+border:1px dashed var(--border);border-radius:9px;background:var(--card)}
 .note{background:var(--gold-dim);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;
 padding:11px 14px;font-size:12.5px;line-height:1.6;margin-top:12px}
 .note b{color:var(--page-title)}
@@ -153,28 +155,28 @@ border-top:1px solid var(--border);line-height:1.6}
   </div>
 
   <div class="sec">
-    <h3>Quy mô tiền theo 4 nhóm</h3>
-    <div class="sub">Mỗi cặp deal được phân vào đúng 1 trong 4 nhóm theo (chân nào CaptureDate
-      trước) × (Gross bên nào lớn hơn): <b>Cho vay tiền, Vay bond</b> (buy trước, sell sau) và
-      <b>Đi vay tiền, Cho vay bond</b> (sell trước, buy sau). Xem giải thích chi tiết ở hai trang
-      "Buy trước" / "Sell trước".</div>
+    <h3>Cách chia 4 nhóm</h3>
+    <div class="sub">Mỗi cặp deal vào đúng 1 nhóm, theo hai trục: <b>chiều</b> quyết định MSB đưa
+      tài sản nào ra, <b>dấu lãi/lỗ</b> quyết định MSB đi vay hay cho vay (đi vay thì chịu chi phí,
+      cho vay thì hưởng lãi).</div>
+    <div class="tw card" style="margin-bottom:13px"><table id="tbRule"></table></div>
     <div class="grid g23">
       <div class="card"><h4>Tiền chân đầu mỗi nhóm</h4>
-        <div class="ch4sub">Tổng tiền chân đầu, nghìn tỷ VND</div><div id="chScale" class="ch"></div></div>
-      <div class="card"><h4>Dư nợ theo ngày (theo Settlement)</h4>
+        <div class="ch4sub">Tổng tiền chân thanh toán trước, nghìn tỷ VND</div><div id="chScale" class="ch"></div></div>
+      <div class="card"><h4>Dư nợ theo ngày</h4>
         <div class="ch4sub">Số dư còn hiệu lực tại từng ngày, nghìn tỷ VND</div><div id="chOutst" class="ch"></div></div>
     </div>
   </div>
 
   <div class="sec">
-    <h3>Phân bố %/năm</h3>
-    <div class="sub">Chỉ tính trên cặp có kỳ hạn CaptureDate &gt; 0 ngày — đa số cặp có CaptureDate hai
-      chân trùng nhau nên %/năm không áp dụng (xem ghi chú cuối trang).</div>
+    <h3>Lãi suất ngụ ý</h3>
+    <div class="sub">Lãi/lỗ ÷ tiền chân đầu ÷ số ngày × 365. Dấu thống nhất với lãi/lỗ:
+      <b>dương = MSB hưởng lãi</b>, <b>âm = MSB chịu chi phí</b>.</div>
     <div class="grid g2">
       <div class="card"><h4>%/năm theo nhóm</h4>
-        <div class="ch4sub">Trọng số theo tiền × ngày, chỉ trên cặp có ngày &gt; 0</div><div id="chCarry" class="ch"></div></div>
+        <div class="ch4sub">Trọng số theo tiền × ngày</div><div id="chCarry" class="ch"></div></div>
       <div class="card"><h4>Phân bố %/năm từng cặp</h4>
-        <div class="ch4sub">Toàn bộ cặp có ngày &gt; 0</div><div id="chHist" class="ch"></div></div>
+        <div class="ch4sub">Toàn bộ 198 cặp</div><div id="chHist" class="ch"></div></div>
     </div>
   </div>
 
@@ -187,9 +189,10 @@ border-top:1px solid var(--border);line-height:1.6}
 <!-- ============ P2 — Buy trước ============ -->
 <section id="p2" class="page">
   <div class="ph">
-    <h1>Buy trước, Sell sau</h1>
-    <p>Chân mua thanh toán trước (CaptureDate sớm hơn), chân bán thanh toán sau. Gross(Sell) &gt;
-      Gross(Buy) → <b>Cho vay tiền</b>; Gross(Sell) &lt; Gross(Buy) → <b>Vay bond</b>.</p>
+    <h1>Buy trước — MSB đưa TIỀN ra</h1>
+    <p>Chân mua thanh toán trước, chân bán lại thanh toán sau (reverse repo): MSB bỏ tiền ra nhận
+      bond vào làm bảo đảm. MSB <b>hưởng lãi</b> → <b>Cho vay tiền</b>; MSB <b>chịu chi phí</b> →
+      <b>Vay bond</b> (trả phí để mượn bond).</p>
   </div>
   <div class="subcols">
     <div class="subcol" id="colCVT"></div>
@@ -200,13 +203,13 @@ border-top:1px solid var(--border);line-height:1.6}
 <!-- ============ P3 — Sell trước ============ -->
 <section id="p3" class="page">
   <div class="ph">
-    <h1>Sell trước, Buy sau</h1>
-    <p>Chân bán thanh toán trước (CaptureDate sớm hơn), chân mua lại thanh toán sau. Gross(Sell) &gt;
-      Gross(Buy) → <b>Đi vay tiền</b>; Gross(Sell) &lt; Gross(Buy) → <b>Cho vay bond</b> (MSB cho mượn
-      bond, trả rebate interest — chiều bình thường của repo bán trước, không phải khoản lỗ bất thường).</p>
+    <h1>Sell trước — MSB đưa BOND ra</h1>
+    <p>Chân bán thanh toán trước, chân mua lại thanh toán sau (repo): MSB giao bond đi, nhận tiền
+      về. MSB <b>chịu chi phí</b> → <b>Vay tiền</b> (trả lãi vay); MSB <b>hưởng lãi</b> →
+      <b>Cho vay bond</b> (được trả phí cho mượn bond).</p>
   </div>
   <div class="subcols">
-    <div class="subcol" id="colDVT"></div>
+    <div class="subcol" id="colVT"></div>
     <div class="subcol" id="colCVB"></div>
   </div>
 </section>
@@ -242,15 +245,25 @@ border-top:1px solid var(--border);line-height:1.6}
   </div>
 
   <div class="sec">
+    <h3>Cặp lãi/lỗ đúng bằng 0</h3>
+    <div class="sub">Gross Amount hai chân trùng nhau đến từng đồng. Không phải lỗi ghép cặp:
+      lãi repo ngụ ý của các deal này nhỏ hơn bước làm tròn của <code>GrossAmount</code> trên hệ
+      thống (bội số 10.000đ) nên bị làm tròn mất. Xếp vào nhóm <b>Cho vay bond</b> theo cấu trúc —
+      chân bán trước nên MSB đã đưa bond ra, chi phí bằng 0.</div>
+    <div class="tw card"><table id="tbZero"></table></div>
+  </div>
+
+  <div class="sec">
     <h3>Cặp có Δyield lớn hoặc %/năm lớn</h3>
-    <div class="sub">Nhóm dưới đây gồm cặp có Δyield ≥ 10bp trên kỳ hạn ≤ 30 ngày, hoặc
-      |%/năm| &gt; 15 trên kỳ hạn ≥ 3 ngày. Do đa số cặp có kỳ hạn CaptureDate = 0, danh sách này
-      chủ yếu bắt bằng Δyield.</div>
+    <div class="sub">Cặp có Δyield ≥ 10bp trên kỳ hạn ≤ 30 ngày, hoặc |%/năm| &gt; 15 trên kỳ hạn
+      ≥ 3 ngày.</div>
     <div class="tw card"><table id="tbAnom"></table></div>
   </div>
 
   <div class="sec">
     <h3>Cặp kỳ hạn 1–2 ngày có |%/năm| &gt; 8</h3>
+    <div class="sub">Chênh lệch tiền tuyệt đối chỉ vài chục triệu nhưng quy đổi ×365 nên %/năm lớn
+      — đọc bằng cột lãi/lỗ tuyệt đối, không đọc bằng %/năm.</div>
     <div class="tw card"><table id="tbNoise"></table></div>
   </div>
 
@@ -270,10 +283,10 @@ border-top:1px solid var(--border);line-height:1.6}
   <div class="card">
     <div class="ctrl">
       <button class="pill on" data-g="all" onclick="setGrp('all',this)">Tất cả</button>
+      <button class="pill" data-g="VT" onclick="setGrp('VT',this)">Vay tiền</button>
+      <button class="pill" data-g="CVB" onclick="setGrp('CVB',this)">Cho vay bond</button>
       <button class="pill" data-g="CVT" onclick="setGrp('CVT',this)">Cho vay tiền</button>
       <button class="pill" data-g="VB" onclick="setGrp('VB',this)">Vay bond</button>
-      <button class="pill" data-g="DVT" onclick="setGrp('DVT',this)">Đi vay tiền</button>
-      <button class="pill" data-g="CVB" onclick="setGrp('CVB',this)">Cho vay bond</button>
       <select id="fCpty" onchange="renderPairs()"></select>
       <input id="fQ" placeholder="Tìm mã TP / đối tác / deal id" oninput="renderPairs()">
       <span class="cnt" id="pairCnt"></span>
@@ -357,18 +370,20 @@ function table(cols, rows, foot) {
   return `<thead><tr>${th}</tr></thead><tbody>${tb}</tbody>${tf}`;
 }
 
-/* ---------- 4 nhóm ---------- */
+/* ---------- 4 nhóm ----------
+   Trục 1 (chiều thanh toán) quyết định MSB đưa TÀI SẢN nào ra.
+   Trục 2 (dấu lãi/lỗ) quyết định MSB ĐI VAY (chịu chi phí) hay CHO VAY (hưởng lãi). */
 const GRP = {
-  CVT: { label: 'Cho vay tiền', tag: 'cvt', color: '--gold',
-    desc: 'Buy trước, Sell sau, Gross(Sell) > Gross(Buy) — MSB thu thêm khi bán lại, đọc như lãi cho vay tiền.' },
-  VB:  { label: 'Vay bond', tag: 'vb', color: '--red',
-    desc: 'Buy trước, Sell sau, Gross(Sell) < Gross(Buy) — MSB mượn bond, trả phí ngầm qua bán lại rẻ hơn.' },
-  DVT: { label: 'Đi vay tiền', tag: 'dvt', color: '--cyan',
-    desc: 'Sell trước, Buy sau, Gross(Sell) > Gross(Buy) — MSB bán trước thu tiền, mua lại rẻ hơn.' },
-  CVB: { label: 'Cho vay bond', tag: 'cvb', color: '--violet',
-    desc: 'Sell trước, Buy sau, Gross(Sell) < Gross(Buy) — MSB cho mượn bond, trả rebate interest trên tiền cọc: chiều BÌNH THƯỜNG của repo bán trước, không phải khoản lỗ bất thường.' }
+  VT:  { label: 'Vay tiền', tag: 'vt', color: '--red', side: 'Sell trước', role: 'Chịu chi phí',
+    desc: 'MSB giao bond đi, nhận tiền về, rồi trả lãi khi mua lại — đi vay tiền qua repo trái phiếu.' },
+  CVB: { label: 'Cho vay bond', tag: 'cvb', color: '--violet', side: 'Sell trước', role: 'Hưởng lãi',
+    desc: 'MSB giao bond đi nhưng mua lại rẻ hơn — được trả phí cho mượn bond (bond special).' },
+  CVT: { label: 'Cho vay tiền', tag: 'cvt', color: '--gold', side: 'Buy trước', role: 'Hưởng lãi',
+    desc: 'MSB bỏ tiền ra nhận bond làm bảo đảm, bán lại đắt hơn — thu lãi cho vay tiền (reverse repo).' },
+  VB:  { label: 'Vay bond', tag: 'vb', color: '--orange', side: 'Buy trước', role: 'Chịu chi phí',
+    desc: 'MSB bỏ tiền ra nhận bond vào nhưng bán lại rẻ hơn — trả phí để mượn bond.' }
 };
-const GCODES = ['CVT', 'VB', 'DVT', 'CVB'];
+const GCODES = ['VT', 'CVB', 'CVT', 'VB'];
 
 /* =======================================================================
    PAGE 1 — overview
@@ -381,17 +396,34 @@ document.getElementById('brandDt').textContent =
   vnd(D.kpi.dFrom) + ' – ' + vnd(D.kpi.dTo) + ' · Market Risk';
 document.getElementById('phLead').innerHTML =
   `Toàn bộ <b>${D.kpi.nDeals}</b> chân giao dịch trái phiếu chính phủ nhập vào RPBOD_B002 (đã lọc
-   folder AFS-DCM/HUONG/HUY) từ ngày chốt sổ <b>${vnd(D.kpi.dFrom)}</b> đến <b>${vnd(D.kpi.dTo)}</b>,
+   folder AFS-DCM/HUONG/HUY) từ <b>${vnd(D.kpi.dFrom)}</b> đến <b>${vnd(D.kpi.dTo)}</b>,
    ghép thành <b>${D.kpi.nPairs}</b> cặp mua–bán khớp khối lượng, không còn chân lẻ nào
-   (${D.kpi.nUn} chân chưa ghép). Mỗi cặp phân vào 1 trong 4 nhóm theo chiều trước/sau và so sánh Gross.`;
+   (${D.kpi.nUn} chân chưa ghép). Lãi/lỗ mỗi cặp = <b>chênh lệch Gross Amount hai chân</b>;
+   dương = MSB hưởng lãi, âm = MSB chịu chi phí. Không cặp nào bị loại khỏi số tổng hợp.`;
 
 document.getElementById('kpiRow').innerHTML =
   kpi('neu', 'Cặp deal đã ghép', num(D.kpi.nPairs, 0), 'cặp', `${D.kpi.nDeals} chân · ${D.kpi.nUn} chân chưa ghép`) +
   GCODES.map(g => {
     const b = KG[g], meta = GRP[g];
-    return kpi(b.pnl >= 0 ? 'pos' : 'neg', meta.label, num(b.cash / 1000, 1), 'nghìn tỷ',
-      `${b.n} cặp · ${num(b.pnl, 0)} tr · kỳ hạn ${b.minD}–${b.maxD}n`);
+    const tone = b.n === 0 ? 'neu' : (b.pnl >= 0 ? 'pos' : 'neg');
+    return kpi(tone, meta.label, num(b.cash / 1000, 1), 'nghìn tỷ',
+      b.n === 0 ? 'Không có cặp nào trong kỳ'
+                : `${b.n} cặp · ${num(b.pnl, 0)} tr · ${pct(b.rate)}/năm · kỳ hạn ${b.minD}–${b.maxD}n`);
   }).join('');
+
+document.getElementById('tbRule').innerHTML = table([
+  { t: 'Chiều thanh toán', f: r => r.side },
+  { t: 'MSB đưa ra', f: r => r.asset },
+  { t: 'Lãi/lỗ', f: r => r.sign },
+  { t: 'Vai trò', f: r => r.role },
+  { t: 'Nhóm', f: r => `<span class="tag ${GRP[r.g].tag}">${GRP[r.g].label}</span>` },
+  { t: 'Số cặp', n: 1, f: r => num(KG[r.g].n, 0) }
+], [
+  { g: 'VT', side: 'Sell trước (repo)', asset: 'Bond', sign: 'âm', role: 'Chịu chi phí → đi vay' },
+  { g: 'CVB', side: 'Sell trước (repo)', asset: 'Bond', sign: 'dương', role: 'Hưởng lãi → cho vay' },
+  { g: 'CVT', side: 'Buy trước (reverse repo)', asset: 'Tiền', sign: 'dương', role: 'Hưởng lãi → cho vay' },
+  { g: 'VB', side: 'Buy trước (reverse repo)', asset: 'Tiền', sign: 'âm', role: 'Chịu chi phí → đi vay' }
+]);
 
 chart('chScale', () => base({
   tooltip: { trigger: 'axis', valueFormatter: v => num(v, 2) + ' nghìn tỷ' },
@@ -410,9 +442,10 @@ chart('chOutst', () => base({
   legend: { data: GCODES.map(g => GRP[g].label), top: 0, textStyle: { color: cssv('--chart-label'), fontSize: 11 } },
   xAxis: { type: 'time', axisLabel: axL(), axisLine: axS() },
   yAxis: { type: 'value', axisLabel: Object.assign(axL(), { formatter: v => num(v / 1000, 1) }), splitLine: splL() },
+  // outst đã ở TỶ VND; formatter chia 1000 để ra nghìn tỷ. Đừng nhân thêm 1000 ở đây.
   series: GCODES.map(g => ({
     name: GRP[g].label, type: 'line', step: 'end', showSymbol: false,
-    data: D.groups[g].outst.map(([d, v]) => [d, v * 1000]), itemStyle: { color: cssv(GRP[g].color) }, areaStyle: { opacity: .12 }
+    data: D.groups[g].outst, itemStyle: { color: cssv(GRP[g].color) }, areaStyle: { opacity: .12 }
   }))
 }));
 
@@ -450,19 +483,22 @@ chart('chCarry', () => base({
 })();
 
 document.getElementById('noteMain').innerHTML = `<ul>
-<li><b>Cấu trúc.</b> ${D.kpi.nDeals} chân giao dịch ghép thành ${D.kpi.nPairs} cặp, ${D.kpi.nUn} chân lẻ.</li>
-${GCODES.map(g => {
+<li><b>Cấu trúc.</b> ${D.kpi.nDeals} chân giao dịch ghép thành ${D.kpi.nPairs} cặp, ${D.kpi.nUn} chân lẻ.
+    Tổng lãi/lỗ ròng <b>${num(totalPnl, 0)} triệu</b> trên ${num(totalCash / 1000, 2)} nghìn tỷ.</li>
+${GCODES.filter(g => KG[g].n).map(g => {
   const b = KG[g];
   return `<li><b>${GRP[g].label}.</b> ${b.n} cặp · ${num(b.cash / 1000, 2)} nghìn tỷ · mệnh giá
     ${num(b.face / 1000, 2)} nghìn tỷ · kỳ hạn ${b.minD}–${b.maxD} ngày (trung vị ${num(b.med, 0)}) ·
     <b>${num(b.pnl, 0)} triệu · ${pct(b.rate)}/năm</b>.</li>`;
 }).join('')}
+${GCODES.filter(g => !KG[g].n).map(g =>
+  `<li><b>${GRP[g].label}.</b> Không có cặp nào trong kỳ.</li>`).join('')}
 <li><b>Danh sách tra cứu.</b> ${D.anom.length} cặp Δyield ≥ 10bp / |%/năm| lớn ·
-    ${D.noise.length} cặp kỳ hạn ngắn |%/năm| lớn ·
+    ${D.noise.length} cặp kỳ hạn ngắn |%/năm| lớn · ${D.zero.length} cặp lãi/lỗ đúng bằng 0 ·
     ${D.fmis.length} cặp hai chân khác folder · ${D.cmis.length} cặp ghép chéo đối tác đã xác nhận.</li>
-<li><b>Ghi chú kỳ hạn.</b> Kỳ hạn (số ngày) tính theo <b>CaptureDate</b> hai chân, không phải
-    SettlementDate — đa số cặp có CaptureDate hai chân trùng ngày nên hiện 0 ngày; đây là lựa chọn
-    nghiệp vụ đã xác nhận, không phải lỗi.</li></ul>`;
+<li><b>Quy ước ngày.</b> <b>CaptureDate</b> (ngày BO ghi nhận) chỉ dùng để <b>ghép cặp</b> — chân nào
+    đi với chân nào. <b>SettlementDate</b> dùng để đọc nghiệp vụ: chân nào thanh toán trước và kỳ hạn
+    bao nhiêu ngày (số ngày trôi qua, deal qua đêm = 1 ngày).</li></ul>`;
 
 /* =======================================================================
    PAGES 2 & 3 — group detail (2 cột con mỗi trang)
@@ -470,15 +506,24 @@ ${GCODES.map(g => {
 function groupCol(container, g) {
   const meta = GRP[g], b = KG[g], gd = D.groups[g];
   const pfx = g;
-  container.innerHTML = `
+  const head = `
     <div class="sh"><span class="dot" style="background:${cssv(meta.color) || ''}"></span>
       <h2>${meta.label}</h2></div>
-    <div class="sub" style="font-size:11.5px;color:var(--text-dim);margin-bottom:11px">${meta.desc}</div>
+    <div class="sub" style="font-size:11.5px;color:var(--text-dim);margin-bottom:11px">${meta.desc}</div>`;
+  // Nhóm rỗng: một dòng nói rõ, không dựng chart/bảng trống gây rối.
+  if (!b.n) {
+    container.innerHTML = head +
+      `<div class="empty">Không có cặp nào thuộc nhóm này trong kỳ
+       ${vnd(D.kpi.dFrom)} – ${vnd(D.kpi.dTo)}.</div>`;
+    return;
+  }
+  container.innerHTML = head + `
     <div class="sec"><div class="grid g2" id="kpi${pfx}"></div></div>
     <div class="sec">
       <h3 style="font-size:14px">Kỳ hạn</h3>
       <div id="chTen${pfx}" class="ch sm"></div>
       <div class="tw"><table id="tbTen${pfx}"></table></div>
+      <div id="warn${pfx}"></div>
     </div>
     <div class="sec">
       <h3 style="font-size:14px">Top mã trái phiếu</h3>
@@ -490,12 +535,14 @@ function groupCol(container, g) {
       <div id="chFold${pfx}" class="ch sm"></div>
     </div>`;
 
+  const isLend = meta.role === 'Hưởng lãi';
   document.getElementById(`kpi${pfx}`).innerHTML =
     kpi('neu', 'Số cặp', num(b.n, 0), 'cặp', `Mệnh giá ${num(b.face / 1000, 2)} nghìn tỷ`) +
-    kpi('neu', 'Tổng tiền', num(b.cash / 1000, 1), 'nghìn tỷ', `Kỳ hạn trung vị ${num(b.med, 0)} ngày`) +
-    kpi(b.pnl >= 0 ? 'pos' : 'neg', 'Lãi/lỗ', num(b.pnl, 0), 'triệu VND',
-      `${b.nLai} cặp dương · ${b.nLo} cặp âm`) +
-    kpi('warn', '%/năm', pct(b.rate), '/năm', 'Trọng số theo tiền × ngày, chỉ cặp ngày>0');
+    kpi('neu', 'Tổng tiền', num(b.cash / 1000, 1), 'nghìn tỷ',
+      `Kỳ hạn ${b.minD}–${b.maxD} ngày (trung vị ${num(b.med, 0)})`) +
+    kpi(b.pnl >= 0 ? 'pos' : 'neg', isLend ? 'Lãi thu về' : 'Chi phí phải trả',
+      num(b.pnl, 0), 'triệu VND', `${b.nLai} cặp dương · ${b.nLo} cặp âm`) +
+    kpi('warn', '%/năm', pct(b.rate), '/năm', 'Trọng số theo tiền × ngày');
 
   if (gd.tenor.length) {
     chart(`chTen${pfx}`, () => base({
@@ -519,6 +566,22 @@ function groupCol(container, g) {
     { t: 'Lãi/lỗ (tr)', n: 1, f: r => num(r.pnl, 0), c: r => sgn(r.pnl) },
     { t: '%/năm', n: 1, f: r => pct(r.rate), c: r => sgn(r.rate) }
   ], gd.tenor);
+
+  // Bucket 1 ngày: chênh lệch tiền nhân 365 nên %/năm bị phóng đại. Chỉ ra CỤ THỂ
+  // mấy cặp Δyield lớn đang gánh phần lớn con số, để không ai đọc nhầm cả bucket.
+  const d1 = D.pairs.filter(p => p.grp === g && p.days === 1);
+  const big = d1.filter(p => Math.abs(p.dy) >= 10);
+  if (d1.length && big.length) {
+    const sBig = big.reduce((s, p) => s + p.pnl, 0);
+    const sAll = d1.reduce((s, p) => s + p.pnl, 0);
+    document.getElementById(`warn${pfx}`).innerHTML =
+      `<div class="note" style="font-size:11.5px"><b>Đọc bucket 1 ngày bằng cột lãi/lỗ tuyệt đối,
+       đừng đọc bằng %/năm.</b> Chênh lệch tiền của deal qua đêm nhân 365 nên %/năm bị phóng đại.
+       Trong ${d1.length} cặp qua đêm, ${big.length} cặp có Δyield ≥ 10bp
+       (${big.map(p => p.sid + '/' + p.bid).join(', ')}) chiếm ${num(sBig, 0)} tr trên tổng
+       ${num(sAll, 0)} tr — xem trang <b>Tra cứu</b>. ${d1.length - big.length} cặp còn lại chỉ
+       ${num(sAll - sBig, 0)} tr.</div>`;
+  }
 
   if (gd.bond.length) {
     chart(`chBond${pfx}`, () => base({
@@ -558,9 +621,9 @@ function groupCol(container, g) {
     }));
   }
 }
-groupCol(document.getElementById('colCVT'), 'CVT');
+groupCol(document.getElementById('colCVT'), 'CVT');   // p2 — Buy trước
 groupCol(document.getElementById('colVB'), 'VB');
-groupCol(document.getElementById('colDVT'), 'DVT');
+groupCol(document.getElementById('colVT'), 'VT');     // p3 — Sell trước
 groupCol(document.getElementById('colCVB'), 'CVB');
 
 /* =======================================================================
@@ -570,23 +633,36 @@ groupCol(document.getElementById('colCVB'), 'CVB');
   const grid = document.getElementById('cptyGrid');
   grid.innerHTML = GCODES.map(g => `
     <div class="card">
-      <h4>${GRP[g].label} — theo đối tác</h4>
-      <div class="ch4sub">Tiền (nghìn tỷ) và lãi/lỗ (tr)</div>
-      <div id="chCpty${g}" class="ch sm"></div>
-      <div class="tw"><table id="tbCpty${g}"></table></div>
+      <h4><span class="tag ${GRP[g].tag}">${GRP[g].label}</span> — theo đối tác</h4>
+      <div class="ch4sub">${GRP[g].side} · ${KG[g].n} cặp · ${num(KG[g].cash / 1000, 2)} nghìn tỷ${
+        D.groups[g].cpty.length > 12 ? ` · biểu đồ hiện 12/${D.groups[g].cpty.length} đối tác lớn nhất, bảng đủ` : ''}</div>
+      ${KG[g].n ? `<div id="chCpty${g}" class="ch sm"></div>
+      <div class="tw"><table id="tbCpty${g}"></table></div>`
+      : '<div class="empty">Không có cặp nào thuộc nhóm này trong kỳ.</div>'}
     </div>`).join('');
   GCODES.forEach(g => {
     const arr = D.groups[g].cpty;
-    if (!arr.length) { document.getElementById(`chCpty${g}`).innerHTML = '<div class="ch4sub">Không có dữ liệu</div>'; return; }
+    if (!arr.length) return;
+    // Thanh ngang chứ không phải bánh: một nhóm có tới 20 đối tác, vẽ bánh thì
+    // nhãn chồng lên nhau không đọc được.
+    const top = arr.slice(0, 12), tot = arr.reduce((s, c) => s + c.cash, 0);
     chart(`chCpty${g}`, () => base({
-      tooltip: { trigger: 'item', formatter: p => `<b>${esc(p.name)}</b><br>${num(p.value / 1000, 2)} nghìn tỷ · ${p.percent}%` },
-      legend: { bottom: 0, textStyle: { color: cssv('--chart-label'), fontSize: 11 } },
-      grid: null,
+      tooltip: {
+        trigger: 'item', formatter: p => {
+          const r = top[p.dataIndex];
+          return `<b>${esc(r.cpty)}</b><br>${r.n} cặp · ${num(r.cash / 1000, 2)} nghìn tỷ
+            (${(r.cash / tot * 100).toFixed(1)}%)<br>Lãi/lỗ ${num(r.pnl, 0)} tr`;
+        }
+      },
+      legend: { show: false },
+      grid: { left: 8, right: 46, top: 10, bottom: 6, containLabel: true },
+      // data đã ở nghìn tỷ (cash/1000) nên formatter KHÔNG chia thêm lần nữa.
+      xAxis: { type: 'value', axisLabel: Object.assign(axL(), { formatter: v => num(v, 1) }), splitLine: splL() },
+      yAxis: { type: 'category', data: top.map(c => c.cpty).reverse(), axisLabel: Object.assign(axL(), { fontSize: 10 }), axisLine: axS() },
       series: [{
-        type: 'pie', radius: ['38%', '62%'], center: ['50%', '42%'],
-        data: arr.map(c => ({ name: c.cpty, value: c.cash })),
-        label: { color: cssv('--chart-text'), fontSize: 10, formatter: '{b}\n{d}%' },
-        itemStyle: { borderWidth: 2, borderColor: cssv('--card') }
+        type: 'bar', barWidth: '64%', data: top.map(c => +(c.cash / 1000).toFixed(3)).reverse(),
+        itemStyle: { color: cssv(GRP[g].color) },
+        label: { show: true, position: 'right', formatter: p => num(p.value, 2), color: cssv('--chart-text'), fontSize: 10 }
       }]
     }));
     document.getElementById(`tbCpty${g}`).innerHTML = table([
@@ -609,9 +685,9 @@ groupCol(document.getElementById('colCVB'), 'CVB');
    ======================================================================= */
 document.getElementById('kpiX').innerHTML =
   kpi('neu', 'Δyield / %/năm lớn', num(D.anom.length, 0), 'cặp', `Lãi/lỗ ${num(D.anom.reduce((s, r) => s + r.pnl, 0), 0)} triệu VND`) +
-  kpi('neu', 'Kỳ hạn ngắn |%/năm| lớn', num(D.noise.length, 0), 'cặp', `Lãi/lỗ ${num(D.noise.reduce((s, r) => s + r.pnl, 0), 0)} triệu VND`) +
-  kpi('neu', 'Hai chân khác folder', num(D.fmis.length, 0), 'cặp', `Lãi/lỗ ${num(D.fmis.reduce((s, r) => s + r.pnl, 0), 0)} triệu VND`) +
-  kpi('neu', 'Ghép chéo đối tác', num(D.cmis.length + (D.cmis.length ? 0 : 0), 0), 'cặp', 'Đã xác nhận nghiệp vụ (CROSS_OK)');
+  kpi('neu', 'Kỳ hạn 1–2 ngày, |%/năm| > 8', num(D.noise.length, 0), 'cặp', `Lãi/lỗ ${num(D.noise.reduce((s, r) => s + r.pnl, 0), 0)} triệu VND`) +
+  kpi('neu', 'Lãi/lỗ đúng bằng 0', num(D.zero.length, 0), 'cặp', 'Lãi repo nhỏ hơn bước làm tròn') +
+  kpi('neu', 'Hai chân khác folder', num(D.fmis.length, 0), 'cặp', `Lãi/lỗ ${num(D.fmis.reduce((s, r) => s + r.pnl, 0), 0)} triệu VND`);
 
 (function () {
   const sp = D.pairs.filter(p => typeof p.sid === 'string');
@@ -620,17 +696,38 @@ document.getElementById('kpiX').innerHTML =
     { t: 'Kênh', f: r => r.clr }, { t: 'CaptureDate', n: 1, f: r => vnd(r.cap) },
     { t: 'Thanh toán', n: 1, f: r => vnd(r.set) }, { t: 'Mệnh giá (tỷ)', n: 1, f: r => num(r.face, 1) },
     { t: 'Yield', n: 1, f: r => r.y + '%' }, { t: 'Tiền (tỷ)', n: 1, f: r => num(r.cash, 2) }
-  ], sp.flatMap(r => [
-    { k: 'Mua vào (B)', id: r.bid, cpty: r.cpty.split('→')[0] || r.cpty, clr: r.bclr, cap: r.bcap, set: r.bset, face: r.face, y: r.by, cash: r.cash },
-    { k: 'Bán ra (S)', id: r.sid, cpty: r.cpty.split('→')[1] || r.cpty, clr: r.sclr, cap: r.scap, set: r.sset, face: r.face, y: r.sy, cash: r.cash - r.pnl }
-  ]));
+  ], sp.flatMap(r => {
+    // `cash` là tiền CHÂN THANH TOÁN TRƯỚC (tỷ VND); `pnl` = Gross(S) − Gross(B) (triệu VND).
+    // Suy ra chân còn lại theo dirn, nhớ quy đổi triệu -> tỷ trước khi cộng/trừ.
+    const sCash = r.dirn === 'A' ? r.cash : r.cash + r.pnl / 1000;
+    const bCash = r.dirn === 'A' ? r.cash - r.pnl / 1000 : r.cash;
+    return [
+      { k: 'Mua vào (B)', id: r.bid, cpty: r.cptyB, clr: r.bclr, cap: r.bcap, set: r.bset, face: r.face, y: r.by, cash: bCash },
+      { k: 'Bán ra (S)', id: r.sid, cpty: r.cptyS, clr: r.sclr, cap: r.scap, set: r.sset, face: r.face, y: r.sy, cash: sCash }
+    ];
+  }));
   const r = sp[0];
   document.getElementById('noteSpecial').innerHTML = r ? `
-  <b>Cặp ${r.bid} ↔ ${r.sid}.</b> MSB mua ${num(r.face, 1)} tỷ mệnh giá ${r.paper} qua kênh
-  <b>${r.bclr}</b>, rồi bán lại đúng khối lượng đó qua kênh <b>${r.sclr}</b>, cùng CaptureDate
-  ${vnd(r.scap)}. Lãi/lỗ ${num(r.pnl, 0)} triệu VND, tương đương <b>${pct(r.rate)}/năm</b>.
+  <b>Cặp ${r.bid} ↔ ${r.sid}.</b> MSB mua ${num(r.face, 1)} tỷ mệnh giá ${r.paper} từ
+  <b>${esc(r.cptyB)}</b> qua kênh <b>${r.bclr}</b> (thanh toán ${vnd(r.bset)}), rồi bán lại đúng khối
+  lượng đó cho <b>${esc(r.cptyS)}</b> qua kênh <b>${r.sclr}</b> (thanh toán ${vnd(r.sset)}), tách
+  thành hai lệnh bằng nhau. Hai chân cùng CaptureDate ${vnd(r.scap)} và cùng yield ${r.by}%.
+  Chân mua thanh toán trước nên MSB <b>đưa tiền ra</b>; lãi/lỗ ${num(r.pnl, 0)} triệu VND
+  (<b>${pct(r.rate)}/năm</b>) là dương nên xếp nhóm <b>${GRP[r.grp].label}</b>.
   Bản chất vẫn là <b>repo</b>, MSB đứng trung gian giữa hai đối tác khác nhau — xác nhận nghiệp vụ.` : '';
 })();
+
+document.getElementById('tbZero').innerHTML = table([
+  { t: 'Deal S / B', f: r => r.sid + ' / ' + r.bid },
+  { t: 'Nhóm', f: r => `<span class="tag ${GRP[r.grp].tag}">${GRP[r.grp].label}</span>` },
+  { t: 'Mã TP', f: r => r.paper }, { t: 'Đối tác', f: r => esc(r.cpty) },
+  { t: 'Mệnh giá (tỷ)', n: 1, f: r => num(r.face, 1) },
+  { t: 'Settlement S', n: 1, f: r => vnd(r.sset) }, { t: 'Settlement B', n: 1, f: r => vnd(r.bset) },
+  { t: 'Ngày', n: 1, f: r => r.days },
+  { t: 'Tiền (tỷ)', n: 1, f: r => num(r.cash, 2) },
+  { t: 'Yield S', n: 1, f: r => r.sy + '%' }, { t: 'Yield B', n: 1, f: r => r.by + '%' },
+  { t: 'Δyield', n: 1, f: r => num(r.dy, 2) + 'bp' }
+], D.zero);
 
 document.getElementById('tbAnom').innerHTML = table([
   { t: 'Deal S / B', f: r => r.sid + ' / ' + r.bid },
@@ -704,13 +801,17 @@ function renderPairs() {
 renderPairs();
 
 document.getElementById('footNote').innerHTML =
-  `Nguồn: input <b>RPBOD_B002</b>, ${D.kpi.nDeals} chân giao dịch (đã lọc folder AFS-DCM/HUONG/HUY)
-   từ ${vnd(D.kpi.dFrom)} đến ${vnd(D.kpi.dTo)} (theo CaptureDate). Cặp S↔B ghép theo cùng mã trái
-   phiếu, cùng đối tác, cùng coupon, ngược chiều S/B; ưu tiên cùng CaptureDate, phần dư ghép theo
-   thứ tự CaptureDate. Một cặp ghép chéo đối tác (KBNN↔PGBV-HO) đã xác nhận nghiệp vụ.
-   Lãi/lỗ = Gross(Sell) − Gross(Buy). Thứ tự trước/sau và kỳ hạn (số ngày) đều tính theo
-   <b>CaptureDate</b>, không phải SettlementDate. Phân loại 4 nhóm theo (chân nào CaptureDate
-   trước) × (Gross bên nào lớn hơn). <b>Không cặp nào bị loại khỏi số tổng hợp.</b>`;
+  `Nguồn: input <b>RPBOD_B002</b>, ${D.kpi.nDeals} chân giao dịch (đã lọc folder AFS-DCM/HUONG/HUY,
+   bỏ hai sổ nội bộ AFS-GOV/AFS-ALM và các rail SBV/VSD-AVBL/AFS-ITB/AFS-LOANFI)
+   từ ${vnd(D.kpi.dFrom)} đến ${vnd(D.kpi.dTo)}.
+   <b>Ghép cặp</b> theo cùng mã trái phiếu, cùng đối tác, cùng coupon, ngược chiều S/B; ưu tiên hai
+   chân cùng <b>CaptureDate</b> (dấu vết book cùng lúc), phần dư ghép FIFO. Một cặp ghép chéo đối
+   tác (KBNN ↔ PGBV-HO) đã xác nhận nghiệp vụ.
+   <b>Đọc nghiệp vụ</b> theo <b>SettlementDate</b>: chân nào thanh toán trước quyết định MSB đưa
+   bond hay tiền ra; kỳ hạn = số ngày trôi qua giữa hai ngày thanh toán (qua đêm = 1 ngày).
+   Lãi/lỗ = Gross(Sell) − Gross(Buy); <b>dương = MSB hưởng lãi → cho vay</b>,
+   <b>âm = MSB chịu chi phí → đi vay</b>. %/năm = lãi/lỗ ÷ tiền chân đầu ÷ số ngày × 365,
+   trọng số theo tiền × ngày. <b>Không cặp nào bị loại khỏi số tổng hợp.</b>`;
 
 /* ---------- navigation, theme, save ---------- */
 function goPage(id, el) {

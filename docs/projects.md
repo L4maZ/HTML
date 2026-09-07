@@ -83,12 +83,15 @@ mục "Phụ lục — GovBond RPBOD_B002".
 này dựng lại toàn bộ từ template mỗi lần).
 
 - 6 trang: Tổng quan · **Buy trước** (Cho vay tiền | Vay bond, 2 cột con) · **Sell trước**
-  (Đi vay tiền | Cho vay bond, 2 cột con) · Đối tác (4 nhóm) · Tra cứu · Chi tiết cặp deal.
+  (Vay tiền | Cho vay bond, 2 cột con) · Đối tác (4 nhóm) · Tra cứu · Chi tiết cặp deal.
   Thay hẳn cấu trúc nhị phân Nhóm A/Nhóm B của bản cũ.
-- Thứ tự trước/sau và kỳ hạn theo `CaptureDate`, không phải `SettlementDate` — khác bản
-  MSB_RP_DM cũ. 196/198 cặp có CaptureDate hai chân trùng ngày nên kỳ hạn hiển thị đa số
-  là 0 — đã xác nhận nghiệp vụ, không phải lỗi.
-- 198 cặp: 104 Cho vay bond, 93 Đi vay tiền, 1 Cho vay tiền, 0 Vay bond.
+- `CaptureDate` chỉ để **ghép cặp**; `SettlementDate` để đọc chiều trước/sau và kỳ hạn.
+  Bản đầu dùng CaptureDate cho cả hai nên hỏng — xem `bond-deal-pairing.md`.
+- 198 cặp: 102 Vay tiền, 59 Cho vay bond, 37 Cho vay tiền, 0 Vay bond.
+- Nhóm rỗng hiện một dòng "Không có cặp nào trong kỳ" thay vì chart/bảng trống.
+- **Bẫy đơn vị đã sửa** (dễ tái phạm): `cash` là **tỷ**, `pnl` là **triệu** — trừ thẳng
+  hai đại lượng này cho ra sai 1000 lần (đã xảy ra ở bảng deal đặc biệt). Chart nào đã
+  đổi data sang nghìn tỷ thì `axisLabel.formatter` **không** được chia 1000 lần nữa.
 - **Bẫy dữ liệu**: cột `GrossAmount` có 16/346 dòng là **string** dạng `'  1012036120.0000000K'`
   (đơn vị nghìn), không phải số. Không parse là lệch 1000 lần.
 - Ngưỡng ngoại lệ **theo kỳ hạn**: yield lệch ≥ 10bp chỉ là định giá lại khi kỳ hạn ≤ 30 ngày;

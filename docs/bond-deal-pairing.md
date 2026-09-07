@@ -288,19 +288,55 @@ dịch, và 2 trong 5 sổ AFS-* xuất hiện — `AFS-GOV`, `AFS-ALM` — là 
 bạch được đối tác ngoài (xác nhận của Jak, 09/2026). **Quyết định:** chỉ giữ dòng có
 `Folders_ShortName` ∈ {AFS-DCM, AFS-HUONG, AFS-HUY} trước khi ghép cặp (374/601 dòng).
 
-**Thứ tự trước/sau và kỳ hạn dùng `CaptureDate`**, không dùng `SettlementDate` — khác
-với `ghep_cap_deal_bond.py` (MSB_RP_DM) và `ghep_cap_deal_fibond.py` (VALUE_DATE).
-Xác nhận riêng của Jak cho pipeline này: "logic là lấy capture date, ngày ghi nhận
-giao dịch". Hệ quả đã kiểm chứng: **196/198 cặp có CaptureDate hai chân trùng ngày**
-(kỳ hạn hiển thị = 0 ngày), trong khi SettlementDate lệch 1–351 ngày — đã báo cho Jak
-và được xác nhận giữ nguyên theo CaptureDate, không dùng SettlementDate cho kỳ hạn.
+**Hai cột ngày, hai vai trò khác nhau** — đây là chỗ bản đầu làm sai:
+
+| Cột | Dùng để | Vì sao |
+|---|---|---|
+| `CaptureDate` | **Ghép cặp**: chân nào đi với chân nào | Hai chân một hợp đồng được BO book cùng lúc — bằng chứng mạnh nhất khi nhóm có >2 chân |
+| `SettlementDate` | **Đọc nghiệp vụ**: chân nào trước, kỳ hạn bao lâu | Là dòng tiền thật |
+
+Bản đầu (09/2026) dùng `CaptureDate` cho **cả hai** việc và hỏng: **196/198 cặp có
+CaptureDate hai chân trùng ngày**, nên trục trước/sau bị quyết định bởi tie-break tùy
+tiện của code (**197 "Sell trước" / 1 "Buy trước"**) và kỳ hạn luôn bằng 0. Hệ quả là
+2/4 nhóm rỗng vì lý do kỹ thuật, chart Kỳ hạn trắng trơn. Chuyển trục trước/sau sang
+`SettlementDate` cho **161 repo / 37 reverse repo** — và cả 37 cặp reverse repo đều có
+pnl dương, đúng sách vở, không một ngoại lệ.
+
+Kỳ hạn = **số ngày trôi qua** giữa hai `SettlementDate`, không phân biệt chiều; deal qua
+đêm = 1 ngày. (Có cân nhắc quy ước cộng đầu mút +1 nhưng Jak chốt bỏ.)
 
 CROSS_OK — một ngoại lệ chéo đối tác đã xác nhận (MSB đứng trung gian, cùng case với
 file cũ): deal 50120 (B, Cpty=KBNN) ghép với 50127+50128 (S, Cpty=PGBV-HO), mã
 TD2636023, cùng CaptureDate 24/06/2026, cùng khối lượng 6,000,000.
 
-Phân loại 4 nhóm giống hệt FIBond (xem phụ lục trên). Kết quả kỳ 08/06–04/09/2026:
-**198 cặp** (104 Cho vay bond, 93 Đi vay tiền, 1 Cho vay tiền, 0 Vay bond), 0 chân dư.
+### Phân loại 4 nhóm (khác FIBond — chốt lại 09/2026)
+
+Nguyên tắc của Jak: *"đi vay thì chịu chi phí vay, cho vay thì hưởng lãi"*. Ghép với
+cấu trúc repo thì **chiều quyết định MSB đưa tài sản nào ra**, **dấu quyết định vai trò**:
+
+| Chiều (SettlementDate) | MSB đưa ra | pnl | Vai trò | Nhóm |
+|---|---|---|---|---|
+| Sell trước (repo) | Bond | âm | Chịu chi phí | **Vay tiền** |
+| Sell trước (repo) | Bond | dương | Hưởng lãi | **Cho vay bond** |
+| Buy trước (reverse repo) | Tiền | dương | Hưởng lãi | **Cho vay tiền** |
+| Buy trước (reverse repo) | Tiền | âm | Chịu chi phí | **Vay bond** |
+
+Một cặp bán-trước **không thể** là "vay bond" — MSB đã đưa bond ra rồi; dấu chỉ nói ai
+trả tiền cho ai, không đổi được ai đang giữ bond. Quy tắc 4 nhóm cũ (bản FIBond, phụ lục
+trên) gán nhãn **ngược** ở nhánh bán-trước; nhánh mua-trước thì trùng nhau.
+
+Kết quả kỳ 08/06–04/09/2026: **198 cặp**, 0 chân dư —
+102 Vay tiền (−4,59%/năm), 59 Cho vay bond (+6,18%/năm), 37 Cho vay tiền (+4,53%/năm),
+0 Vay bond. Cả ba nhóm rơi vào mặt bằng repo TPCP; bản trước cho ra −15.625%/năm.
+
+2 cặp có pnl **đúng bằng 0** (50073/50074, 50437/50438): `GrossAmount` hai chân trùng
+đến từng đồng vì lãi repo ngụ ý (~2.250đ và ~3.300đ) nhỏ hơn bước làm tròn 10.000đ của
+`GrossAmount`. Xếp vào Cho vay bond theo cấu trúc, liệt kê riêng ở trang Tra cứu.
+
+Bucket kỳ hạn 1 ngày của nhóm Vay tiền ra −67%/năm: **không phải lỗi ghép cặp** — 3/33
+cặp có Δyield lớn (−14bp, −40bp, −27,6bp) gánh −5.768 tr trên tổng −6.006 tr; 30 cặp còn
+lại chỉ −238 tr (−0,4% đến −5%/năm). Cả 3 đã nằm trong danh sách cảnh báo, và
+50158/50159 cũng từng bị gắn cờ ở pipeline MSB_RP_DM cũ.
 
 Bug đã sửa trong `build_D_govbond.py::wrate()`: công thức %/năm bình quân gia quyền
 gốc (chuyển thể từ `ghep_cap_deal_bond.py::blk()`) cộng dồn pnl trên TẤT CẢ cặp ở tử

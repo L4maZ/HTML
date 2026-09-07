@@ -133,6 +133,9 @@ def emit(s, b, qty, out):
     rate = (pnl / first_cash * 365 / days * 100) if days > 0 and first_cash else 0.0
     out.append(dict(
         paper=s['Bonds_ShortName'], cpty=s['Cpty_ShortName'],
+        # Gan nhu moi cap hai chan cung doi tac; rieng cap CROSS_OK thi khac nhau,
+        # nen luu rieng tung chan de trinh bay dung.
+        cptyS=s['Cpty_ShortName'], cptyB=b['Cpty_ShortName'],
         face=round(qty * s['FaceValue'] / 1e9, 4),
         sid=s['BondsDeals_Id'], bid=b['BondsDeals_Id'], dirn=dirn, loai=loai,
         days=days, d1=first['SettlementDate'], d2=second['SettlementDate'],
