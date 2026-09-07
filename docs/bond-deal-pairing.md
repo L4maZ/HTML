@@ -272,3 +272,43 @@ MSB mượn bond, trả phí ngầm qua phần thu hồi khi bán lại thấp h
 
 Phân bổ thực tế kỳ 24/08/2026 (330 cặp): 270 Cho vay bond, 59 Cho vay tien,
 1 Di vay tien, 0 Vay bond.
+
+
+## Phụ lục — GovBond RPBOD_B002 (thay MSB_RP_DM cũ, 09/2026)
+
+Script ghép cặp: [`bond/tools/ghep_cap_deal_govbond.py`](../bond/tools/ghep_cap_deal_govbond.py)
+Tổng hợp D + render HTML: [`bond/tools/build_D_govbond.py`](../bond/tools/build_D_govbond.py),
+[`bond/tools/render_govbond_report.py`](../bond/tools/render_govbond_report.py)
+Dữ liệu: `bond/source/RPBOD_B002_2026.08.27.xlsx` (601 dòng, CaptureDate 08/06–04/09/2026)
+Output: `bond/Phan_tich_GD_Bond_20260608_20260904.html`
+
+Export mới đầy đủ hơn `MSB_RP_DM` cũ nhưng có bẫy: `Cpty_ShortName` không phải lúc nào
+cũng là đối tác ngoài thật. `Folders_ShortName` là sổ (book) MSB dùng book chân giao
+dịch, và 2 trong 5 sổ AFS-* xuất hiện — `AFS-GOV`, `AFS-ALM` — là sổ nội bộ không tách
+bạch được đối tác ngoài (xác nhận của Jak, 09/2026). **Quyết định:** chỉ giữ dòng có
+`Folders_ShortName` ∈ {AFS-DCM, AFS-HUONG, AFS-HUY} trước khi ghép cặp (374/601 dòng).
+
+**Thứ tự trước/sau và kỳ hạn dùng `CaptureDate`**, không dùng `SettlementDate` — khác
+với `ghep_cap_deal_bond.py` (MSB_RP_DM) và `ghep_cap_deal_fibond.py` (VALUE_DATE).
+Xác nhận riêng của Jak cho pipeline này: "logic là lấy capture date, ngày ghi nhận
+giao dịch". Hệ quả đã kiểm chứng: **196/198 cặp có CaptureDate hai chân trùng ngày**
+(kỳ hạn hiển thị = 0 ngày), trong khi SettlementDate lệch 1–351 ngày — đã báo cho Jak
+và được xác nhận giữ nguyên theo CaptureDate, không dùng SettlementDate cho kỳ hạn.
+
+CROSS_OK — một ngoại lệ chéo đối tác đã xác nhận (MSB đứng trung gian, cùng case với
+file cũ): deal 50120 (B, Cpty=KBNN) ghép với 50127+50128 (S, Cpty=PGBV-HO), mã
+TD2636023, cùng CaptureDate 24/06/2026, cùng khối lượng 6,000,000.
+
+Phân loại 4 nhóm giống hệt FIBond (xem phụ lục trên). Kết quả kỳ 08/06–04/09/2026:
+**198 cặp** (104 Cho vay bond, 93 Đi vay tiền, 1 Cho vay tiền, 0 Vay bond), 0 chân dư.
+
+Bug đã sửa trong `build_D_govbond.py::wrate()`: công thức %/năm bình quân gia quyền
+gốc (chuyển thể từ `ghep_cap_deal_bond.py::blk()`) cộng dồn pnl trên TẤT CẢ cặp ở tử
+số nhưng chỉ tính trọng số cặp có ngày>0 ở mẫu số — với nhóm có rất ít cặp ngày>0 (do
+hệ quả CaptureDate ở trên), một cặp lẻ gánh hết pnl của các cặp còn lại, ra %/năm vô
+lý (đã thấy -15625%/năm ở nhóm Cho vay bond). Sửa: cả tử số và mẫu số cùng lọc trên
+tập cặp có ngày>0.
+
+HTML: 6 trang, cấu trúc khác 2 nhóm A/B cũ — trang "Buy trước" (Cho vay tiền | Vay
+bond) và "Sell trước" (Đi vay tiền | Cho vay bond), mỗi trang 2 cột con đầy đủ
+(KPI+kỳ hạn+mã TP+folder) đặt cạnh nhau, theo xác nhận của Jak.

@@ -9,7 +9,8 @@ Cập nhật sau khi đọc trực tiếp 6 file (14/08/2026).
 | `BaoCao_RRTT_Bond_key_v7` | Report 5 trang, key system | Wine `#7B2D3B` + paper | ECharts inline | Chuẩn tham chiếu |
 | `VBMA_Weekly_20260807` | Weekly 6 trang | Wine `#8B2332` | ECharts inline | Chạy tốt |
 | `Phan_tich_GD_Bond_20260608_20260810` | Phân tích deal 5 trang | Navy/gold + dark mode | ECharts inline | Bản cũ, thay bằng bản 20/08 |
-| `Phan_tich_GD_Bond_20260608_20260820` | Phân tích deal 6 trang | Navy/gold + dark mode | ECharts inline | Bản hiện hành |
+| `Phan_tich_GD_Bond_20260608_20260820` | Phân tích deal 6 trang, 2 nhóm A/B | Navy/gold + dark mode | ECharts inline | Bản cũ (MSB_RP_DM), thay bằng bản 04/09 |
+| `Phan_tich_GD_Bond_20260608_20260904` | Phân tích deal 6 trang, 4 nhóm phân loại | Navy/gold + dark mode | ECharts inline | Bản hiện hành (RPBOD_B002) |
 | `QC.RR.022_lampd3` | Quy chế + đánh giá GAP | Terracotta `#b83a10` | SVG viết tay | Chạy tốt |
 | `Peer_Bond_Dashboard_AutoReport_ByGemini_` | Dashboard 5 tab | Terracotta `#b84a32` | **CDN** | **Không dùng được offline** |
 | `cfa_l1_console` | Study console (không phải dashboard) | Ink/gold/paper | KaTeX CDN, degrade được | Chạy được offline |
@@ -68,6 +69,26 @@ phần trình bày. Phương pháp ghép cặp và các bẫy dữ liệu: [`bon
   dựng lại được khi đổi dark mode. `chart(id, fn)` thay cho `mk(id, opt)` trực tiếp.
 - **Bẫy CSS đã sửa**: `.pos`/`.neg` global đè lên `.kpi.pos` (dùng `.pos` làm tone nền) → chữ
   trắng thành xanh lá trên nền xanh đậm. Đã scope về `td.pos, span.pos`.
+
+## Phan_tich_GD_Bond_20260608_20260904 — 4 nhóm phân loại, nguồn RPBOD_B002
+
+Dựng lại từ `bond/source/RPBOD_B002_2026.08.27.xlsx` (601 dòng, lọc còn 374 sau khi bỏ
+folder AFS-GOV/AFS-ALM/rail nội bộ), thay hoàn toàn bản `..._20260820` (MSB_RP_DM).
+Phương pháp, bẫy dữ liệu, bug đã sửa: [`bond-deal-pairing.md`](bond-deal-pairing.md)
+mục "Phụ lục — GovBond RPBOD_B002".
+
+**Sinh lại số:** `cd bond/tools && python3 render_govbond_report.py` — chạy
+`ghep_cap_deal_govbond.py` → `build_D_govbond.py` → ghép template + ECharts blob, ghi
+đè `bond/Phan_tich_GD_Bond_20260608_20260904.html` (KHÔNG sửa in-place như bản cũ; file
+này dựng lại toàn bộ từ template mỗi lần).
+
+- 6 trang: Tổng quan · **Buy trước** (Cho vay tiền | Vay bond, 2 cột con) · **Sell trước**
+  (Đi vay tiền | Cho vay bond, 2 cột con) · Đối tác (4 nhóm) · Tra cứu · Chi tiết cặp deal.
+  Thay hẳn cấu trúc nhị phân Nhóm A/Nhóm B của bản cũ.
+- Thứ tự trước/sau và kỳ hạn theo `CaptureDate`, không phải `SettlementDate` — khác bản
+  MSB_RP_DM cũ. 196/198 cặp có CaptureDate hai chân trùng ngày nên kỳ hạn hiển thị đa số
+  là 0 — đã xác nhận nghiệp vụ, không phải lỗi.
+- 198 cặp: 104 Cho vay bond, 93 Đi vay tiền, 1 Cho vay tiền, 0 Vay bond.
 - **Bẫy dữ liệu**: cột `GrossAmount` có 16/346 dòng là **string** dạng `'  1012036120.0000000K'`
   (đơn vị nghìn), không phải số. Không parse là lệch 1000 lần.
 - Ngưỡng ngoại lệ **theo kỳ hạn**: yield lệch ≥ 10bp chỉ là định giá lại khi kỳ hạn ≤ 30 ngày;

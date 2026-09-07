@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phân tích giao dịch GovBond — 4 nhóm phân loại</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0A2463;--gold:#D4A843;--gold-light:#F5E6B8;--gold-dim:rgba(212,168,67,.13);
+--cyan:#3E92CC;--green:#2DD881;--red:#F87171;--orange:#FB923C;--violet:#A78BFA;
+--pos-grad:linear-gradient(135deg,#0d2e1a,#1a5c32);--neg-grad:linear-gradient(135deg,#2e0d0d,#5c1a1a);
+--warn-grad:linear-gradient(135deg,#2e1e0d,#5c3a10);--neu-grad:linear-gradient(135deg,#0d1e2e,#1a3a5c);
+--bg:#F0F2F5;--surface:#fff;--card:#fff;--card-hover:#F8FAFC;--text:#1A1A2E;--text-dim:#6B7280;
+--border:rgba(0,0,0,.08);--shadow:0 2px 16px rgba(10,36,99,.07);
+--ph-bg:#0A2463;--ph-text:#fff;--page-title:#0A2463;
+--chart-label:#555;--chart-grid:rgba(0,0,0,.06);--chart-text:#1A1A2E;--vnd-bar:#0A2463;
+--f-head:'Crimson Pro',Georgia,serif;--f-body:'DM Sans','Segoe UI',sans-serif;}
+[data-theme="dark"]{--bg:#070F1F;--surface:#0C1A30;--card:#0F2040;--card-hover:#1A3A6A;--text:#E8EDF4;
+--text-dim:#7A8FA8;--border:rgba(255,255,255,.07);--shadow:0 2px 16px rgba(0,0,0,.3);
+--ph-bg:#1A3A6A;--ph-text:#F5E6B8;--page-title:#F5E6B8;--chart-label:#7A8FA8;
+--chart-grid:rgba(255,255,255,.05);--chart-text:#E8EDF4;--vnd-bar:#4FC3F7;--gold-dim:rgba(212,168,67,.15);
+--pos-grad:linear-gradient(135deg,#0a2016,#153d25);--neg-grad:linear-gradient(135deg,#200a0a,#3d1515);
+--warn-grad:linear-gradient(135deg,#201608,#3d2a0c);--neu-grad:linear-gradient(135deg,#08141f,#123049);}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--f-body);background:var(--bg);color:var(--text);
+transition:background .3s,color .3s;font-size:14px}
+.num,td.n,th.n{font-variant-numeric:tabular-nums}
+.view{display:none}.view.active{display:flex}
+.sidebar{width:248px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+.sb-brand{padding:20px 18px;border-bottom:1px solid var(--border)}
+.sb-brand h2{font-family:var(--f-head);font-size:19px;color:var(--page-title);line-height:1.2}
+.sb-brand .dt{font-size:11px;color:var(--text-dim);margin-top:5px}
+.sb-nav{padding:14px 10px;flex:1}
+.sb-lbl{font-size:10px;letter-spacing:.9px;color:var(--text-dim);padding:0 8px 8px;font-weight:600}
+.sb-item{padding:9px 11px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text-dim);
+display:flex;align-items:center;gap:9px;margin-bottom:2px;transition:.18s}
+.sb-item:hover{background:var(--card-hover);color:var(--text)}
+.sb-item.active{background:var(--navy);color:#fff}
+[data-theme="dark"] .sb-item.active{background:var(--gold);color:var(--navy)}
+.sb-bot{padding:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:7px}
+.sb-bot button{width:100%;padding:8px;border-radius:7px;border:1px solid var(--border);
+background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-family:inherit}
+.sb-bot button:hover{background:var(--card-hover)}
+.main{flex:1;padding:22px 26px;overflow-x:hidden;min-width:0}
+.page{display:none;animation:fadeUp .3s ease}.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.ph{background:var(--ph-bg);color:var(--ph-text);border-radius:11px;padding:17px 21px;margin-bottom:18px}
+.ph h1{font-family:var(--f-head);font-size:23px;font-weight:600;line-height:1.15}
+.ph p{font-size:12.5px;opacity:.82;margin-top:5px;max-width:920px;line-height:1.5}
+.sec{margin-bottom:22px}
+.sec>h3{font-family:var(--f-head);font-size:17px;color:var(--page-title);margin-bottom:4px}
+.sec>.sub{font-size:12px;color:var(--text-dim);margin-bottom:11px;line-height:1.5;max-width:960px}
+.grid{display:grid;gap:13px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g23{grid-template-columns:minmax(0,2fr) minmax(0,3fr)}
+.g32{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
+@media(max-width:1150px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3,.g23,.g32{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:900px){.subcols{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){.g2,.g4{grid-template-columns:minmax(0,1fr)}
+.sidebar{display:none}.main{padding:14px}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:15px 17px;
+box-shadow:var(--shadow);min-width:0}
+.card h4{font-size:13px;font-weight:600;margin-bottom:3px}
+.card .ch4sub{font-size:11px;color:var(--text-dim);margin-bottom:9px;line-height:1.45}
+.kpi{border-radius:11px;padding:15px 17px;color:#fff;min-width:0}
+.kpi.pos{background:var(--pos-grad)}.kpi.neg{background:var(--neg-grad)}
+.kpi.warn{background:var(--warn-grad)}.kpi.neu{background:var(--neu-grad)}
+.kpi .k{font-size:11px;opacity:.78;letter-spacing:.3px}
+.kpi .v{font-size:25px;font-weight:700;margin:5px 0 2px;font-variant-numeric:tabular-nums;line-height:1.1}
+.kpi .u{font-size:11px;opacity:.7;font-weight:400}
+.kpi .d{font-size:11px;opacity:.8;margin-top:5px;line-height:1.45}
+.ch{width:100%;height:290px}.ch.sm{height:230px}.ch.lg{height:360px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:520px}
+th{text-align:left;padding:8px 9px;font-size:10.5px;letter-spacing:.5px;color:var(--text-dim);
+font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--card)}
+th.n,td.n{text-align:right}
+td{padding:7px 9px;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr:hover{background:var(--card-hover)}
+tfoot td{font-weight:600;border-top:2px solid var(--border);border-bottom:none;background:var(--gold-dim)}
+/* scoped to cells/spans: .kpi also uses .pos/.neg as a background tone and must stay white */
+td.pos,span.pos{color:#15803d}td.neg,span.neg{color:#b91c1c}
+[data-theme="dark"] td.pos,[data-theme="dark"] span.pos{color:var(--green)}
+[data-theme="dark"] td.neg,[data-theme="dark"] span.neg{color:var(--red)}
+.kpi.pos,.kpi.neg,.kpi.warn,.kpi.neu{color:#fff}
+.tag{display:inline-block;padding:2px 7px;border-radius:5px;font-size:10.5px;font-weight:600;
+border:1px solid var(--border)}
+.tag.cvt{background:rgba(212,168,67,.18);color:#8a6512}
+.tag.vb{background:rgba(248,113,113,.16);color:#b91c1c}
+.tag.dvt{background:rgba(62,146,204,.14);color:#1d5c85}
+.tag.cvb{background:rgba(167,139,250,.18);color:#5b3fa0}
+[data-theme="dark"] .tag.cvt{color:var(--gold)}[data-theme="dark"] .tag.vb{color:var(--red)}
+[data-theme="dark"] .tag.dvt{color:var(--cyan)}[data-theme="dark"] .tag.cvb{color:var(--violet)}
+.note{background:var(--gold-dim);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;
+padding:11px 14px;font-size:12.5px;line-height:1.6;margin-top:12px}
+.note b{color:var(--page-title)}
+.note ul{margin:6px 0 0 17px}.note li{margin-bottom:4px}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:11px}
+.ctrl input,.ctrl select{padding:7px 10px;border-radius:7px;border:1px solid var(--border);
+background:var(--card);color:var(--text);font-size:12.5px;font-family:inherit}
+.ctrl input{min-width:190px}
+.pill{padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:var(--card);
+color:var(--text-dim);cursor:pointer;font-size:12px;font-family:inherit}
+.pill.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+[data-theme="dark"] .pill.on{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.cnt{font-size:12px;color:var(--text-dim);margin-left:auto}
+.foot{font-size:11px;color:var(--text-dim);margin-top:26px;padding-top:13px;
+border-top:1px solid var(--border);line-height:1.6}
+.subcols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.subcol{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--card-hover)}
+.subcol>.sh{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+.subcol>.sh h2{font-family:var(--f-head);font-size:16px}
+.subcol>.sh .dot{width:10px;height:10px;border-radius:50%}
+.subcol .sec{margin-bottom:16px}
+</style>
+%%ECHARTS%%
+</head><body>
+
+<div id="reportView" class="view active">
+<aside class="sidebar">
+  <div class="sb-brand">
+    <h2>Phân tích giao dịch GovBond</h2>
+    <div class="dt" id="brandDt">Market Risk</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-lbl">NAVIGATION</div>
+    <div class="sb-item active" onclick="goPage('p1',this)"><span>📌</span> Tổng quan</div>
+    <div class="sb-item" onclick="goPage('p2',this)"><span>🏦</span> Buy trước</div>
+    <div class="sb-item" onclick="goPage('p3',this)"><span>💰</span> Sell trước</div>
+    <div class="sb-item" onclick="goPage('p4',this)"><span>🤝</span> Đối tác</div>
+    <div class="sb-item" onclick="goPage('p5',this)"><span>🔎</span> Tra cứu</div>
+    <div class="sb-item" onclick="goPage('p6',this)"><span>📋</span> Chi tiết cặp deal</div>
+  </nav>
+  <div class="sb-bot">
+    <button onclick="toggleTheme()">🌓 Đổi giao diện</button>
+    <button onclick="saveFile()">💾 Lưu bản HTML</button>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- ============ P1 ============ -->
+<section id="p1" class="page active">
+  <div class="ph">
+    <h1>Giao dịch GovBond — 4 nhóm phân loại</h1>
+    <p id="phLead"></p>
+  </div>
+
+  <div class="sec">
+    <div class="grid g4" id="kpiRow"></div>
+  </div>
+
+  <div class="sec">
+    <h3>Quy mô tiền theo 4 nhóm</h3>
+    <div class="sub">Mỗi cặp deal được phân vào đúng 1 trong 4 nhóm theo (chân nào CaptureDate
+      trước) × (Gross bên nào lớn hơn): <b>Cho vay tiền, Vay bond</b> (buy trước, sell sau) và
+      <b>Đi vay tiền, Cho vay bond</b> (sell trước, buy sau). Xem giải thích chi tiết ở hai trang
+      "Buy trước" / "Sell trước".</div>
+    <div class="grid g23">
+      <div class="card"><h4>Tiền chân đầu mỗi nhóm</h4>
+        <div class="ch4sub">Tổng tiền chân đầu, nghìn tỷ VND</div><div id="chScale" class="ch"></div></div>
+      <div class="card"><h4>Dư nợ theo ngày (theo Settlement)</h4>
+        <div class="ch4sub">Số dư còn hiệu lực tại từng ngày, nghìn tỷ VND</div><div id="chOutst" class="ch"></div></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3>Phân bố %/năm</h3>
+    <div class="sub">Chỉ tính trên cặp có kỳ hạn CaptureDate &gt; 0 ngày — đa số cặp có CaptureDate hai
+      chân trùng nhau nên %/năm không áp dụng (xem ghi chú cuối trang).</div>
+    <div class="grid g2">
+      <div class="card"><h4>%/năm theo nhóm</h4>
+        <div class="ch4sub">Trọng số theo tiền × ngày, chỉ trên cặp có ngày &gt; 0</div><div id="chCarry" class="ch"></div></div>
+      <div class="card"><h4>Phân bố %/năm từng cặp</h4>
+        <div class="ch4sub">Toàn bộ cặp có ngày &gt; 0</div><div id="chHist" class="ch"></div></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3>Tổng hợp số liệu</h3>
+    <div class="note" id="noteMain"></div>
+  </div>
+</section>
+
+<!-- ============ P2 — Buy trước ============ -->
+<section id="p2" class="page">
+  <div class="ph">
+    <h1>Buy trước, Sell sau</h1>
+    <p>Chân mua thanh toán trước (CaptureDate sớm hơn), chân bán thanh toán sau. Gross(Sell) &gt;
+      Gross(Buy) → <b>Cho vay tiền</b>; Gross(Sell) &lt; Gross(Buy) → <b>Vay bond</b>.</p>
+  </div>
+  <div class="subcols">
+    <div class="subcol" id="colCVT"></div>
+    <div class="subcol" id="colVB"></div>
+  </div>
+</section>
+
+<!-- ============ P3 — Sell trước ============ -->
+<section id="p3" class="page">
+  <div class="ph">
+    <h1>Sell trước, Buy sau</h1>
+    <p>Chân bán thanh toán trước (CaptureDate sớm hơn), chân mua lại thanh toán sau. Gross(Sell) &gt;
+      Gross(Buy) → <b>Đi vay tiền</b>; Gross(Sell) &lt; Gross(Buy) → <b>Cho vay bond</b> (MSB cho mượn
+      bond, trả rebate interest — chiều bình thường của repo bán trước, không phải khoản lỗ bất thường).</p>
+  </div>
+  <div class="subcols">
+    <div class="subcol" id="colDVT"></div>
+    <div class="subcol" id="colCVB"></div>
+  </div>
+</section>
+
+<!-- ============ P4 ============ -->
+<section id="p4" class="page">
+  <div class="ph">
+    <h1>Đối tác</h1>
+    <p>Tiền, kỳ hạn và lãi/lỗ theo từng đối tác, tách theo 4 nhóm.</p>
+  </div>
+  <div class="grid g2" id="cptyGrid"></div>
+  <div class="sec">
+    <h3>Ghi chú</h3>
+    <div class="note" id="noteCpty"></div>
+  </div>
+</section>
+
+<!-- ============ P5 ============ -->
+<section id="p5" class="page">
+  <div class="ph">
+    <h1>Danh sách tra cứu</h1>
+    <p>Các nhóm cặp deal tách riêng cho dễ tra. <b>Không nhóm nào bị loại khỏi số tổng hợp.</b></p>
+  </div>
+
+  <div class="sec"><div class="grid g4" id="kpiX"></div></div>
+
+  <div class="sec">
+    <h3>Deal đặc biệt · KBNN mua vào ↔ PGBV-HO bán ra</h3>
+    <div class="sub">Cặp duy nhất trong kỳ có <b>hai chân khác đối tác</b> — MSB đứng <b>trung gian</b>,
+      xác nhận nghiệp vụ (xem `docs/bond-deal-pairing.md`, mục CROSS_OK).</div>
+    <div class="card"><div class="tw"><table id="tbSpecial"></table></div>
+      <div class="note" id="noteSpecial"></div></div>
+  </div>
+
+  <div class="sec">
+    <h3>Cặp có Δyield lớn hoặc %/năm lớn</h3>
+    <div class="sub">Nhóm dưới đây gồm cặp có Δyield ≥ 10bp trên kỳ hạn ≤ 30 ngày, hoặc
+      |%/năm| &gt; 15 trên kỳ hạn ≥ 3 ngày. Do đa số cặp có kỳ hạn CaptureDate = 0, danh sách này
+      chủ yếu bắt bằng Δyield.</div>
+    <div class="tw card"><table id="tbAnom"></table></div>
+  </div>
+
+  <div class="sec">
+    <h3>Cặp kỳ hạn 1–2 ngày có |%/năm| &gt; 8</h3>
+    <div class="tw card"><table id="tbNoise"></table></div>
+  </div>
+
+  <div class="sec">
+    <h3>Hai chân hạch toán khác danh mục (folder)</h3>
+    <div class="sub">Chân bán và chân mua lại của cùng một cặp rơi vào hai folder AFS-* khác nhau.</div>
+    <div class="tw card"><table id="tbFmis"></table></div>
+  </div>
+</section>
+
+<!-- ============ P6 ============ -->
+<section id="p6" class="page">
+  <div class="ph">
+    <h1>Chi tiết từng cặp deal</h1>
+    <p>Toàn bộ 198 cặp S↔B đã ghép. Lọc theo nhóm, đối tác, mã trái phiếu hoặc số hiệu deal.</p>
+  </div>
+  <div class="card">
+    <div class="ctrl">
+      <button class="pill on" data-g="all" onclick="setGrp('all',this)">Tất cả</button>
+      <button class="pill" data-g="CVT" onclick="setGrp('CVT',this)">Cho vay tiền</button>
+      <button class="pill" data-g="VB" onclick="setGrp('VB',this)">Vay bond</button>
+      <button class="pill" data-g="DVT" onclick="setGrp('DVT',this)">Đi vay tiền</button>
+      <button class="pill" data-g="CVB" onclick="setGrp('CVB',this)">Cho vay bond</button>
+      <select id="fCpty" onchange="renderPairs()"></select>
+      <input id="fQ" placeholder="Tìm mã TP / đối tác / deal id" oninput="renderPairs()">
+      <span class="cnt" id="pairCnt"></span>
+    </div>
+    <div class="tw"><table id="tbPairs"></table></div>
+  </div>
+  <div class="foot" id="footNote"></div>
+</section>
+
+</main>
+</div>
+
+<script>
+%%D_JSON%%
+
+/* ---------- helpers ---------- */
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const num = (v, d = 1) => (v == null || isNaN(v)) ? '–' :
+  v.toLocaleString('vi-VN', { minimumFractionDigits: d, maximumFractionDigits: d });
+const pct = (v, d = 2) => (v == null || isNaN(v)) ? '–' : (v >= 0 ? '' : '−') + Math.abs(v).toFixed(d) + '%';
+const sgn = v => v > 0.0005 ? 'pos' : (v < -0.0005 ? 'neg' : '');
+const vnd = s => s ? s.split('-').reverse().join('/') : '–';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* ---------- chart registry: one door, everything resizes ---------- */
+const REG = new Map();
+function mk(id, opt) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!el.clientWidth) { REG.set(id, { el, opt, inst: null }); return; }
+  let e = REG.get(id);
+  if (e && e.inst) { e.opt = opt; e.inst.setOption(opt, true); return; }
+  const inst = echarts.init(el);
+  inst.setOption(opt);
+  REG.set(id, { el, opt, inst });
+}
+function tryInit() {
+  REG.forEach((e, id) => {
+    if (!e.inst && e.el.clientWidth) {
+      e.inst = echarts.init(e.el);
+      e.inst.setOption(e.opt);
+    }
+  });
+}
+function resizeAll() { REG.forEach(e => e.inst && e.inst.resize()); }
+
+const BUILDERS = [];
+function chart(id, fn) { BUILDERS.push({ id, fn }); mk(id, fn()); }
+function buildCharts() { BUILDERS.forEach(b => mk(b.id, b.fn())); }
+const RO = new ResizeObserver(() => { tryInit(); resizeAll(); });
+
+/* ---------- shared chart theme ---------- */
+function base(extra) {
+  const lbl = cssv('--chart-label'), grid = cssv('--chart-grid'), txt = cssv('--chart-text');
+  return Object.assign({
+    textStyle: { fontFamily: "'DM Sans','Segoe UI',sans-serif", color: txt },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, confine: true },
+    grid: { left: 8, right: 12, top: 34, bottom: 6, containLabel: true },
+    legend: { top: 0, textStyle: { color: lbl, fontSize: 11 }, itemHeight: 9, itemWidth: 14 }
+  }, extra);
+}
+const axL = () => ({ color: cssv('--chart-label'), fontSize: 11 });
+const axS = () => ({ lineStyle: { color: cssv('--chart-grid') } });
+const splL = () => ({ lineStyle: { color: cssv('--chart-grid') } });
+
+/* ---------- KPI cards & tables ---------- */
+function kpi(tone, k, v, u, d) {
+  return `<div class="kpi ${tone}"><div class="k">${k}</div>
+  <div class="v">${v}<span class="u"> ${u || ''}</span></div><div class="d">${d || ''}</div></div>`;
+}
+function table(cols, rows, foot) {
+  const th = cols.map(c => `<th class="${c.n ? 'n' : ''}">${c.t}</th>`).join('');
+  const tb = rows.map(r => '<tr>' + cols.map(c => {
+    const v = c.f(r);
+    return `<td class="${c.n ? 'n' : ''} ${c.c ? c.c(r) : ''}">${v}</td>`;
+  }).join('') + '</tr>').join('');
+  const tf = foot ? `<tfoot><tr>${cols.map(c => {
+    const v = foot[c.k];
+    return `<td class="${c.n ? 'n' : ''}">${v == null ? '' : v}</td>`;
+  }).join('')}</tr></tfoot>` : '';
+  return `<thead><tr>${th}</tr></thead><tbody>${tb}</tbody>${tf}`;
+}
+
+/* ---------- 4 nhóm ---------- */
+const GRP = {
+  CVT: { label: 'Cho vay tiền', tag: 'cvt', color: '--gold',
+    desc: 'Buy trước, Sell sau, Gross(Sell) > Gross(Buy) — MSB thu thêm khi bán lại, đọc như lãi cho vay tiền.' },
+  VB:  { label: 'Vay bond', tag: 'vb', color: '--red',
+    desc: 'Buy trước, Sell sau, Gross(Sell) < Gross(Buy) — MSB mượn bond, trả phí ngầm qua bán lại rẻ hơn.' },
+  DVT: { label: 'Đi vay tiền', tag: 'dvt', color: '--cyan',
+    desc: 'Sell trước, Buy sau, Gross(Sell) > Gross(Buy) — MSB bán trước thu tiền, mua lại rẻ hơn.' },
+  CVB: { label: 'Cho vay bond', tag: 'cvb', color: '--violet',
+    desc: 'Sell trước, Buy sau, Gross(Sell) < Gross(Buy) — MSB cho mượn bond, trả rebate interest trên tiền cọc: chiều BÌNH THƯỜNG của repo bán trước, không phải khoản lỗ bất thường.' }
+};
+const GCODES = ['CVT', 'VB', 'DVT', 'CVB'];
+
+/* =======================================================================
+   PAGE 1 — overview
+   ======================================================================= */
+const KG = D.kpi.groups;
+const totalCash = GCODES.reduce((s, g) => s + KG[g].cash, 0);
+const totalPnl = GCODES.reduce((s, g) => s + KG[g].pnl, 0);
+
+document.getElementById('brandDt').textContent =
+  vnd(D.kpi.dFrom) + ' – ' + vnd(D.kpi.dTo) + ' · Market Risk';
+document.getElementById('phLead').innerHTML =
+  `Toàn bộ <b>${D.kpi.nDeals}</b> chân giao dịch trái phiếu chính phủ nhập vào RPBOD_B002 (đã lọc
+   folder AFS-DCM/HUONG/HUY) từ ngày chốt sổ <b>${vnd(D.kpi.dFrom)}</b> đến <b>${vnd(D.kpi.dTo)}</b>,
+   ghép thành <b>${D.kpi.nPairs}</b> cặp mua–bán khớp khối lượng, không còn chân lẻ nào
+   (${D.kpi.nUn} chân chưa ghép). Mỗi cặp phân vào 1 trong 4 nhóm theo chiều trước/sau và so sánh Gross.`;
+
+document.getElementById('kpiRow').innerHTML =
+  kpi('neu', 'Cặp deal đã ghép', num(D.kpi.nPairs, 0), 'cặp', `${D.kpi.nDeals} chân · ${D.kpi.nUn} chân chưa ghép`) +
+  GCODES.map(g => {
+    const b = KG[g], meta = GRP[g];
+    return kpi(b.pnl >= 0 ? 'pos' : 'neg', meta.label, num(b.cash / 1000, 1), 'nghìn tỷ',
+      `${b.n} cặp · ${num(b.pnl, 0)} tr · kỳ hạn ${b.minD}–${b.maxD}n`);
+  }).join('');
+
+chart('chScale', () => base({
+  tooltip: { trigger: 'axis', valueFormatter: v => num(v, 2) + ' nghìn tỷ' },
+  legend: { show: false },
+  xAxis: { type: 'category', data: GCODES.map(g => GRP[g].label), axisLabel: axL(), axisLine: axS() },
+  yAxis: { type: 'value', axisLabel: Object.assign(axL(), { formatter: v => num(v, 1) }), splitLine: splL() },
+  series: [{
+    type: 'bar', barWidth: '52%',
+    data: GCODES.map(g => ({ value: +(KG[g].cash / 1000).toFixed(2), itemStyle: { color: cssv(GRP[g].color) } })),
+    label: { show: true, position: 'top', formatter: p => num(p.value, 2), color: cssv('--chart-text'), fontSize: 11 }
+  }]
+}));
+
+chart('chOutst', () => base({
+  tooltip: { trigger: 'axis', valueFormatter: v => num(v / 1000, 2) + ' nghìn tỷ' },
+  legend: { data: GCODES.map(g => GRP[g].label), top: 0, textStyle: { color: cssv('--chart-label'), fontSize: 11 } },
+  xAxis: { type: 'time', axisLabel: axL(), axisLine: axS() },
+  yAxis: { type: 'value', axisLabel: Object.assign(axL(), { formatter: v => num(v / 1000, 1) }), splitLine: splL() },
+  series: GCODES.map(g => ({
+    name: GRP[g].label, type: 'line', step: 'end', showSymbol: false,
+    data: D.groups[g].outst.map(([d, v]) => [d, v * 1000]), itemStyle: { color: cssv(GRP[g].color) }, areaStyle: { opacity: .12 }
+  }))
+}));
+
+chart('chCarry', () => base({
+  tooltip: { trigger: 'axis', valueFormatter: v => v.toFixed(2) + '%' },
+  legend: { show: false },
+  xAxis: { type: 'category', data: GCODES.map(g => GRP[g].label), axisLabel: axL(), axisLine: axS() },
+  yAxis: { type: 'value', axisLabel: Object.assign(axL(), { formatter: v => v + '%' }), splitLine: splL() },
+  series: [{
+    type: 'bar', barWidth: '46%',
+    data: GCODES.map(g => ({ value: +KG[g].rate.toFixed(2), itemStyle: { color: cssv(GRP[g].color) } })),
+    label: { show: true, position: 'top', formatter: p => p.value.toFixed(2) + '%', color: cssv('--chart-text'), fontSize: 11 }
+  }]
+}));
+
+(function () {
+  const all = GCODES.flatMap(g => D.groups[g].hist).filter(v => v > -30 && v < 30);
+  const lo = -20, hi = 20, step = 2, bins = [];
+  for (let x = lo; x < hi; x += step) bins.push({ x: x, n: 0 });
+  all.forEach(v => {
+    let i = Math.floor((Math.min(hi - .001, Math.max(lo, v)) - lo) / step);
+    if (bins[i]) bins[i].n++;
+  });
+  chart('chHist', () => base({
+    tooltip: { trigger: 'axis', formatter: p => p[0].axisValue + '%/năm: ' + p[0].value + ' cặp' },
+    legend: { show: false },
+    xAxis: { type: 'category', data: bins.map(b => b.x), axisLabel: Object.assign(axL(), { interval: 1 }), axisLine: axS() },
+    yAxis: { type: 'value', name: 'số cặp', nameTextStyle: axL(), axisLabel: axL(), splitLine: splL() },
+    series: [{
+      type: 'bar', barWidth: '86%', data: bins.map(b => ({
+        value: b.n, itemStyle: { color: b.x < 0 ? cssv('--red') : cssv('--green') }
+      }))
+    }]
+  }));
+})();
+
+document.getElementById('noteMain').innerHTML = `<ul>
+<li><b>Cấu trúc.</b> ${D.kpi.nDeals} chân giao dịch ghép thành ${D.kpi.nPairs} cặp, ${D.kpi.nUn} chân lẻ.</li>
+${GCODES.map(g => {
+  const b = KG[g];
+  return `<li><b>${GRP[g].label}.</b> ${b.n} cặp · ${num(b.cash / 1000, 2)} nghìn tỷ · mệnh giá
+    ${num(b.face / 1000, 2)} nghìn tỷ · kỳ hạn ${b.minD}–${b.maxD} ngày (trung vị ${num(b.med, 0)}) ·
+    <b>${num(b.pnl, 0)} triệu · ${pct(b.rate)}/năm</b>.</li>`;
+}).join('')}
+<li><b>Danh sách tra cứu.</b> ${D.anom.length} cặp Δyield ≥ 10bp / |%/năm| lớn ·
+    ${D.noise.length} cặp kỳ hạn ngắn |%/năm| lớn ·
+    ${D.fmis.length} cặp hai chân khác folder · ${D.cmis.length} cặp ghép chéo đối tác đã xác nhận.</li>
+<li><b>Ghi chú kỳ hạn.</b> Kỳ hạn (số ngày) tính theo <b>CaptureDate</b> hai chân, không phải
+    SettlementDate — đa số cặp có CaptureDate hai chân trùng ngày nên hiện 0 ngày; đây là lựa chọn
+    nghiệp vụ đã xác nhận, không phải lỗi.</li></ul>`;
+
+/* =======================================================================
+   PAGES 2 & 3 — group detail (2 cột con mỗi trang)
+   ======================================================================= */
+function groupCol(container, g) {
+  const meta = GRP[g], b = KG[g], gd = D.groups[g];
+  const pfx = g;
+  container.innerHTML = `
+    <div class="sh"><span class="dot" style="background:${cssv(meta.color) || ''}"></span>
+      <h2>${meta.label}</h2></div>
+    <div class="sub" style="font-size:11.5px;color:var(--text-dim);margin-bottom:11px">${meta.desc}</div>
+    <div class="sec"><div class="grid g2" id="kpi${pfx}"></div></div>
+    <div class="sec">
+      <h3 style="font-size:14px">Kỳ hạn</h3>
+      <div id="chTen${pfx}" class="ch sm"></div>
+      <div class="tw"><table id="tbTen${pfx}"></table></div>
+    </div>
+    <div class="sec">
+      <h3 style="font-size:14px">Top mã trái phiếu</h3>
+      <div id="chBond${pfx}" class="ch sm"></div>
+      <div class="tw"><table id="tbBond${pfx}"></table></div>
+    </div>
+    <div class="sec">
+      <h3 style="font-size:14px">Danh mục hạch toán (folder)</h3>
+      <div id="chFold${pfx}" class="ch sm"></div>
+    </div>`;
+
+  document.getElementById(`kpi${pfx}`).innerHTML =
+    kpi('neu', 'Số cặp', num(b.n, 0), 'cặp', `Mệnh giá ${num(b.face / 1000, 2)} nghìn tỷ`) +
+    kpi('neu', 'Tổng tiền', num(b.cash / 1000, 1), 'nghìn tỷ', `Kỳ hạn trung vị ${num(b.med, 0)} ngày`) +
+    kpi(b.pnl >= 0 ? 'pos' : 'neg', 'Lãi/lỗ', num(b.pnl, 0), 'triệu VND',
+      `${b.nLai} cặp dương · ${b.nLo} cặp âm`) +
+    kpi('warn', '%/năm', pct(b.rate), '/năm', 'Trọng số theo tiền × ngày, chỉ cặp ngày>0');
+
+  if (gd.tenor.length) {
+    chart(`chTen${pfx}`, () => base({
+      tooltip: { trigger: 'item', formatter: p => {
+        const r = gd.tenor[p.dataIndex];
+        return `<b>${r.k}</b><br>${r.n} cặp · ${num(r.cash / 1000, 2)} nghìn tỷ<br>${num(r.pnl, 0)} tr (${pct(r.rate)}/năm)`;
+      }},
+      legend: { show: false },
+      xAxis: { type: 'category', data: gd.tenor.map(t => t.k), axisLabel: axL(), axisLine: axS() },
+      yAxis: { type: 'value', axisLabel: Object.assign(axL(), { formatter: v => num(v / 1000, 1) }), splitLine: splL() },
+      series: [{
+        type: 'bar', barWidth: '52%', data: gd.tenor.map(t => t.cash), itemStyle: { color: cssv(meta.color) },
+        label: { show: true, position: 'top', formatter: p => gd.tenor[p.dataIndex].n + ' cặp', color: cssv('--chart-text'), fontSize: 10 }
+      }]
+    }));
+  }
+  document.getElementById(`tbTen${pfx}`).innerHTML = table([
+    { t: 'Kỳ hạn', f: r => r.k },
+    { t: 'Cặp', n: 1, f: r => num(r.n, 0) },
+    { t: 'Tiền (nghìn tỷ)', n: 1, f: r => num(r.cash / 1000, 2) },
+    { t: 'Lãi/lỗ (tr)', n: 1, f: r => num(r.pnl, 0), c: r => sgn(r.pnl) },
+    { t: '%/năm', n: 1, f: r => pct(r.rate), c: r => sgn(r.rate) }
+  ], gd.tenor);
+
+  if (gd.bond.length) {
+    chart(`chBond${pfx}`, () => base({
+      tooltip: { trigger: 'item', formatter: p => {
+        const r = gd.bond[p.dataIndex];
+        return `<b>${r.b}</b> · coupon ${r.cpn}% · đáo hạn ${vnd(r.mat)}<br>${r.n} cặp · ${num(r.cash / 1000, 2)} nghìn tỷ`;
+      }},
+      legend: { show: false },
+      grid: { left: 8, right: 40, top: 12, bottom: 6, containLabel: true },
+      xAxis: { type: 'value', axisLabel: Object.assign(axL(), { formatter: v => num(v, 1) }), splitLine: splL() },
+      yAxis: { type: 'category', data: gd.bond.map(x => x.b).reverse(), axisLabel: Object.assign(axL(), { fontSize: 10 }), axisLine: axS() },
+      series: [{
+        type: 'bar', barWidth: '62%', data: gd.bond.map(x => +(x.cash / 1000).toFixed(3)).reverse(),
+        itemStyle: { color: cssv(meta.color) },
+        label: { show: true, position: 'right', formatter: p => num(p.value, 2), color: cssv('--chart-text'), fontSize: 10 }
+      }]
+    }));
+  }
+  document.getElementById(`tbBond${pfx}`).innerHTML = table([
+    { t: 'Mã TP', f: r => r.b }, { t: 'Coupon', n: 1, f: r => r.cpn + '%' },
+    { t: 'Đáo hạn', n: 1, f: r => vnd(r.mat) }, { t: 'Cặp', n: 1, f: r => num(r.n, 0) },
+    { t: 'Tiền (nghìn tỷ)', n: 1, f: r => num(r.cash / 1000, 2) },
+    { t: 'Lãi/lỗ (tr)', n: 1, f: r => num(r.pnl, 0), c: r => sgn(r.pnl) }
+  ], gd.bond);
+
+  if (gd.fold.length) {
+    chart(`chFold${pfx}`, () => base({
+      tooltip: { trigger: 'item', formatter: p => `<b>${p.name}</b><br>${num(p.value / 1000, 2)} nghìn tỷ · ${p.percent}%` },
+      legend: { bottom: 0, textStyle: { color: cssv('--chart-label'), fontSize: 11 } },
+      grid: null,
+      series: [{
+        type: 'pie', radius: ['40%', '64%'], center: ['50%', '42%'],
+        data: gd.fold.map(f => ({ name: f.f, value: f.cash })),
+        label: { color: cssv('--chart-text'), fontSize: 11, formatter: '{b}\n{d}%' },
+        itemStyle: { borderWidth: 2, borderColor: cssv('--card') }
+      }]
+    }));
+  }
+}
+groupCol(document.getElementById('colCVT'), 'CVT');
+groupCol(document.getElementById('colVB'), 'VB');
+groupCol(document.getElementById('colDVT'), 'DVT');
+groupCol(document.getElementById('colCVB'), 'CVB');
+
+/* =======================================================================
+   PAGE 4 — counterparties
+   ======================================================================= */
+(function () {
+  const grid = document.getElementById('cptyGrid');
+  grid.innerHTML = GCODES.map(g => `
+    <div class="card">
+      <h4>${GRP[g].label} — theo đối tác</h4>
+      <div class="ch4sub">Tiền (nghìn tỷ) và lãi/lỗ (tr)</div>
+      <div id="chCpty${g}" class="ch sm"></div>
+      <div class="tw"><table id="tbCpty${g}"></table></div>
+    </div>`).join('');
+  GCODES.forEach(g => {
+    const arr = D.groups[g].cpty;
+    if (!arr.length) { document.getElementById(`chCpty${g}`).innerHTML = '<div class="ch4sub">Không có dữ liệu</div>'; return; }
+    chart(`chCpty${g}`, () => base({
+      tooltip: { trigger: 'item', formatter: p => `<b>${esc(p.name)}</b><br>${num(p.value / 1000, 2)} nghìn tỷ · ${p.percent}%` },
+      legend: { bottom: 0, textStyle: { color: cssv('--chart-label'), fontSize: 11 } },
+      grid: null,
+      series: [{
+        type: 'pie', radius: ['38%', '62%'], center: ['50%', '42%'],
+        data: arr.map(c => ({ name: c.cpty, value: c.cash })),
+        label: { color: cssv('--chart-text'), fontSize: 10, formatter: '{b}\n{d}%' },
+        itemStyle: { borderWidth: 2, borderColor: cssv('--card') }
+      }]
+    }));
+    document.getElementById(`tbCpty${g}`).innerHTML = table([
+      { t: 'Đối tác', f: r => esc(r.cpty) },
+      { t: 'Cặp', n: 1, f: r => num(r.n, 0) },
+      { t: 'Tiền (nghìn tỷ)', n: 1, f: r => num(r.cash / 1000, 2) },
+      { t: 'Lãi/lỗ (tr)', n: 1, f: r => num(r.pnl, 0), c: r => sgn(r.pnl) }
+    ], arr);
+  });
+  const notes = GCODES.filter(g => D.groups[g].cpty.length).map(g => {
+    const arr = D.groups[g].cpty, top = arr[0], b = KG[g];
+    return `<li><b>${GRP[g].label}:</b> ${arr.length} đối tác. Lớn nhất ${esc(top.cpty)} chiếm
+      ${(top.cash / b.cash * 100).toFixed(0)}%.</li>`;
+  }).join('');
+  document.getElementById('noteCpty').innerHTML = `<ul>${notes}</ul>`;
+})();
+
+/* =======================================================================
+   PAGE 5 — lookup lists
+   ======================================================================= */
+document.getElementById('kpiX').innerHTML =
+  kpi('neu', 'Δyield / %/năm lớn', num(D.anom.length, 0), 'cặp', `Lãi/lỗ ${num(D.anom.reduce((s, r) => s + r.pnl, 0), 0)} triệu VND`) +
+  kpi('neu', 'Kỳ hạn ngắn |%/năm| lớn', num(D.noise.length, 0), 'cặp', `Lãi/lỗ ${num(D.noise.reduce((s, r) => s + r.pnl, 0), 0)} triệu VND`) +
+  kpi('neu', 'Hai chân khác folder', num(D.fmis.length, 0), 'cặp', `Lãi/lỗ ${num(D.fmis.reduce((s, r) => s + r.pnl, 0), 0)} triệu VND`) +
+  kpi('neu', 'Ghép chéo đối tác', num(D.cmis.length + (D.cmis.length ? 0 : 0), 0), 'cặp', 'Đã xác nhận nghiệp vụ (CROSS_OK)');
+
+(function () {
+  const sp = D.pairs.filter(p => typeof p.sid === 'string');
+  document.getElementById('tbSpecial').innerHTML = table([
+    { t: 'Chân', f: r => r.k }, { t: 'Deal id', f: r => r.id }, { t: 'Đối tác', f: r => r.cpty },
+    { t: 'Kênh', f: r => r.clr }, { t: 'CaptureDate', n: 1, f: r => vnd(r.cap) },
+    { t: 'Thanh toán', n: 1, f: r => vnd(r.set) }, { t: 'Mệnh giá (tỷ)', n: 1, f: r => num(r.face, 1) },
+    { t: 'Yield', n: 1, f: r => r.y + '%' }, { t: 'Tiền (tỷ)', n: 1, f: r => num(r.cash, 2) }
+  ], sp.flatMap(r => [
+    { k: 'Mua vào (B)', id: r.bid, cpty: r.cpty.split('→')[0] || r.cpty, clr: r.bclr, cap: r.bcap, set: r.bset, face: r.face, y: r.by, cash: r.cash },
+    { k: 'Bán ra (S)', id: r.sid, cpty: r.cpty.split('→')[1] || r.cpty, clr: r.sclr, cap: r.scap, set: r.sset, face: r.face, y: r.sy, cash: r.cash - r.pnl }
+  ]));
+  const r = sp[0];
+  document.getElementById('noteSpecial').innerHTML = r ? `
+  <b>Cặp ${r.bid} ↔ ${r.sid}.</b> MSB mua ${num(r.face, 1)} tỷ mệnh giá ${r.paper} qua kênh
+  <b>${r.bclr}</b>, rồi bán lại đúng khối lượng đó qua kênh <b>${r.sclr}</b>, cùng CaptureDate
+  ${vnd(r.scap)}. Lãi/lỗ ${num(r.pnl, 0)} triệu VND, tương đương <b>${pct(r.rate)}/năm</b>.
+  Bản chất vẫn là <b>repo</b>, MSB đứng trung gian giữa hai đối tác khác nhau — xác nhận nghiệp vụ.` : '';
+})();
+
+document.getElementById('tbAnom').innerHTML = table([
+  { t: 'Deal S / B', f: r => r.sid + ' / ' + r.bid },
+  { t: 'Nhóm', f: r => `<span class="tag ${GRP[r.grp].tag}">${GRP[r.grp].label}</span>` },
+  { t: 'Mã TP', f: r => r.paper }, { t: 'Đối tác', f: r => esc(r.cpty) },
+  { t: 'Ngày', n: 1, f: r => r.days }, { t: 'Tiền (tỷ)', n: 1, f: r => num(r.cash, 1) },
+  { t: 'Lãi/lỗ (tr)', n: 1, f: r => num(r.pnl, 1), c: r => sgn(r.pnl) },
+  { t: '%/năm', n: 1, f: r => pct(r.rate) },
+  { t: 'Δyield', n: 1, f: r => num(r.dy, 1) + 'bp', c: r => Math.abs(r.dy) >= 10 ? 'neg' : '' },
+  { t: 'Lý do', f: r => r.why }
+], D.anom);
+
+document.getElementById('tbNoise').innerHTML = table([
+  { t: 'Deal S / B', f: r => r.sid + ' / ' + r.bid },
+  { t: 'Nhóm', f: r => `<span class="tag ${GRP[r.grp].tag}">${GRP[r.grp].label}</span>` },
+  { t: 'Mã TP', f: r => r.paper }, { t: 'Đối tác', f: r => esc(r.cpty) },
+  { t: 'Ngày', n: 1, f: r => r.days }, { t: 'Tiền (tỷ)', n: 1, f: r => num(r.cash, 1) },
+  { t: 'Lãi/lỗ (tr)', n: 1, f: r => num(r.pnl, 1), c: r => sgn(r.pnl) },
+  { t: '%/năm', n: 1, f: r => pct(r.rate) }, { t: 'Δyield', n: 1, f: r => num(r.dy, 1) + 'bp' }
+], D.noise);
+
+document.getElementById('tbFmis').innerHTML = table([
+  { t: 'Deal S / B', f: r => r.sid + ' / ' + r.bid },
+  { t: 'Nhóm', f: r => `<span class="tag ${GRP[r.grp].tag}">${GRP[r.grp].label}</span>` },
+  { t: 'Mã TP', f: r => r.paper }, { t: 'Đối tác', f: r => esc(r.cpty) },
+  { t: 'Folder chân bán', f: r => r.sf }, { t: 'Folder chân mua', f: r => r.bf },
+  { t: 'Tiền (tỷ)', n: 1, f: r => num(r.cash, 1) },
+  { t: 'Lãi/lỗ (tr)', n: 1, f: r => num(r.pnl, 1), c: r => sgn(r.pnl) }
+], D.fmis);
+
+/* =======================================================================
+   PAGE 6 — pair explorer
+   ======================================================================= */
+let GFILT = 'all';
+function setGrp(g, el) {
+  GFILT = g;
+  document.querySelectorAll('.pill[data-g]').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+  renderPairs();
+}
+(function () {
+  const cs = Array.from(new Set(D.pairs.map(p => p.cpty))).sort();
+  document.getElementById('fCpty').innerHTML =
+    '<option value="">Tất cả đối tác</option>' + cs.map(c => `<option>${esc(c)}</option>`).join('');
+})();
+const pairCols = () => [
+  { t: 'Nhóm', f: r => `<span class="tag ${GRP[r.grp].tag}">${GRP[r.grp].label}</span>` },
+  { t: 'Deal S / B', f: r => r.sid + ' / ' + r.bid },
+  { t: 'Mã TP', f: r => r.paper }, { t: 'Đối tác', f: r => esc(r.cpty) },
+  { t: 'Mệnh giá (tỷ)', n: 1, f: r => num(r.face, 1) },
+  { t: 'CaptureDate S', n: 1, f: r => vnd(r.scap) }, { t: 'CaptureDate B', n: 1, f: r => vnd(r.bcap) },
+  { t: 'Ngày', n: 1, f: r => r.days }, { t: 'Tiền (tỷ)', n: 1, f: r => num(r.cash, 1) },
+  { t: 'Lãi/lỗ (tr)', n: 1, f: r => num(r.pnl, 1), c: r => sgn(r.pnl) },
+  { t: '%/năm', n: 1, f: r => pct(r.rate), c: r => sgn(r.rate) },
+  { t: 'Δyield', n: 1, f: r => num(r.dy, 1) + 'bp', c: r => Math.abs(r.dy) >= 10 ? 'neg' : '' }
+];
+function renderPairs() {
+  const q = document.getElementById('fQ').value.trim().toLowerCase();
+  const c = document.getElementById('fCpty').value;
+  const rows = D.pairs.filter(p =>
+    (GFILT === 'all' || p.grp === GFILT) &&
+    (!c || p.cpty === c) &&
+    (!q || (p.paper + ' ' + p.cpty + ' ' + p.sid + ' ' + p.bid).toLowerCase().includes(q))
+  ).sort((a, b) => (a.scap < b.scap ? 1 : -1));
+  const cash = rows.reduce((s, r) => s + r.cash, 0);
+  const pnl = rows.reduce((s, r) => s + r.pnl, 0);
+  document.getElementById('pairCnt').innerHTML =
+    `${rows.length} cặp · ${num(cash / 1000, 2)} nghìn tỷ · lãi/lỗ <span class="${sgn(pnl)}">${num(pnl, 0)} tr</span>`;
+  document.getElementById('tbPairs').innerHTML = table(pairCols(), rows);
+}
+renderPairs();
+
+document.getElementById('footNote').innerHTML =
+  `Nguồn: input <b>RPBOD_B002</b>, ${D.kpi.nDeals} chân giao dịch (đã lọc folder AFS-DCM/HUONG/HUY)
+   từ ${vnd(D.kpi.dFrom)} đến ${vnd(D.kpi.dTo)} (theo CaptureDate). Cặp S↔B ghép theo cùng mã trái
+   phiếu, cùng đối tác, cùng coupon, ngược chiều S/B; ưu tiên cùng CaptureDate, phần dư ghép theo
+   thứ tự CaptureDate. Một cặp ghép chéo đối tác (KBNN↔PGBV-HO) đã xác nhận nghiệp vụ.
+   Lãi/lỗ = Gross(Sell) − Gross(Buy). Thứ tự trước/sau và kỳ hạn (số ngày) đều tính theo
+   <b>CaptureDate</b>, không phải SettlementDate. Phân loại 4 nhóm theo (chân nào CaptureDate
+   trước) × (Gross bên nào lớn hơn). <b>Không cặp nào bị loại khỏi số tổng hợp.</b>`;
+
+/* ---------- navigation, theme, save ---------- */
+function goPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  try { localStorage.setItem('bondgd.nav', id); } catch (e) { }
+  requestAnimationFrame(() => requestAnimationFrame(() => { tryInit(); resizeAll(); }));
+  setTimeout(() => { tryInit(); resizeAll(); }, 320);
+}
+function toggleTheme() {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+  try { localStorage.setItem('bondgd.theme', dark ? 'light' : 'dark'); } catch (e) { }
+  REG.forEach(e => e.inst && e.inst.dispose());
+  REG.clear();
+  buildCharts();
+  requestAnimationFrame(() => { tryInit(); resizeAll(); });
+}
+function saveFile() {
+  const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const b = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = 'Phan_tich_GD_Bond_' + D.kpi.dFrom.replace(/-/g, '') + '_' + D.kpi.dTo.replace(/-/g, '') + '.html';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+try {
+  const t = localStorage.getItem('bondgd.theme');
+  if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+} catch (e) { }
+
+document.querySelectorAll('.ch').forEach(el => RO.observe(el));
+window.addEventListener('resize', resizeAll);
+tryInit();
+try {
+  const n = localStorage.getItem('bondgd.nav');
+  if (n && document.getElementById(n)) {
+    const el = document.querySelector(`.sb-item[onclick*="'${n}'"]`);
+    if (el) goPage(n, el);
+  }
+} catch (e) { }
+
+window.BONDGD = { D, REG, goPage, resizeAll, saveFile };
+
+</script>
+</body></html>
