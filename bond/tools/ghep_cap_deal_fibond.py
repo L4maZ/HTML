@@ -15,6 +15,22 @@ repo. Toàn bộ cặp khớp đủ 4 điều kiện trên đều tính là Repo
 
 CAPTURE_DATE hai chân lệch xa nhau chỉ dùng để TÁCH RIÊNG một sheet cho dễ
 soát BO (`gap_cap`), không dùng để loại trừ khỏi kết quả.
+
+PHÂN LOẠI 4 NHÓM (chốt 09/2026, thay cho nhị phân đi vay/cho vay cũ):
+theo (chân nào thanh toán TRƯỚC) x (Gross bên nào LỚN HƠN). pnl = Gross(S)
+− Gross(B) luôn luôn, bất kể chân nào trước — xem chứng minh trong `emit()`.
+
+    Buy trước, Sell sau, Gross(S) > Gross(B)  ->  Cho vay tien
+    Buy trước, Sell sau, Gross(S) < Gross(B)  ->  Vay bond
+    Sell trước, Buy sau, Gross(S) > Gross(B)  ->  Di vay tien
+    Sell trước, Buy sau, Gross(S) < Gross(B)  ->  Cho vay bond
+
+Đây không phải "lãi/lỗ của đi vay/cho vay tiền" — "Cho vay bond" (Sell
+trước, trả nhiều hơn khi mua lại) là MSB cho mượn bond, trả rebate interest
+trên tiền cọc nhận được — đó là chiều BÌNH THƯỜNG của repo bán trước, không
+phải một khoản lỗ bất thường. Dữ liệu 24/08/2026: 270/271 cặp Sell-trước
+rơi vào "Cho vay bond"; 59/59 cặp Buy-trước đều "Cho vay tien" (không cặp
+nào "Vay bond" trong kỳ này).
 """
 import openpyxl
 from collections import defaultdict, Counter
@@ -39,15 +55,28 @@ for (paper, cpty, face), v in g.items():
         first, second = (s, b) if s['VALUE_DATE'] <= b['VALUE_DATE'] else (b, s)
         dirn = 'A' if first is s else 'B'
         gap_cap = abs((s['CAPTURE_DATE'] - b['CAPTURE_DATE']).days)
+        # pnl = Gross(S) - Gross(B) LUÔN LUÔN, bất kể chân nào thanh toán trước
+        # (hai nhánh dirn rút gọn về cùng biểu thức này — xem chứng minh ở
+        # docs/bond-deal-pairing.md).
+        pnl = (first['GROSS_AMOUNT'] - second['GROSS_AMOUNT']) if dirn == 'A' \
+            else (second['GROSS_AMOUNT'] - first['GROSS_AMOUNT'])
+        # Phân loại 4 nhóm theo (chân nào thanh toán trước) x (Gross bên nào lớn hơn).
+        # Không phải "lãi/lỗ của đi vay/cho vay" nữa — đây là 4 hình thái nghiệp vụ
+        # khác nhau: Buy trước + Sell>Buy = cho vay tiền (reverse repo lãi thường thấy);
+        # Buy trước + Sell<Buy = vay bond (trả phí để mượn bond); Sell trước +
+        # Sell>Buy = đi vay tiền (repo lãi/hiếm gặp); Sell trước + Sell<Buy = cho vay
+        # bond (cho mượn bond, trả rebate interest trên tiền cọc — đây là chiều
+        # THƯỜNG GẶP của "repo bán trước", không phải chi phí vay bất thường).
+        if dirn == 'B':
+            loai = 'Cho vay tien' if pnl > 0 else 'Vay bond'
+        else:
+            loai = 'Di vay tien' if pnl > 0 else 'Cho vay bond'
         matched.append(dict(
             paper=paper, cpty=cpty, prod=s['PRODUCT_CODE'], face=face,
-            sid=s['DEAL_ID'], bid=b['DEAL_ID'], dirn=dirn,
+            sid=s['DEAL_ID'], bid=b['DEAL_ID'], dirn=dirn, loai=loai,
             days=(second['VALUE_DATE'] - first['VALUE_DATE']).days,
             d1=first['VALUE_DATE'], d2=second['VALUE_DATE'],
-            cash=first['GROSS_AMOUNT'], gap_cap=gap_cap,
-            # dương = có lợi cho MSB, đúng quy ước file TPCP
-            pnl=(first['GROSS_AMOUNT'] - second['GROSS_AMOUNT']) if dirn == 'A'
-                else (second['GROSS_AMOUNT'] - first['GROSS_AMOUNT']),
+            cash=first['GROSS_AMOUNT'], gap_cap=gap_cap, pnl=pnl,
             sy=s['YIELD'], by=b['YIELD'], st=s['TRANSACTION_STATUS'] + b['TRANSACTION_STATUS'],
             scap=s['CAPTURE_DATE'], bcap=b['CAPTURE_DATE'])
         )

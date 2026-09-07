@@ -250,3 +250,25 @@ lượt phần dư ghép theo **thứ tự ngày thanh toán** (FIFO), không th
 
 Kết quả kỳ 24/08/2026: 330 cặp Repo/Reverse Repo (54 cùng ngày nhập, 276 khác
 ngày nhập), 133 chân không ghép được.
+
+### Phân loại 4 nhóm (chốt 09/2026, thay nhị phân đi vay/cho vay cũ)
+
+Theo (chân nào thanh toán TRƯỚC) × (Gross bên nào LỚN HƠN). `pnl = Gross(S) −
+Gross(B)` luôn luôn, bất kể chân nào trước — hai nhánh `dirn` rút gọn về cùng
+biểu thức này (xem `emit()` trong script).
+
+| Chân trước | So sánh Gross | Loai |
+|---|---|---|
+| Buy trước, Sell sau | Gross(S) > Gross(B) | Cho vay tien |
+| Buy trước, Sell sau | Gross(S) < Gross(B) | Vay bond |
+| Sell trước, Buy sau | Gross(S) > Gross(B) | Di vay tien |
+| Sell trước, Buy sau | Gross(S) < Gross(B) | Cho vay bond |
+
+Đây không phải "lãi/lỗ của đi vay/cho vay tiền" — **"Cho vay bond"** (Sell
+trước, trả nhiều hơn khi mua lại) là MSB cho mượn bond, trả rebate interest
+trên tiền cọc nhận được: đó là chiều BÌNH THƯỜNG của repo bán trước, không
+phải một khoản lỗ bất thường. **"Vay bond"** (Buy trước, bán lại rẻ hơn) là
+MSB mượn bond, trả phí ngầm qua phần thu hồi khi bán lại thấp hơn.
+
+Phân bổ thực tế kỳ 24/08/2026 (330 cặp): 270 Cho vay bond, 59 Cho vay tien,
+1 Di vay tien, 0 Vay bond.
