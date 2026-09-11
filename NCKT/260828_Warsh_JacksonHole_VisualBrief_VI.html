@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>In Our Time — Visual Brief VI</title>
+<style>
+@page{size:297mm 210mm;margin:0;}
+:root{
+  --dark:#1E2733; --dark2:#2A3644; --or:#F5821F; --red:#E03C31;
+  --amb:#F5A623; --grn:#1FA97A; --blu:#3D7EB8;
+  --ink:#161C24; --tx:#3C4654; --dim:#7C8797; --line:#E3E7ED; --wash:#F7F9FB;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DejaVu Sans','Liberation Sans',sans-serif;color:var(--tx);
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;}
+.p{width:297mm;height:210mm;position:relative;overflow:hidden;background:#fff;page-break-after:always;}
+.p:last-child{page-break-after:auto;}
+.bar{position:absolute;top:0;left:0;right:0;height:5mm;background:var(--or);}
+.hd{position:absolute;top:13mm;left:14mm;right:14mm;}
+.hd h1{font-size:23pt;font-weight:800;color:var(--ink);letter-spacing:-.4px;line-height:1.12;
+  display:inline-block;border-bottom:2.5px solid var(--or);padding-bottom:3px;}
+.hd .sb{font-size:9.6pt;color:var(--dim);margin-top:5mm;line-height:1.45;max-width:215mm;}
+.bd{position:absolute;top:38mm;left:14mm;right:14mm;bottom:14mm;display:flex;flex-direction:column;gap:6mm;}
+.ft{position:absolute;bottom:6mm;left:14mm;right:14mm;display:flex;justify-content:space-between;
+  border-top:.6px solid var(--line);padding-top:2.5mm;font-size:6.6pt;color:var(--dim);letter-spacing:.6px;}
+
+/* cover */
+.cv{background:var(--dark);}
+.cv .rings{position:absolute;top:-52mm;right:-58mm;width:170mm;height:170mm;}
+.cv .rings i{position:absolute;border-radius:50%;display:block;}
+.cv .rings i:nth-child(1){inset:0;background:var(--or);}
+.cv .rings i:nth-child(2){inset:0 22mm 0 0;background:#E8551C;}
+.cv .rings i:nth-child(3){inset:0 42mm 0 0;background:var(--red);}
+.cv .kick{position:absolute;top:20mm;left:16mm;font-size:10pt;font-weight:800;color:#fff;letter-spacing:2.6px;}
+.cv h1{position:absolute;top:30mm;left:16mm;font-size:46pt;font-weight:800;color:#fff;letter-spacing:-1.2px;}
+.cv .vn{position:absolute;top:52mm;left:16mm;font-size:15pt;color:#C6CEDA;font-weight:400;}
+.cv .ln{position:absolute;top:64mm;left:16mm;width:36mm;height:2.5mm;background:var(--or);}
+.cv .who{position:absolute;bottom:42mm;left:16mm;font-size:16pt;font-weight:800;color:#fff;}
+.cv .who small{display:block;font-size:9pt;font-weight:400;color:#95A1B2;margin-top:2.5mm;letter-spacing:.3px;}
+.cv .qt{position:absolute;bottom:20mm;left:16mm;right:80mm;font-size:11pt;font-style:italic;color:#DDE3EC;line-height:1.5;
+  border-left:2.5px solid var(--or);padding-left:6mm;}
+.cv .ft{color:#6B7788;border-top-color:#38434F;}
+
+/* generic blocks */
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:7mm;}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:8mm;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:5mm;}
+.g6{display:grid;grid-template-columns:repeat(3,1fr);gap:6mm 8mm;}
+
+.card{border:1px solid var(--line);border-radius:2mm;padding:5mm 5.5mm;position:relative;overflow:hidden;background:#fff;}
+.card::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1.8mm;background:var(--or);}
+.card.r::after{background:var(--red);} .card.g::after{background:var(--grn);}
+.card.a::after{background:var(--amb);} .card.b::after{background:var(--blu);}
+.card .l{font-size:7.6pt;font-weight:800;color:var(--ink);letter-spacing:1px;text-transform:uppercase;}
+.card .v{font-size:22pt;font-weight:800;color:var(--red);margin:2mm 0 2.5mm;letter-spacing:-.8px;line-height:1;}
+.card .v.o{color:var(--or);} .card .v.g{color:var(--grn);} .card .v.n{color:var(--ink);font-size:16pt;}
+.card .d{font-size:8.6pt;line-height:1.5;color:var(--tx);}
+
+.kbox{background:var(--wash);border-left:3px solid var(--or);padding:5mm 6mm;border-radius:0 2mm 2mm 0;}
+.kbox h4{font-size:8.6pt;font-weight:800;color:var(--ink);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3mm;}
+.kbox p{font-size:9pt;line-height:1.55;margin-bottom:2mm;}
+.kbox p:last-child{margin-bottom:0;}
+.kbox.d{background:var(--dark);border-left-color:var(--or);}
+.kbox.d h4{color:var(--or);} .kbox.d p{color:#D5DCE6;}
+
+p{font-size:9.4pt;line-height:1.58;}
+b{color:var(--ink);font-weight:700;}
+em{font-style:normal;color:var(--red);font-weight:700;}
+.q{border-left:3px solid var(--or);background:#FFF7F0;padding:4.5mm 6mm;border-radius:0 2mm 2mm 0;}
+.q p{font-size:11pt;font-style:italic;color:var(--ink);line-height:1.5;}
+.q .a{font-size:7.4pt;color:var(--dim);margin-top:2mm;font-style:normal;letter-spacing:.5px;}
+
+/* numbered */
+.num{display:flex;gap:4mm;}
+.num .n{flex:0 0 9mm;height:9mm;border-radius:50%;background:var(--ink);color:#fff;font-size:9pt;font-weight:800;
+  display:flex;align-items:center;justify-content:center;}
+.num .n.o{background:var(--or);} .num .n.r{background:var(--red);}
+.num .t b{display:block;font-size:9pt;letter-spacing:.5px;text-transform:uppercase;margin-bottom:1.5mm;}
+.num .t span{font-size:8.6pt;line-height:1.5;color:var(--tx);display:block;}
+
+/* bar chart */
+.bars{display:flex;flex-direction:column;gap:4mm;}
+.brow{display:flex;align-items:center;gap:5mm;}
+.brow .bl{flex:0 0 52mm;font-size:8.6pt;text-align:right;color:var(--tx);}
+.brow .bt{flex:1;height:7mm;background:#EDF0F4;border-radius:3.5mm;overflow:hidden;}
+.brow .bt i{display:block;height:100%;border-radius:3.5mm;}
+.brow .bv{flex:0 0 14mm;font-size:10pt;font-weight:800;color:var(--ink);}
+
+/* flow */
+.flow{display:flex;align-items:center;gap:3mm;}
+.flow .fb{flex:1;background:var(--dark);color:#fff;border-radius:2mm;padding:4.5mm 3mm;text-align:center;
+  font-size:8.4pt;font-weight:700;letter-spacing:.6px;}
+.flow .fa{color:var(--or);font-size:13pt;font-weight:800;}
+
+/* toc */
+.toc{display:grid;grid-template-columns:1fr 1fr;gap:3.5mm 10mm;}
+.ti{display:flex;align-items:baseline;gap:4mm;border-bottom:.7px dotted #CDD4DE;padding-bottom:2.2mm;}
+.ti .tn{flex:0 0 8mm;font-size:9pt;font-weight:800;color:var(--or);}
+.ti .tt{flex:1;font-size:9.6pt;color:var(--ink);font-weight:600;}
+.ti .tp{font-size:8.6pt;color:var(--dim);font-weight:700;}
+.tsec{grid-column:1/-1;font-size:7.6pt;font-weight:800;color:var(--dim);letter-spacing:1.4px;
+  text-transform:uppercase;margin-top:2mm;padding-bottom:1mm;border-bottom:1.5px solid var(--or);}
+.tsec:first-child{margin-top:0;}
+
+/* table */
+table{width:100%;border-collapse:collapse;font-size:8.6pt;}
+th{background:var(--dark);color:#fff;padding:3mm 4mm;text-align:left;font-size:7.8pt;letter-spacing:.8px;text-transform:uppercase;}
+td{padding:3mm 4mm;border-bottom:.6px solid var(--line);vertical-align:top;line-height:1.45;}
+tr:nth-child(even) td{background:var(--wash);}
+td:first-child{font-weight:700;color:var(--ink);}
+
+.gl{font-size:8.8pt;line-height:1.55;margin-bottom:3mm;}
+.gl b{color:var(--or);}
+.tag{display:inline-block;font-size:6.8pt;font-weight:800;letter-spacing:.8px;padding:1mm 2.5mm;border-radius:1mm;
+  background:#FFF0E2;color:#B45A0C;text-transform:uppercase;}
+.tag.i{background:#EAF2FA;color:#2C6293;}
+</style>
+</head>
+<body>
+
+<!-- 01 COVER -->
+<div class="p cv">
+  <div class="rings"><i></i><i></i><i></i></div>
+  <div class="kick">FEDERAL RESERVE · JACKSON HOLE · 28.08.2026</div>
+  <h1>IN OUR TIME</h1>
+  <div class="vn">Trong thời đại của chúng ta</div>
+  <div class="ln"></div>
+  <div class="who">Chủ tịch Kevin Warsh<small>Bản tóm lược trực quan bằng tiếng Việt · Tài liệu sử dụng nội bộ</small></div>
+  <div class="qt">“Hôm nay, tôi đứng đây để cam kết với một kỷ luật chính sách, không cam kết trước với một quyết định cụ thể.”</div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>01</span></div>
+</div>
+
+<!-- 02 MUC LUC -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>MỤC LỤC</h1>
+    <div class="sb">Hai mươi mốt trang, chia bốn phần theo đúng cấu trúc bài phát biểu, kèm phần suy luận của phòng.</div></div>
+  <div class="bd"><div class="toc">
+    <div class="tsec">Dẫn nhập</div>
+    <div class="ti"><span class="tn">03</span><span class="tt">Thông điệp xuyên suốt</span></div>
+    <div class="ti"><span class="tn">04</span><span class="tt">Bản đồ bài phát biểu</span></div>
+    <div class="tsec">Phần 1 — AI và bối cảnh chính sách tương lai</div>
+    <div class="ti"><span class="tn">05</span><span class="tt">AI: biến số mới của nền kinh tế</span></div>
+    <div class="ti"><span class="tn">06</span><span class="tt">Bốn câu hỏi chưa có lời giải</span></div>
+    <div class="tsec">Phần 2 — Truyền thông chính sách</div>
+    <div class="ti"><span class="tn">07</span><span class="tt">Thu hẹp định hướng chính sách tương lai</span></div>
+    <div class="ti"><span class="tn">08</span><span class="tt">Căn phòng gương và ai phải trả giá</span></div>
+    <div class="tsec">Phần 3 — Nguyên tắc điều hành</div>
+    <div class="ti"><span class="tn">09</span><span class="tt">Sáu nguyên tắc cốt lõi</span></div>
+    <div class="tsec">Phần 4 — Nền kinh tế hiện nay</div>
+    <div class="ti"><span class="tn">10</span><span class="tt">Sức cầu và tài sản còn mạnh</span></div>
+    <div class="ti"><span class="tn">11</span><span class="tt">Lao động và điều kiện tín dụng</span></div>
+    <div class="ti"><span class="tn">12</span><span class="tt">Lạm phát: mức độ và độ rộng</span></div>
+    <div class="ti"><span class="tn">13</span><span class="tt">Kỳ vọng lạm phát và 65 tháng</span></div>
+    <div class="ti"><span class="tn">14</span><span class="tt">Tiêu chuẩn ra quyết định</span></div>
+    <div class="ti"><span class="tn">15</span><span class="tt">Điều bài phát biểu không nói</span></div>
+    <div class="tsec">Suy luận của phòng — không phải kết luận của Fed</div>
+    <div class="ti"><span class="tn">16</span><span class="tt">Hàm ý đối với thế giới</span></div>
+    <div class="ti"><span class="tn">17</span><span class="tt">Kênh truyền dẫn đến Việt Nam</span></div>
+    <div class="ti"><span class="tn">18</span><span class="tt">Góc nhìn Market Risk</span></div>
+    <div class="ti"><span class="tn">19</span><span class="tt">Câu hỏi thảo luận</span></div>
+    <div class="tsec">Phụ lục</div>
+    <div class="ti"><span class="tn">20</span><span class="tt">Ghi chú thuật ngữ</span></div>
+    <div class="ti"><span class="tn">21</span><span class="tt">Kết luận</span></div>
+  </div></div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>02</span></div>
+</div>
+
+<!-- 03 THONG DIEP -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>THÔNG ĐIỆP XUYÊN SUỐT</h1>
+    <div class="sb">Warsh đặt ổn định giá cả trở lại vị trí trung tâm, trong khi tránh cam kết trước đường đi lãi suất</div></div>
+  <div class="bd">
+    <div class="g3" >
+      <div class="card g"><div class="l">Nền kinh tế vững</div><div class="v g">Còn dư địa</div>
+        <div class="d">Đầu tư, lợi nhuận doanh nghiệp, tiêu dùng và thị trường lao động đều cho thấy sức chống chịu. Điều kiện tài chính nói chung khó được coi là thắt chặt.</div></div>
+      <div class="card r"><div class="l">Lạm phát còn cao</div><div class="v">PCE 3,7%</div>
+        <div class="d">PCE 12 tháng ở 3,7%, 6 tháng ở 4,1%; tiến triển hai năm qua còn khiêm tốn; độ rộng tăng giá vẫn cao hơn rõ rệt so với trước đại dịch.</div></div>
+      <div class="card"><div class="l">Thu hẹp forward guidance</div><div class="v o">Không hứa trước</div>
+        <div class="d">Thị trường phải tự đọc dữ liệu và hình thành kỳ vọng. Fed giữ quyền linh hoạt ra quyết định khi thông tin thay đổi.</div></div>
+    </div>
+    <div class="kbox d"><h4>Hàm ý chính <span class="tag i" style="margin-left:3mm;">Suy luận của phòng</span></h4>
+      <p>Thông điệp mang tính thắt chặt vì tăng trưởng và việc làm chưa buộc Fed phải ưu tiên hỗ trợ nền kinh tế.</p>
+      <p>Warsh không tuyên bố sẽ tăng lãi suất; ông đặt ra tiêu chuẩn: lạm phát cơ bản phải tiến về 2% rõ ràng và đủ nhanh.</p>
+      <p>Ít định hướng trước đồng nghĩa với biến động định giá lãi suất, USD và đường cong lợi suất có thể cao hơn quanh mỗi dữ liệu mới.</p>
+    </div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>03</span></div>
+</div>
+
+<!-- 04 BAN DO -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>BẢN ĐỒ BÀI PHÁT BIỂU</h1>
+    <div class="sb">Bốn lớp lập luận dẫn đến tiêu chuẩn ra quyết định chính sách. Warsh tự gọi đây là “bản đồ đường đi — chỉ xin đừng gọi đó là định hướng chính sách tương lai”.</div></div>
+  <div class="bd">
+    <div class="g4" >
+      <div class="card b"><div class="l">1 · AI &amp; năng suất</div><div class="v n">Chân trời dài</div>
+        <div class="d">AI có thể nâng năng suất và thay đổi cấu trúc vốn – lao động, nhưng chưa ảnh hưởng quyết định hiện tại.</div></div>
+      <div class="card"><div class="l">2 · Truyền thông</div><div class="v n">Ít nói hơn</div>
+        <div class="d">Thu hẹp forward guidance; tránh vòng phản chiếu giữa Fed và giá thị trường.</div></div>
+      <div class="card a"><div class="l">3 · Nguyên tắc</div><div class="v n">Sáu điều</div>
+        <div class="d">Mục tiêu PCE 2% cố định; lãi suất ngắn hạn là công cụ chủ đạo; tiền tệ có vai trò.</div></div>
+      <div class="card r"><div class="l">4 · Kinh tế hiện tại</div><div class="v n">Vững – dai dẳng</div>
+        <div class="d">Kinh tế và việc làm vững, điều kiện tài chính dễ chịu, trong khi lạm phát còn dai dẳng.</div></div>
+    </div>
+    <div style="text-align:center;color:var(--dim);font-size:15pt;">↓</div>
+    <div class="kbox d" style="text-align:center;border-left:none;border-top:3px solid var(--or);border-radius:2mm;">
+      <h4 style="letter-spacing:1.6px;">Kết quả</h4>
+      <p style="font-size:13pt;font-weight:800;color:#fff;letter-spacing:.5px;">LẠM PHÁT PHẢI TIẾN VỀ MỤC TIÊU RÕ RÀNG VÀ ĐỦ NHANH</p>
+    </div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>04</span></div>
+</div>
+
+<!-- 05 AI -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>AI: BIẾN SỐ MỚI CỦA NỀN KINH TẾ</h1>
+    <div class="sb">“Thời thế đã thay đổi. Chúng ta đã đi đến một bước ngoặt của lịch sử.” — từ lo trì trệ kéo dài sang tiềm năng tăng trưởng cao hơn</div></div>
+  <div class="bd">
+    <div class="g3" >
+      <div class="card"><div class="l">Doanh số token · 2 phòng thí nghiệm hàng đầu</div><div class="v o">&gt;100 tỷ USD</div>
+        <div class="d">Quy đổi theo năm, chỉ tính riêng hai phòng thí nghiệm dẫn đầu, theo các báo cáo Warsh dẫn.</div></div>
+      <div class="card"><div class="l">Tốc độ mở rộng</div><div class="v o">&gt;500%</div>
+        <div class="d">Mức tăng của chính doanh số token đó so với một năm trước.</div></div>
+      <div class="card b"><div class="l">Quy luật vận động</div><div class="v n">“Moore siêu tốc”</div>
+        <div class="d">Các quy luật mở rộng quy mô đang làm thay đổi cả phương thức lẫn tốc độ đổi mới.</div></div>
+    </div>
+    <div class="g2">
+      <div class="kbox"><h4>Vì sao Fed quan tâm</h4>
+        <p>Vốn và lao động kết hợp tạo ra các mô hình ngôn ngữ lớn; người dùng mua token để truy cập. Những nguồn vốn ngày càng lớn đang đổ vào mọi loại hạ tầng liên quan đến AI.</p>
+        <p>Fed nhận thấy AI là <b>một biến số mới, có khả năng trở thành một yếu tố sản xuất mới</b>, tác động cả đến nền kinh tế thực lẫn thị trường tài chính.</p></div>
+      <div class="kbox" style="border-left-color:var(--red);"><h4>Nhưng chưa vào quyết định hôm nay</h4>
+        <p>Fed lập nhóm công tác về năng suất và việc làm để nghiên cứu các vấn đề này.</p>
+        <p>Warsh nói rõ: <em>các khuyến nghị sẽ được đưa ra sau và không ảnh hưởng đến những quyết định chính sách hiện tại.</em></p></div>
+    </div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>05</span></div>
+</div>
+
+<!-- 06 4 CAU HOI -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>BỐN CÂU HỎI CHƯA CÓ LỜI GIẢI</h1>
+    <div class="sb">Những ẩn số Warsh nêu ra mà Fed chưa trả lời được — và ba chân trời thời gian tương ứng</div></div>
+  <div class="bd">
+    <div class="g2" style="gap:6mm 10mm;">
+      <div class="num"><div class="n o">1</div><div class="t"><b>Năng suất</b><span>Việc ứng dụng AI có làm năng suất của toàn nền kinh tế tăng mạnh và bền vững hay không? Nếu có, khi nào điều đó sẽ xảy ra?</span></div></div>
+      <div class="num"><div class="n o">2</div><div class="t"><b>Lao động</b><span>Việc sử dụng token sẽ bổ trợ hay cạnh tranh với lao động? Thế hệ mô hình tiếp theo đòi hỏi cường độ vốn cao hơn, hay chính mô hình giúp tìm ra lời giải?</span></div></div>
+      <div class="num"><div class="n o">3</div><div class="t"><b>Cấu trúc thị trường</b><span>Chưa rõ lợi nhuận trên vốn cuối cùng sẽ thuộc về ai và trong khoảng thời gian nào.</span></div></div>
+      <div class="num"><div class="n o">4</div><div class="t"><b>Giá cân bằng của token</b><span>Token có phân hóa đến mức người dùng phải trả ngày càng nhiều cho mô hình tiên tiến nhất? Giá token mô hình cũ có giảm về chi phí cận biên?</span></div></div>
+    </div>
+    <div class="g3">
+      <div class="card b"><div class="l">Hiện tại</div><div class="v n">Không tác động</div>
+        <div class="d">Không ảnh hưởng quyết định trong bối cảnh chính sách hiện nay.</div></div>
+      <div class="card a"><div class="l">Trung hạn</div><div class="v n">Đang nghiên cứu</div>
+        <div class="d">Nhóm công tác về năng suất, việc làm và cấu trúc thị trường.</div></div>
+      <div class="card g"><div class="l">Dài hạn</div><div class="v n">Đổi cách đánh giá</div>
+        <div class="d">Có thể thay đổi cung tiềm năng và cách Fed đánh giá nền kinh tế.</div></div>
+    </div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>06</span></div>
+</div>
+
+<!-- 07 FORWARD GUIDANCE -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>THU HẸP ĐỊNH HƯỚNG CHÍNH SÁCH TƯƠNG LAI</h1>
+    <div class="sb">Một công cụ của khủng hoảng đã tồn tại quá lâu so với thời gian hữu dụng của nó</div></div>
+  <div class="bd">
+    <div class="q" >
+      <p>“Minh bạch trong truyền thông về các quyết định chính sách tương lai không tự thân là một phẩm chất tốt. Hoạt động truyền thông phải phục vụ trách nhiệm quan trọng nhất của Fed: đưa ra chính sách tiền tệ đúng đắn.”</p>
+    </div>
+    <div class="g2" >
+      <div class="kbox"><h4>Di sản của khủng hoảng 2008</h4>
+        <p>Warsh và các đồng nghiệp đã đưa forward guidance thành thông lệ trong Khủng hoảng Tài chính Toàn cầu và công bố “hết sức rầm rộ”. Công cụ đó rất cần thiết vào thời điểm ấy.</p>
+        <p>Nhưng giống một số di sản khủng hoảng khác, <b>thông lệ này đã tồn tại quá lâu so với thời gian hữu dụng của nó</b>.</p></div>
+      <div class="kbox" style="border-left-color:var(--red);"><h4>Rủi ro: mơ hồ dưới danh nghĩa rõ ràng</h4>
+        <p>Chia sẻ quá nhiều về quá trình thảo luận và cam kết quá mức với quyết định tương lai <b>có thể dẫn thị trường, doanh nghiệp và hộ gia đình đi sai hướng</b>.</p>
+        <p>Khi nhà hoạch định gần như cam kết trước lãi suất suốt chu kỳ, Fed <em>tự hạn chế khả năng quyết định đúng vào thời điểm cần thiết</em>.</p></div>
+    </div>
+    <div class="kbox d"><h4>Còn một hàm phản ứng rõ ràng thì sao?</h4>
+      <p>Warsh tự đặt câu hỏi rồi tự trả lời: hiểu biết về nền kinh tế chưa đủ chính xác để đưa ra một câu trả lời máy móc và đã định sẵn. Việc đưa ra dự báo nhằm minh họa hàm phản ứng <b style="color:#fff;">hiệu quả trong lý thuyết hơn ngoài đời thực</b>.</p>
+      <p>Ông dẫn một tiền lệ cụ thể: <b style="color:#fff;">forward guidance năm 2021 có thể đã làm chậm phản ứng chính sách trước lạm phát cao</b>. Thay vào đó, nhiệm kỳ của ông sẽ hướng tới những mô hình đáng tin cậy hơn và quy tắc vững chắc hơn — với sự khiêm tốn rằng dự báo chính xác vẫn chỉ là mục tiêu hướng tới.</p>
+    </div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>07</span></div>
+</div>
+
+<!-- 08 CAN PHONG GUONG -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>CĂN PHÒNG GƯƠNG — VÀ AI PHẢI TRẢ GIÁ</h1>
+    <div class="sb">Tín hiệu giá cần càng ít bị lọc càng tốt; nhưng người chịu thiệt nặng nhất lại không nằm trên thị trường</div></div>
+  <div class="bd">
+    <div class="flow" >
+      <div class="fb">DỮ LIỆU THỰC</div><div class="fa">→</div>
+      <div class="fb">THỊ TRƯỜNG ĐỊNH GIÁ</div><div class="fa">→</div>
+      <div class="fb">FED QUAN SÁT</div><div class="fa">→</div>
+      <div class="fb" style="background:var(--or);">QUYẾT ĐỊNH</div>
+    </div>
+    <div class="g2" >
+      <div class="kbox" style="border-left-color:var(--red);"><h4>Vòng phản chiếu</h4>
+        <p>“Nếu thị trường phụ thuộc đáng kể vào định hướng của Fed, còn Fed lại phụ thuộc vào giá thị trường, tất cả chúng ta sẽ <b>dễ bỏ qua diễn biến mới hơn, dễ không kịp chuẩn bị trước bước ngoặt hơn và dễ phạm sai lầm hơn</b>.”</p></div>
+      <div class="kbox"><h4>Fed cần gì từ thị trường</h4>
+        <p>Tín hiệu càng ít bị lọc càng tốt: cấu trúc nội tại thị trường; mức độ và biến động giá tài sản giữa các lĩnh vực; giá và khối lượng chứng khoán Kho bạc; giá trị đối ngoại của USD; chi phí và khả năng tiếp cận tín dụng; giá nhiều nhóm hàng hóa.</p>
+        <p>Ngược lại, thành viên thị trường <b>phải tự rút ra kết luận</b>, không chỉ nhìn vào Fed để quyết định giao dịch tiếp theo.</p></div>
+    </div>
+    <div class="kbox d"><h4>Nghịch lý Warsh nêu ra</h4>
+      <p>Người chịu chi phí lớn nhất của vấn đề căn phòng gương <b style="color:#fff;">không phải là thành viên thị trường</b>. Tổn thất nghiêm trọng nhất rơi vào những người không sở hữu tài sản tài chính.</p>
+      <p>“Nếu Fed đánh giá sai lạm phát và nền kinh tế, ai chịu hậu quả nặng nề nhất? Không phải những người thành đạt trong giới tài chính. Chính những người Mỹ làm việc chăm chỉ phải đối mặt với lạm phát quá cao hoặc công việc bỗng trở nên kém ổn định.”</p>
+    </div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>08</span></div>
+</div>
+
+<!-- 09 SAU NGUYEN TAC -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>SÁU NGUYÊN TẮC ĐIỀU HÀNH</h1>
+    <div class="sb">Khung tư duy của Warsh về chính sách tiền tệ, thay cho một hàm phản ứng máy móc</div></div>
+  <div class="bd">
+    <div class="g6" >
+      <div class="num"><div class="n">01</div><div class="t"><b>Dữ liệu đương thời</b><span>Tin tức hôm qua thường bị nhầm với hiện tại. Ưu tiên xu hướng, tránh điểm dữ liệu riêng lẻ.</span></div></div>
+      <div class="num"><div class="n">02</div><div class="t"><b>Cân bằng cung – cầu</b><span>Phía cung không quan sát trực tiếp được, chỉ suy luận; đánh giá luôn có sai số.</span></div></div>
+      <div class="num"><div class="n r">03</div><div class="t"><b>Mục tiêu 2% cố định</b><span>PCE 2% là dứt khoát. Ổn định giá không tự động xảy ra; lạm phát không tự quay về trung bình.</span></div></div>
+      <div class="num"><div class="n">04</div><div class="t"><b>Nhiệm vụ kép</b><span>Không phải chọn một trong hai. Lạm phát cao tự nó gây tổn hại lớn đến thịnh vượng.</span></div></div>
+      <div class="num"><div class="n r">05</div><div class="t"><b>Lãi suất ngắn hạn</b><span>Công cụ chủ đạo. Chính sách phi truyền thống chỉ dùng rất hạn chế, nếu có, ngoài khủng hoảng thực sự.</span></div></div>
+      <div class="num"><div class="n r">06</div><div class="t"><b>Tiền tệ có vai trò</b><span>Quan điểm không thịnh hành, nhưng cần theo dõi tiền do NHTW và hệ thống tài chính tạo ra.</span></div></div>
+    </div>
+    <div class="q">
+      <p>“Một Fed ít phát ngôn hơn nhưng có mục đích rõ ràng hơn trong truyền thông sẽ có khả năng hoàn thành mục tiêu tốt hơn… Mượn lời Tướng Chuck Yeager: <b>Vào thời khắc quyết định, chỉ có lý do hoặc kết quả.</b>”</p>
+      <div class="a">BA NGUYÊN TẮC ĐÁNH DẤU ĐỎ LÀ NHỮNG ĐIỂM KHÁC BIỆT LỚN NHẤT SO VỚI KHUNG ĐIỀU HÀNH TRƯỚC ĐÓ</div>
+    </div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>09</span></div>
+</div>
+
+<!-- 10 KINH TE MY -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>SỨC CẦU VÀ TÀI SẢN CÒN MẠNH</h1>
+    <div class="sb">Các chỉ báo Warsh dùng để bác bỏ nhận định rằng điều kiện tài chính đang bị kiềm chế trên diện rộng</div></div>
+  <div class="bd">
+    <div class="g3" >
+      <div class="card g"><div class="l">Đầu tư thiết bị &amp; tài sản vô hình</div><div class="v g">~9%</div><div class="d">Thay đổi bốn quý — tốc độ cao nhất kể từ 2021.</div></div>
+      <div class="card"><div class="l">Hạ tầng AI trong tăng capex</div><div class="v o">&gt;½</div><div class="d">Hơn một nửa mức tăng chi tiêu vốn năm nay quy được cho xây dựng hạ tầng liên quan AI.</div></div>
+      <div class="card g"><div class="l">Lợi nhuận S&amp;P 500</div><div class="v g">&gt;20%</div><div class="d">Tăng trong năm qua; biên lợi nhuận cao so với lịch sử; biến động cổ phiếu thấp.</div></div>
+    </div>
+    <div class="g3" >
+      <div class="card g"><div class="l">Tiêu dùng thực</div><div class="v g">&gt;2%</div><div class="d">Tăng trong bốn quý vừa qua, bất chấp các cú sốc.</div></div>
+      <div class="card g"><div class="l">PDFP</div><div class="v g">~3%</div><div class="d">Từ đầu năm đến nay. Chỉ tiêu này thường chứa nhiều tín hiệu hơn GDP.</div></div>
+      <div class="card a"><div class="l">Lĩnh vực chịu sức ép</div><div class="v n">Nhà ở · Nông nghiệp</div><div class="d">Hai ngoại lệ Warsh thừa nhận trong bức tranh chung tích cực.</div></div>
+    </div>
+    <div class="q"><p>“Xét tổng thể, tôi khó có thể mô tả các điều kiện tài chính nói chung là thắt chặt.”</p>
+      <div class="a">MỘT CHỈ BÁO VỀ SỨC MẠNH LÀ KHẢ NĂNG CHỐNG CHỊU CÚ SỐC — CẢ KINH TẾ THỰC VÀ PHỐ WALL ĐỀU THỂ HIỆN SỨC CHỐNG CHỊU ĐÁNG KỂ</div></div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>10</span></div>
+</div>
+
+<!-- 11 LAO DONG & TIN DUNG -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>LAO ĐỘNG VÀ ĐIỀU KIỆN TÍN DỤNG</h1>
+    <div class="sb">Vế việc làm “nước Mỹ đang có kết quả tốt”; còn tín dụng cho thấy rất ít dấu hiệu bị chính sách kiềm chế</div></div>
+  <div class="bd">
+    <div class="g2">
+      <div style="display:flex;flex-direction:column;gap:5mm;">
+        <div class="g2" style="gap:5mm;">
+          <div class="card g"><div class="l">Tỷ lệ thất nghiệp</div><div class="v g">4,1%</div><div class="d">Thấp so với lịch sử, gần như không đổi trong vài năm qua.</div></div>
+          <div class="card g"><div class="l">Đơn trợ cấp thất nghiệp</div><div class="v n">Gần đáy</div><div class="d">Bình quân bốn tuần gần mức thấp nhất nhiều thập niên.</div></div>
+        </div>
+        <div class="kbox"><h4>Vì sao việc làm mới hằng tháng thấp</h4>
+          <p>Tỷ lệ luân chuyển lao động thấp một phần bắt nguồn từ <b>quá trình tái kết nối</b> trên thị trường lao động.</p>
+          <p>Khi nguồn cung lao động hầu như không tăng, <em>số việc làm mới hằng tháng đương nhiên sẽ thấp</em> — Warsh dùng lập luận này để bác bỏ cách đọc bi quan về số liệu việc làm.</p></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5mm;">
+        <div class="kbox" style="border-left-color:var(--red);"><h4>Tín dụng gần như không bị siết</h4>
+          <p><b>Chênh lệch tín dụng</b> trái phiếu doanh nghiệp và khoản vay có đòn bẩy gần vùng thấp trong phạm vi lịch sử; khối lượng phát hành khá lớn trong năm.</p>
+          <p><b>Khảo sát Cán bộ Tín dụng Cấp cao tháng 7:</b> tiêu chuẩn với khoản vay thương mại và công nghiệp thuộc vùng nới lỏng hơn so với lịch sử — góp phần giải thích mức tăng cho vay năm nay.</p></div>
+        <div class="kbox d"><h4>Warsh đặt mình cạnh FOMC tháng 7</h4>
+          <p>Biên bản tháng 7 nhất trí: thị trường lao động ổn định, sản lượng vững chắc, <b style="color:#fff;">nhưng lạm phát vẫn quá cao</b>. Đa số chọn chờ thêm thông tin giữa hai kỳ họp — trước diễn biến chuỗi cung ứng, dòng vốn và địa chính trị.</p>
+          <p>Đồng thời Ủy ban đồng thuận <b style="color:#fff;">sẵn sàng hành động khi hoàn cảnh đòi hỏi</b>.</p></div>
+      </div>
+    </div>
+    <div class="q"><p>“Về phần mình, hôm nay tôi ấn tượng với kết quả chung của nền kinh tế, vốn dường như đã mạnh lên.”</p>
+      <div class="a">MỘT CHỈ BÁO VỀ SỨC MẠNH LÀ KHẢ NĂNG CHỐNG CHỊU CÚ SỐC</div></div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>11</span></div>
+</div>
+
+<!-- 12 LAM PHAT -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>LẠM PHÁT: MỨC ĐỘ VÀ ĐỘ RỘNG</h1>
+    <div class="sb">Warsh phân rã 199 cấu phần riêng lẻ của chỉ số giá PCE để đo xu hướng lạm phát cơ bản</div></div>
+  <div class="bd">
+    <div class="g3" >
+      <div class="card r"><div class="l">PCE · 12 tháng</div><div class="v">3,7%</div><div class="d">Thước đo lạm phát ưu tiên của Fed, cao hơn đáng kể mục tiêu.</div></div>
+      <div class="card"><div class="l">PCE · 6 tháng</div><div class="v o">4,1%</div><div class="d">Động lượng ngắn hơn thậm chí cao hơn thước đo 12 tháng.</div></div>
+      <div class="card g"><div class="l">Mục tiêu</div><div class="v g">2,0%</div><div class="d">Mục tiêu PCE được Warsh mô tả là cố định và dứt khoát.</div></div>
+    </div>
+    <div style="font-size:9.6pt;font-weight:800;color:var(--ink);letter-spacing:.8px;margin-bottom:4mm;">
+      ĐỘ RỘNG CỦA ÁP LỰC GIÁ — TỶ LỆ CẤU PHẦN TRONG RỔ PCE TĂNG GIÁ TRÊN 3%</div>
+    <div class="bars" >
+      <div class="brow"><span class="bl">Đỉnh sau đại dịch</span><span class="bt"><i style="width:77%;background:var(--red);"></i></span><span class="bv">77%</span></div>
+      <div class="brow"><span class="bl">12 tháng gần nhất</span><span class="bt"><i style="width:54%;background:var(--or);"></i></span><span class="bv">54%</span></div>
+      <div class="brow"><span class="bl">6 tháng gần nhất <small style="color:var(--dim)">(quy đổi năm)</small></span><span class="bt"><i style="width:49%;background:var(--amb);"></i></span><span class="bv">49%</span></div>
+      <div class="brow"><span class="bl">Bình quân hai thập niên trước dịch</span><span class="bt"><i style="width:32%;background:var(--grn);"></i></span><span class="bv">32%</span></div>
+    </div>
+    <div class="kbox"><h4>Cách đọc</h4>
+      <p>Mỗi thước đo tổng quát đều đã giảm đáng kể so với đỉnh năm 2022, nhưng <b>tiến triển trong hai năm qua còn khiêm tốn</b>. Dù số liệu PCE và CPI mùa hè tốt hơn dự kiến, chúng chưa cho Warsh thấy xu hướng cơ bản đã cải thiện đáng kể. Tiền lương tăng vừa phải, song ông lưu ý tăng trưởng tiền lương <b>từ lâu không còn là chỉ báo đáng tin cậy</b> về lạm phát tương lai. Đà tăng của giá hàng hóa nói chung cần được theo dõi để đánh giá rủi ro lạm phát có nghiêng về phía tăng hay không.</p></div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>12</span></div>
+</div>
+
+<!-- 13 KY VONG + 65 THANG -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>KỲ VỌNG LẠM PHÁT VÀ 65 THÁNG</h1>
+    <div class="sb">Tin tốt về kỳ vọng, kèm một cảnh báo lịch sử và một lời nhận trách nhiệm hiếm thấy</div></div>
+  <div class="bd">
+    <div class="g2" >
+      <div class="kbox" style="border-left-color:var(--grn);"><h4>Tin tốt</h4>
+        <p>Các thước đo <b>kỳ vọng lạm phát trung hạn nhìn chung vẫn ổn định</b>. Mức bù lạm phát trên thị trường hoán đổi truyền đi tín hiệu mạnh mẽ tương tự.</p>
+        <p>Warsh coi việc giá thị trường vẫn thể hiện niềm tin rằng Fed sẽ mang lại ổn định giá cả là <b>một sự ghi nhận dành cho Fed với tư cách một thể chế</b> — và khẳng định niềm tin đó là đúng.</p></div>
+      <div class="kbox" style="border-left-color:var(--red);"><h4>Cảnh báo lịch sử</h4>
+        <p>“Trong lịch sử kinh tế, đặc điểm của các thước đo kỳ vọng lạm phát trên thị trường là chúng <em>thường trông vững chắc và bền bỉ — cho đến khi không còn như vậy.</em>”</p>
+        <p>Kỳ vọng hiện vẫn được neo giữ tốt <b>nhưng phải được giám sát chặt chẽ</b>. Trách nhiệm của Fed là bảo đảm kỳ vọng không bị mất neo.</p></div>
+    </div>
+    <div class="kbox d" style="border-top:3px solid var(--red);border-left:none;border-radius:2mm;">
+      <h4 style="color:var(--red);">Lời nhận trách nhiệm</h4>
+      <p style="font-size:13pt;font-style:italic;color:#fff;line-height:1.45;">“Có một tín hiệu không ai có thể bỏ qua: trách nhiệm đối với <b style="color:var(--or);">65 tháng lạm phát cao kéo dài</b> hoàn toàn thuộc về ngân hàng trung ương. Và đúng là trách nhiệm đó thuộc về chúng tôi.”</p>
+    </div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>13</span></div>
+</div>
+
+<!-- 14 TIEU CHUAN -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>TIÊU CHUẨN RA QUYẾT ĐỊNH</h1>
+    <div class="sb">Warsh cam kết một kỷ luật chính sách, không cam kết trước một quyết định</div></div>
+  <div class="bd">
+    <div style="text-align:center;font-size:13pt;font-weight:800;color:var(--ink);">
+      Lạm phát cơ bản có đang tiến về mục tiêu 2%?</div>
+    <div class="g3" >
+      <div class="card" style="text-align:center;"><div class="v o" style="font-size:17pt;">RÕ RÀNG</div><div class="d">Xu hướng phải nhìn thấy được, không phải vài điểm dữ liệu tốt.</div></div>
+      <div class="card" style="text-align:center;"><div class="v o" style="font-size:17pt;">ĐỦ NHANH</div><div class="d">Không chỉ hướng đi mà cả tốc độ đều phải đạt.</div></div>
+      <div class="card" style="text-align:center;"><div class="v o" style="font-size:17pt;">BỀN VỮNG</div><div class="d">Xu hướng cơ bản, sau khi loại bỏ các yếu tố đặc thù.</div></div>
+    </div>
+    <div class="kbox d" style="text-align:center;border-left:none;border-top:3px solid var(--or);border-radius:2mm;">
+      <p style="font-size:12pt;font-weight:700;color:#fff;">Nếu chưa đạt tiêu chuẩn → Fed “vẫn còn việc phải làm”</p></div>
+    <div class="g2">
+      <div class="kbox" style="border-left-color:var(--grn);"><h4>Điều được nói</h4>
+        <p>Giữ khả năng hành động nếu diễn biến yêu cầu. Cam kết với kỷ luật chính sách và với mục tiêu 2%.</p></div>
+      <div class="kbox" style="border-left-color:var(--red);"><h4>Điều chưa được nói</h4>
+        <p>Không xác nhận thời điểm hay quy mô thay đổi lãi suất. Không đưa ra quỹ đạo lãi suất hay hàm phản ứng.</p></div>
+    </div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>14</span></div>
+</div>
+
+<!-- 15 KHONG NOI -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>ĐIỀU BÀI PHÁT BIỂU KHÔNG NÓI</h1>
+    <div class="sb">Ba khoảng trống đáng chú ý — với một Chủ tịch Fed mới, những gì không được nhắc cũng là thông tin</div></div>
+  <div class="bd">
+    <div class="g3" >
+      <div class="card r"><div class="l">Bảng cân đối tài sản</div><div class="v n">Không đề cập</div>
+        <div class="d">Không nói về lộ trình thu hẹp định lượng hay quy mô danh mục — dù nguyên tắc số 5 hàm ý hạn chế công cụ phi truyền thống.</div></div>
+      <div class="card r"><div class="l">Chính sách tài khóa</div><div class="v n">Không đề cập</div>
+        <div class="d">Không nhắc phối hợp với Bộ Tài chính, gánh nặng nợ công hay tác động của phát hành nợ lên lợi suất dài hạn.</div></div>
+      <div class="card r"><div class="l">Tính độc lập của Fed</div><div class="v n">Không đề cập</div>
+        <div class="d">Không có đoạn bảo vệ trực tiếp tính độc lập trước sức ép chính trị.</div></div>
+    </div>
+    <div class="kbox"><h4>Vì sao điều này đáng bàn <span class="tag i" style="margin-left:3mm;">Suy luận của phòng</span></h4>
+      <p>Bài phát biểu tập trung gần như hoàn toàn vào <b>khung tư duy và truyền thông</b>, không vào công cụ cụ thể. Với người đọc để dự báo hành động, điều đó có nghĩa: tín hiệu về lãi suất ngắn hạn thì rõ, còn tín hiệu về bảng cân đối và phối hợp tài khóa thì không có.</p>
+      <p>Đây cũng là ba câu hỏi đáng đặt ra trong phần thảo luận: <b>im lặng ở đây là chưa có quan điểm, hay là có quan điểm nhưng chưa đến lúc nói?</b></p></div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>15</span></div>
+</div>
+
+<!-- 16 HAM Y THE GIOI -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>HÀM Ý ĐỐI VỚI THẾ GIỚI</h1>
+    <div class="sb">Các kênh truyền dẫn cần theo dõi sau thông điệp của Warsh <span class="tag i" style="margin-left:3mm;">Suy luận của phòng</span></div></div>
+  <div class="bd">
+    <div class="g3" style="gap:6mm;">
+      <div class="card"><div class="l">Lãi suất toàn cầu</div><div class="d" style="margin-top:2mm;">Kỳ vọng Fed cao hơn kéo lợi suất phi rủi ro và chi phí vốn quốc tế lên.</div></div>
+      <div class="card"><div class="l">USD &amp; FX</div><div class="d" style="margin-top:2mm;">Chênh lệch lãi suất hỗ trợ USD và gây áp lực lên các đồng tiền khác.</div></div>
+      <div class="card"><div class="l">Dòng vốn</div><div class="d" style="margin-top:2mm;">Tài sản USD hấp dẫn hơn có thể làm điều kiện tài chính tại thị trường mới nổi thắt lại.</div></div>
+      <div class="card a"><div class="l">Tài sản rủi ro</div><div class="d" style="margin-top:2mm;">Định giá cổ phiếu và tín dụng nhạy hơn với lãi suất chiết khấu và dữ liệu lạm phát.</div></div>
+      <div class="card a"><div class="l">Biến động</div><div class="d" style="margin-top:2mm;">Ít forward guidance làm phản ứng quanh dữ liệu và phát biểu chính sách mạnh hơn.</div></div>
+      <div class="card a"><div class="l">Đường cong</div><div class="d" style="margin-top:2mm;">Kỳ hạn ngắn phản ánh policy path; kỳ hạn dài còn chịu term premium, tăng trưởng và tài khóa.</div></div>
+    </div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>16</span></div>
+</div>
+
+<!-- 17 VIET NAM -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>KÊNH TRUYỀN DẪN ĐẾN VIỆT NAM</h1>
+    <div class="sb">Đây là suy luận phân tích từ thông điệp của Warsh, không phải kết luận của Fed <span class="tag" style="margin-left:3mm;">Suy luận của phòng</span></div></div>
+  <div class="bd">
+    <div class="g3" style="gap:6mm;">
+      <div class="card r"><div class="l">USD/VND</div><div class="d" style="margin-top:2mm;">USD mạnh và chênh lệch lãi suất bất lợi có thể tăng áp lực tỷ giá, nhất là khi nhu cầu ngoại tệ trong nước cao.</div></div>
+      <div class="card r"><div class="l">Lãi suất VND</div><div class="d" style="margin-top:2mm;">Áp lực FX có thể làm giảm dư địa duy trì thanh khoản quá dồi dào hoặc hạ mặt bằng lãi suất VND.</div></div>
+      <div class="card"><div class="l">TPCP</div><div class="d" style="margin-top:2mm;">Lợi suất toàn cầu tăng tạo áp lực định giá tương đối; tác động trong nước còn phụ thuộc thanh khoản hệ thống và cung phát hành.</div></div>
+      <div class="card"><div class="l">FI Bond / CD</div><div class="d" style="margin-top:2mm;">Chi phí vốn và đường cong tham chiếu cao hơn có thể ảnh hưởng định giá, carry và mức hấp dẫn tương đối của danh mục.</div></div>
+      <div class="card a"><div class="l">Dòng vốn</div><div class="d" style="margin-top:2mm;">Tài sản USD sinh lời cao hơn có thể làm dòng vốn ngoại thận trọng hơn với tài sản VND.</div></div>
+      <div class="card g"><div class="l">Xuất khẩu</div><div class="d" style="margin-top:2mm;">Kinh tế Mỹ vững hỗ trợ nhu cầu; riêng bùng nổ capex AI là cầu trực tiếp cho hàng điện tử. Nhưng chính sách tiền tệ cao hơn lâu hơn có thể làm chậm cầu về sau.</div></div>
+    </div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>17</span></div>
+</div>
+
+<!-- 18 MARKET RISK -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>GÓC NHÌN MARKET RISK</h1>
+    <div class="sb">Những biến số nên đưa vào phần thảo luận của phòng <span class="tag" style="margin-left:3mm;">Suy luận của phòng</span></div></div>
+  <div class="bd">
+    <table>
+      <tr><th style="width:20%">Kênh</th><th style="width:42%">Tín hiệu cần theo dõi</th><th>Rủi ro danh mục</th></tr>
+      <tr><td>Fed path</td><td>Xác suất kỳ họp, SOFR/OIS, UST 2Y</td><td>Duration ngắn; repricing nhanh</td></tr>
+      <tr><td>Đường cong UST</td><td>2s10s, 10s30s, term premium</td><td>Curve và valuation risk</td></tr>
+      <tr><td>USD</td><td>DXY, USD/VND, basis và forward</td><td>FX pressure; chi phí hedge</td></tr>
+      <tr><td>Thanh khoản VND</td><td>ON/1W, OMO, tín phiếu, KBNN</td><td>Funding và carry</td></tr>
+      <tr><td>TPCP Việt Nam</td><td>Đường cong 2Y–10Y; cung sơ cấp</td><td>MtM và giới hạn DV01</td></tr>
+      <tr><td>Tín dụng</td><td>Credit spread, phát hành, thanh khoản</td><td>Spread risk của FI Bond/CD</td></tr>
+    </table>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>18</span></div>
+</div>
+
+<!-- 19 CAU HOI -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>CÂU HỎI THẢO LUẬN</h1>
+    <div class="sb">Dùng cho phần case trong buổi sinh hoạt nghiên cứu kinh tế</div></div>
+  <div class="bd">
+    <div style="display:flex;flex-direction:column;gap:4.5mm;">
+      <div class="num"><div class="n o">01</div><div class="t"><span style="font-size:10pt;color:var(--ink);">Warsh đang mở đường cho một lần tăng lãi suất, hay chỉ tái lập uy tín chống lạm phát?</span></div></div>
+      <div class="num"><div class="n o">02</div><div class="t"><span style="font-size:10pt;color:var(--ink);">Vì sao lợi suất các kỳ hạn có thể phản ứng khác nhau trước cùng một thông điệp?</span></div></div>
+      <div class="num"><div class="n o">03</div><div class="t"><span style="font-size:10pt;color:var(--ink);">Ít forward guidance giúp chính sách linh hoạt hơn, hay làm rủi ro thị trường tăng quá mức?</span></div></div>
+      <div class="num"><div class="n o">04</div><div class="t"><span style="font-size:10pt;color:var(--ink);">Kênh nào truyền dẫn mạnh nhất đến Việt Nam: tỷ giá, lãi suất, dòng vốn hay tăng trưởng?</span></div></div>
+      <div class="num"><div class="n o">05</div><div class="t"><span style="font-size:10pt;color:var(--ink);">Điều kiện nào cho phép Việt Nam tiếp tục đi khác hướng với Fed?</span></div></div>
+      <div class="num"><div class="n r">06</div><div class="t"><span style="font-size:10pt;color:var(--ink);">Warsh đòi bỏ dự báo minh họa hàm phản ứng — vậy Fed xử lý thế nào với dot plot của kỳ họp có SEP?</span></div></div>
+    </div>
+    <div class="kbox"><h4>Gợi ý cách trả lời</h4>
+      <p>Phân biệt rõ ba tầng: <b>dữ kiện trong bài phát biểu</b> · <b>phản ứng thị trường đã quan sát được</b> · <b>suy luận của nhóm</b>. Trộn ba tầng này là lỗi phổ biến nhất khi bình luận chính sách tiền tệ.</p></div>
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>19</span></div>
+</div>
+
+<!-- 20 GHI CHU THUAT NGU -->
+<div class="p"><div class="bar"></div>
+  <div class="hd"><h1>GHI CHÚ THUẬT NGỮ</h1>
+    <div class="sb">Theo ghi chú của bản dịch, bổ sung một số thuật ngữ dùng trong tài liệu này</div></div>
+  <div class="bd"><div class="g2" style="gap:4mm 10mm;">
+    <div>
+      <div class="gl"><b>Forward guidance</b> — Định hướng chính sách tương lai; thông tin của NHTW nhằm định hình kỳ vọng thị trường về đường đi chính sách.</div>
+      <div class="gl"><b>Financial conditions</b> — Điều kiện tài chính; gồm lãi suất, chênh lệch tín dụng, giá tài sản và các yếu tố liên quan.</div>
+      <div class="gl"><b>Inflation compensation</b> — Mức bù lạm phát hàm ý từ giá công cụ thị trường; không đồng nhất hoàn toàn với kỳ vọng lạm phát.</div>
+      <div class="gl"><b>Underlying inflation</b> — Lạm phát cơ bản theo nghĩa xu hướng chung, đã loại bớt tác động của các yếu tố đặc thù.</div>
+      <div class="gl"><b>PDFP</b> — Doanh số cuối cùng thực cho người mua tư nhân trong nước; thường chứa nhiều tín hiệu hơn GDP.</div>
+    </div>
+    <div>
+      <div class="gl"><b>Credit spreads</b> — Phần chênh lệch lợi suất tín dụng so với tài sản tham chiếu có rủi ro thấp hơn.</div>
+      <div class="gl"><b>Main Street / Wall Street</b> — Lần lượt chỉ nền kinh tế thực và khu vực thị trường tài chính.</div>
+      <div class="gl"><b>PCE</b> — Chỉ số giá chi tiêu tiêu dùng cá nhân; thước đo lạm phát ưu tiên của Fed, là cơ sở cho mục tiêu 2%.</div>
+      <div class="gl"><b>FOMC</b> — Ủy ban Thị trường Mở Liên bang; cơ quan quyết định lãi suất chính sách của Fed.</div>
+      <div class="gl"><b>SEP / dot plot</b> — Tóm lược Dự báo Kinh tế, công bố tại các kỳ họp tháng 3, 6, 9 và 12, gồm biểu đồ chấm thể hiện dự báo lãi suất của từng thành viên.</div>
+      <div class="gl"><b>SLOOS</b> — Khảo sát Ý kiến Cán bộ Tín dụng Cấp cao về hoạt động cho vay ngân hàng.</div>
+    </div>
+  </div></div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>20</span></div>
+</div>
+
+<!-- 21 KET LUAN -->
+<div class="p cv">
+  <div class="rings"><i></i><i></i><i></i></div>
+  <div class="kick">KẾT LUẬN</div>
+  <div style="position:absolute;top:44mm;left:16mm;right:120mm;">
+    <div style="font-size:14pt;color:#fff;font-weight:700;line-height:1.55;">
+      Nền kinh tế đủ vững để Fed tập trung vào giá cả.<br>
+      Lạm phát chưa cho thấy tiến triển rõ và đủ nhanh.<br>
+      Thị trường phải tự định giá trong môi trường ít chỉ dẫn hơn.
+    </div>
+    <div style="width:36mm;height:2.5mm;background:var(--or);margin:9mm 0;"></div>
+    <div style="font-size:20pt;font-weight:800;color:var(--or);font-style:italic;">“A discipline, not a decision.”</div>
+  </div>
+  <div style="position:absolute;bottom:18mm;left:16mm;right:80mm;font-size:8.4pt;color:#95A1B2;line-height:1.6;">
+    Nguồn: Bài phát biểu “In Our Time”, Chủ tịch Kevin Warsh, Jackson Hole, 28/8/2026 — federalreserve.gov<br>
+    Bản tiếng Việt được biên tập phục vụ thảo luận nội bộ về kinh tế và rủi ro thị trường. Các trang đánh dấu “Suy luận của phòng” là phân tích nội bộ, không phải kết luận của Fed.
+  </div>
+  <div class="ft"><span>KEVIN WARSH · JACKSON HOLE 2026</span><span>21</span></div>
+</div>
+
+</body>
+</html>
