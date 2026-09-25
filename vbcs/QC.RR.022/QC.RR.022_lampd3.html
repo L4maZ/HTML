@@ -1,7 +1,8 @@
-<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8">
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>QC.RR.022 — Nội dung quy chế &amp; Đánh giá GAP</title>
-<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'DM Sans',sans-serif;background:#fdf3f0;color:#1a202c;display:flex;min-height:100vh}
@@ -57,6 +58,20 @@ main{flex:1;padding:38px 52px;overflow-x:auto;max-width:1000px;margin:0 auto}
 .chart svg{width:100%;height:auto;display:block}
 .chart-cap{font-size:13px;color:#9a4020;line-height:1.55;margin-top:8px;padding-top:8px;border-top:1px dotted #f0c4b2}
 .chart-cap b{color:#b83a10}
+
+/* Tổng hợp thẩm định GAP cho khoản không phát sinh GAP */
+.reviewbox{border:1px solid #d8e5da;background:#fbfdfb;border-radius:10px;margin-top:16px;overflow:hidden}
+.reviewbox-hd{background:#276749;color:#fff;padding:11px 17px;font-size:14px;font-weight:700}
+.reviewitem{padding:15px 17px;border-top:1px solid #e3ece5}
+.reviewitem:first-of-type{border-top:none}
+.reviewtitle{font-size:14.5px;font-weight:700;color:#1f4b32;margin-bottom:7px}
+.reviewsummary{font-size:14px;line-height:1.6;color:#2d3748;margin-bottom:10px}
+.reviewgap{display:inline-block;margin-top:10px;padding:4px 10px;border-radius:12px;background:#e2efe6;color:#276749;font-size:11.5px;font-weight:700;letter-spacing:.35px;text-transform:uppercase}
+.reviewbox .tuyen{margin-top:5px}
+.reviewbox .tcard{border-color:#d8e5da}
+.reviewbox .tcard h5{color:#276749}
+@media(max-width:760px){.reviewbox .tuyen{grid-template-columns:1fr}}
+
 /* GAP box */
 .gapbox{border:1px solid #e0a99a;background:#fffaf8;border-radius:10px;margin-top:16px;overflow:hidden}
 .gapbox-hd{background:#9B2C2C;color:#fff;padding:10px 17px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px}
@@ -113,23 +128,170 @@ body.er-on .hl-mark:hover{background:#ffc4c4;text-decoration:line-through}
 .hlhint.show{display:block}
 @media print{.sidebar,.navfoot,.searchwrap,.hltb,.hlhint{display:none}.page{display:block!important;page-break-after:always}main{max-width:none;margin:0}.kh{break-inside:avoid}
 .hl-mark{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-</style></head><body>
+
+/* --- VBCS / Thực hiện --- */
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 12px}
+.dcell{background:#fff;border:1px solid #e3ece5;border-radius:8px;padding:9px 12px}
+.dlbl{font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#276749;margin-bottom:5px}
+.dval{font-size:14px;line-height:1.55;color:#2d3748;min-height:20px}
+.dval.ph{color:#b9c9bd;font-style:italic}
+.reviewgap.y{background:#f6dcdc;color:#9B2C2C}
+/* --- Chế độ chỉnh sửa --- */
+body.editing [contenteditable]{outline:1px dashed #c9a99c;border-radius:3px;padding:1px 3px;min-width:30px}
+body.editing [contenteditable]:focus{background:#fffbe8;outline:1.5px solid #b83a10}
+body.editing .dval{min-height:24px}
+.delitem{float:right;border:1px solid #e7c3c3;background:#fff;color:#9B2C2C;border-radius:6px;
+  font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;padding:2px 8px;line-height:1.4}
+.delitem:hover{background:#9B2C2C;color:#fff;border-color:#9B2C2C}
+.additem{padding:12px 17px;border-top:1px dashed #cfe0d4;background:#f4f9f5}
+.additem button{border:1px solid #276749;background:#fff;color:#276749;border-radius:8px;
+  font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:8px 15px}
+.additem button:hover{background:#276749;color:#fff}
+.gapsel{margin-top:10px;font-size:12px;font-weight:700;color:#276749;letter-spacing:.3px}
+.gapsel select{font-family:inherit;font-size:12.5px;font-weight:700;color:#276749;border:1px solid #cfe0d4;
+  border-radius:6px;padding:3px 8px;background:#fff;margin-left:4px}
+/* --- Thanh lưu --- */
+.savebar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #f5c9b8;
+  padding:10px 20px;display:flex;align-items:center;gap:10px;z-index:99;box-shadow:0 -3px 14px rgba(184,58,16,.08)}
+.savebar #sv_msg{flex:1;font-size:12.5px;color:#9a4020;font-weight:600}
+.savebar #sv_msg.dirty{color:#9B2C2C}
+.sbtn{border:1px solid #f5c9b8;background:#fff7f4;color:#9a4020;border-radius:9px;padding:9px 15px;
+  font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.sbtn:hover{background:#fde8de;border-color:#b83a10;color:#b83a10}
+.sbtn.on{background:#276749;border-color:#276749;color:#fff}
+.sbtn.primary{background:#b83a10;border-color:#b83a10;color:#fff}
+.sbtn.primary:hover{background:#9a2f0e;color:#fff}
+body{padding-bottom:66px}
+.hltb{bottom:80px}
+@media print{.savebar{display:none}}
+
+
+.reviewbox-hd{cursor:pointer;display:flex;align-items:center;gap:10px;user-select:none}
+.reviewbox-hd:hover{background:#1f5639}
+.rbt{flex-shrink:0}
+.rbmeta{font-size:11.5px;font-weight:600;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.32);
+  border-radius:11px;padding:2px 10px;letter-spacing:.2px}
+.rbmeta.y{background:#f6dcdc;color:#9B2C2C;border-color:#f6dcdc}
+.rbchev{margin-left:auto;font-size:13px;transition:transform .18s}
+.reviewbox.collapsed .rbchev{transform:rotate(-90deg)}
+.reviewbox.collapsed .reviewbody{display:none}
+.rbtools{padding:9px 17px;border-top:1px solid #e3ece5;background:#f4f9f5}
+.rbtools button{border:1px solid #cfe0d4;background:#fff;color:#276749;border-radius:7px;
+  font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:5px 12px}
+.rbtools button:hover{background:#276749;color:#fff;border-color:#276749}
+.reviewtitle{cursor:pointer;display:flex;align-items:center;gap:7px;user-select:none;flex-wrap:wrap}
+.itchev{font-size:11px;color:#276749;transition:transform .18s;flex-shrink:0}
+.reviewitem.collapsed .itchev{transform:rotate(-90deg)}
+.reviewitem.collapsed .itembody{display:none}
+.reviewitem.collapsed{padding-bottom:13px}
+.itgap{margin-left:auto;font-size:11px;font-weight:700;background:#e2efe6;color:#276749;
+  border-radius:10px;padding:2px 9px;flex-shrink:0}
+.itgap.y{background:#f6dcdc;color:#9B2C2C}
+@media print{.reviewbox.collapsed .reviewbody{display:block!important}
+ .reviewitem.collapsed .itembody{display:block!important}.rbtools,.rbchev,.itchev{display:none}}
+
+
+@media (max-width:1150px){
+  .tuyen{grid-template-columns:1fr}
+  .dgrid{grid-template-columns:1fr}
+  main{padding:28px 24px}
+}
+@media (max-width:820px){
+  .sidebar{width:180px}
+  .savebar{flex-wrap:wrap;gap:7px}
+  .savebar #sv_msg{flex-basis:100%}
+}
+
+.rnote{background:#fff7ed;border:1px solid #f0d9b8;border-left:3px solid #d98324;
+  border-radius:0 8px 8px 0;padding:11px 15px;margin-top:12px;font-size:14px;line-height:1.6;color:#7a4a08}
+.rnote.ph{opacity:.5}
+.rntag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+  margin-bottom:6px;padding:3px 10px;border-radius:11px;background:#fbe7c8;color:#8a5a10}
+.rnote b{font-weight:700;color:#6b3d05}
+
+.unbox{border:1px solid #cdd7e5;background:#f7f9fc;border-radius:10px;margin-top:14px;overflow:hidden}
+.unhd{background:#eef2f8;border-bottom:1px solid #dde4ee;padding:10px 16px;cursor:pointer;user-select:none;
+  display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:700;color:#33495e}
+.unhd:hover{background:#e5ecf6}
+.unchev{font-size:11px;transition:transform .18s;color:#5a7290}
+.unbox.collapsed .unchev{transform:rotate(-90deg)}
+.unbox.collapsed .unbody{display:none}
+.untitle{flex:1}
+.unflag{font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+  background:#d8e6f5;color:#2c5b87;border-radius:10px;padding:2px 9px}
+.unflag.empty{background:#e8ecf1;color:#93a3b5}
+.unbody{padding:13px 16px}
+.unval{min-height:64px;background:#fff;border:1px dashed #b9c8dc;border-radius:8px;padding:11px 14px;
+  font-size:14.5px;line-height:1.62;color:#2d3748;outline:none}
+.unval:focus{border-style:solid;border-color:#4b7bab;background:#fffdf5}
+.unval.ph:empty:before{content:'Gõ ghi chú của bạn tại đây…';color:#a9b8c9;font-style:italic}
+.unhint{font-size:11.5px;color:#8496a8;margin-top:7px}
+@media print{.unbox.collapsed .unbody{display:block!important}.unhint,.unchev{display:none}}
+
+/* ---- ẩn/hiện thanh tab ---- */
+.navtoggle{position:fixed;left:240px;top:16px;z-index:120;width:22px;height:44px;border:1px solid #f5c9b8;
+  border-left:none;border-radius:0 8px 8px 0;background:#fff7f4;color:#b83a10;font-size:13px;font-weight:700;
+  cursor:pointer;transition:left .18s}
+.navtoggle:hover{background:#fde8de}
+body.navhidden .sidebar{display:none}
+body.navhidden .navtoggle{left:0}
+body.navhidden main{max-width:1600px}
+/* ---- xem song song ---- */
+.splitwrap{border-top:1px solid #f5c9b8}
+.splithd{display:grid;grid-template-columns:1fr 1fr;position:sticky;top:0;z-index:6;
+  background:#b83a10;color:#fff;font-size:11.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase}
+.splithd>div{padding:8px 15px}
+.splithd>div:first-child{border-right:1px solid rgba(255,255,255,.3)}
+.srow{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #ecd7cc;align-items:stretch}
+.srow:last-child{border-bottom:none}
+.srow:nth-child(even){background:#fffaf8}
+.scl{padding:13px 16px;border-right:1px solid #ecd7cc}
+.scr{padding:13px 16px;background:#f8fbf9}
+.scl .p0,.scl .p1,.scl .p2,.scl .p3,.scl .p4{font-size:14.5px;line-height:1.62;margin-bottom:6px}
+.scl .p1{padding-left:14px}.scl .p2{padding-left:28px}.scl .p3{padding-left:42px}.scl .p4{padding-left:56px}
+.asmhd{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.asmref{background:#276749;color:#fff;font-size:11.5px;font-weight:700;border-radius:5px;padding:2px 8px}
+.asmtit{font-size:14px;font-weight:700;color:#1f4b32;flex:1}
+.asmgap{font-size:11px;font-weight:700;background:#e2efe6;color:#276749;border-radius:10px;padding:2px 9px}
+.asmgap.y{background:#f6dcdc;color:#9B2C2C}
+.asmsel{font-family:inherit;font-size:12px;font-weight:700;border:1px solid #cfe0d4;border-radius:5px;padding:2px 6px}
+.asmsum{font-size:13.5px;line-height:1.58;color:#2d3748;margin-bottom:9px}
+.asmkv,.asmt{font-size:13px;line-height:1.55;margin-bottom:5px;display:flex;gap:8px}
+.asmkv>b,.asmt>b{flex-shrink:0;min-width:62px;font-size:10.5px;font-weight:700;letter-spacing:.5px;
+  text-transform:uppercase;color:#276749;padding-top:2px}
+.asmt>b{min-width:62px;color:#5a7290}
+.asmkv .ph{color:#b9c9bd;font-style:italic}
+.asmnote{margin-top:9px;background:#fff7ed;border-left:3px solid #d98324;border-radius:0 6px 6px 0;
+  padding:9px 12px;font-size:12.5px;line-height:1.55;color:#7a4a08}
+.asmnote>b{display:block;font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:#8a5a10;margin-bottom:4px}
+.asmnone{font-size:12.5px;color:#a8bcae;font-style:italic;padding-top:3px}
+@media (max-width:1150px){.srow,.splithd{grid-template-columns:1fr}
+  .scl{border-right:none;border-bottom:1px dashed #ecd7cc}}
+@media print{.navtoggle{display:none}.splithd{position:static}}
+</style><script id="savedrev">window.__SAVED_REVIEWS={"d10|1":{"r":[{"ref":"a","title":"Xác định khoản mục thuộc Sổ kinh doanh","summary":"Xác định đúng sản phẩm, giao dịch, danh mục hoặc khoản mục thuộc Sổ kinh doanh theo quy định nội bộ của MSB — bước nền để xác định đúng đối tượng chịu rủi ro.","vbcs":"QĐ.RR.014, QC.RR.022","thuchien":"Định kỳ Market Risk gửi email các bên liên quan xác nhận tiêu chí phân tách. Quản lý và báo cáo dựa trên phân tách book.","t1":"<b>K3.a(i)<\/b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.","t2":"<b>K3.b(ii)<\/b> — Đánh giá độc lập và thách thức tính đầy đủ, phù hợp của việc nhận dạng RRTT do Tuyến 1 thực hiện.","t3":"Đánh giá tính chính xác của việc xác định đối tượng thuộc Sổ kinh doanh.","gap":"N"},{"ref":"b(i)","title":"Phân loại theo risk class","summary":"Phân loại RRTT theo bốn nhóm rủi ro chính: lãi suất, ngoại hối, giá cổ phiếu và giá hàng hóa. Quy chế bao phủ trọn phạm vi, không yêu cầu MSB phải phát sinh hoạt động ở cả bốn nhóm.","vbcs":"QC.RR.022, QĐ.7731","thuchien":"","t1":"<b>K3.a(i)<\/b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.","t2":"<b>K3.b(i)<\/b> — Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT.","t3":"Đánh giá tính đầy đủ của việc phân loại theo bản chất rủi ro chính.","gap":"N"},{"ref":"b(ii)","title":"Phân loại theo Delta, Vega và Curvature","summary":"Phân loại RRTT theo ba đặc tính độ nhạy Delta, Vega và Curvature, phù hợp với phương pháp luận SBM của Basel, áp dụng cho từng risk class phù hợp. Yêu cầu tại đây là <b>nhận dạng và phân loại<\/b> theo độ nhạy; việc thực hiện đầy đủ phép tính SBM thuộc phạm vi đo lường tại Điều 11.","vbcs":"QC.RR.022, QĐ.7731","thuchien":"","t1":"<b>K3.a(i)<\/b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.","t2":"<b>K3.b(i)<\/b> — Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT.","t3":"Đánh giá tính phù hợp của khung phân loại rủi ro theo độ nhạy.","gap":"N","note":"Điều 10 b(ii) mô tả rủi ro vega là <b>\"giá trị công cụ thay đổi...\"<\/b>, trong khi Điều 4 Khoản 8 định nghĩa đầy đủ là <b>\"giá trị công cụ, giao dịch hoặc danh mục thay đổi...\"<\/b>. Rủi ro delta ngay trong cùng b(ii) đã chép đúng đủ cụm này. Đề xuất bổ sung cụm <b>\"giao dịch hoặc danh mục\"<\/b> vào phần vega — và cân nhắc cả curvature — để đồng bộ với Điều 4."},{"ref":"b(iii)","title":"Phân loại bổ sung GIRR, CSR, Curve risk và Basis risk","summary":"Cụm <b>\"có thể\"<\/b> trao quyền phân loại bổ sung theo mục tiêu quản trị từng thời kỳ, không tạo nghĩa vụ bắt buộc phải triển khai đồng thời cả bốn nhóm rủi ro thành phần.","vbcs":"QC.RR.022","thuchien":"Chưa tách riêng GIRR/CSR/curve/basis; hiện theo dõi qua PV01 tổng theo kỳ hạn (báo cáo RRTT hằng ngày mục 2, 3.1–3.2).","t1":"<b>K3.a(i)<\/b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.","t2":"<b>K3.b(i)<\/b> — Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT.","t3":"Đánh giá sự phù hợp giữa phạm vi phân loại bổ sung và nhu cầu quản trị.","gap":"N"},{"ref":"b(iv)","title":"Các phân loại RRTT khác","summary":"Điều khoản mở, cho phép bổ sung cách phân loại khác theo quy định pháp luật và nhu cầu quản trị; không bắt buộc hình thành ngay một nhóm phân loại mới.","vbcs":"QC.RR.008, QC.RR.022","thuchien":"","t1":"<b>K3.a(i)<\/b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.","t2":"<b>K3.b(i)<\/b> — Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT.","t3":"Đánh giá khả năng tiếp nhận các phân loại rủi ro mới của hệ thống hiện hành.","gap":"N"},{"ref":"c","title":"Nhận dạng rủi ro tập trung trong hoạt động tự doanh","summary":"Nhận dạng rủi ro tập trung đối với hoạt động giao dịch tự doanh trên đủ ba phạm vi ghi nhận: khoản mục nội bảng, khoản mục ngoại bảng và khoản mục chưa được hạch toán theo pháp luật về kế toán.","vbcs":"QC.RR.022, QĐ.7731","thuchien":"Theo dõi trạng thái rủi ro tập trung trên 3 lớp: nội bảng đã thanh toán, ngoại bảng đã valid chưa thanh toán, ngoài BS chưa valid (báo cáo RRTT hằng ngày mục 3.2, 3.3). Bucket theo kỳ hạn (Tenor), tổ chức phát hành (issuer, rating), loại hình phát hành (TPCP/TPCPBL/TPCQDP). -&gt; Bản chất để nhìn ra rủi ro tập trung&nbsp;<br>FX theo currency; DR: theo kỳ hạn, sản phẩm, currency","t1":"Chủ động nhận dạng GD (có phải tự doanh không) -&gt; nếu là GD tự doanh -&gt; nhận dạng rủi ro tập trung đối với các giao dịch tự doanh (phạm vi: On, off, ngoài để đánh giá RR tập trung)","t2":"&nbsp;Thẩm định quá trình nhận dạng của T1 -&gt; Nhận dạng đã đầy đủ, hợp lý chưa (phải challenge T1).&nbsp;<br>Hướng dẫn nhận dạng rủi ro tập trung cho T1, đưa ra đầy đủ checklist, tiêu chí để phục vụ nhận dạng rủi ro tập trung&nbsp;","t3":"Đánh giá tính đầy đủ của phạm vi nhận dạng rủi ro tập trung.","gap":"N"},{"ref":"d","title":"Nhận dạng các yếu tố rủi ro thị trường","summary":"Nhận dạng các yếu tố rủi ro thị trường tác động đến sản phẩm, giao dịch hoặc danh mục. Danh sách trong quy chế là danh sách mở (\"bao gồm nhưng không giới hạn\"), cho phép bổ sung yếu tố khác khi phù hợp. Năng lực tính toán chi tiết từng sensitivity thuộc phần đo lường tại Điều 11.","vbcs":"QC.RR.022, QĐ.7731","thuchien":"Theo dõi hằng ngày: lãi suất trúng thầu sơ cấp, yield thứ cấp theo kỳ hạn, bid-ask spread, tương quan lợi suất danh mục và chi phí nguồn Repo (báo cáo RRTT hằng ngày mục 5, 6.2, 6.3).","t1":"<b>K3.a(iii)<\/b> — Xác định nguồn gốc phát sinh rủi ro, yếu tố rủi ro thị trường tác động và cơ chế ảnh hưởng đến sản phẩm, giao dịch, danh mục hoặc hoạt động nghiệp vụ.","t2":"<b>K3.b(i)<\/b> — Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT + vai trò thẩm định T1","t3":"Đánh giá tính đầy đủ của các yếu tố rủi ro được nhận dạng.","gap":"N"},{"ref":"e","title":"Hệ thống, dữ liệu và nguồn thông tin","summary":"Xác định và truy vết được hệ thống ghi nhận giao dịch, kho dữ liệu, nguồn giá và nguồn thông tin phục vụ quản lý, đo lường, giám sát và báo cáo RRTT.Trong quá trình nhận dạng -&gt; hệ thống ghi nhận giao dịch là gì, lưu trữ ra sao, nguồn thông tin","vbcs":"QĐ.RR.014, QC.RR.022","thuchien":"Khi nhận dạng các sản phẩm -&gt; nhận biết được sẽ ghi nhận trên hệ thống như nào (Kondor, T24), Database lưu trữ như nào (Baselmart, Workzone, ... ), nguồn thông tin có khả năng truy xuất và đối chiếu. -&gt; hỗ trợ quản lý, đo lường, giám sát và báo cáo RRTT","t1":"<b>K3.a(iv)<\/b> — Cung cấp đầy đủ, kịp thời thông tin cần thiết phục vụ nhận dạng RRTT theo yêu cầu của Tuyến 2.","t2":"<b>K3.b(i)<\/b> — Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT.","t3":"Đánh giá tính tin cậy và khả năng truy vết của hệ thống dữ liệu RRTT.","gap":"N"},{"ref":"f","title":"Đánh giá khả năng định giá","summary":"Đánh giá khả năng định giá, nguồn giá, dữ liệu thị trường, mô hình định giá, mức độ thanh khoản và các yếu tố có thể làm sai lệch giá trị ghi nhận hoặc lãi/lỗ đánh giá lại. Nếu không&nbsp;định giá được -&gt; không được ở sổ Kinh doanh","vbcs":"QĐ.RR.014, QĐ.RR.012, QĐ.RR.044","thuchien":"MR phối hợp với MHCC (Mô hình &amp; Công cụ) xây dựng mô hình MtM, Mark-to-Model<br>Không định giá được -&gt; BB<br>Liệu có định giá được không, MtM, ... trước khi golive các sản phẩm mới<br>Đo lường, định giá với giả định là mua bán được với giá mid -&gt; thị trường phải đảm bảo mua được bán được -&gt; nếu xảy ra, định giá thận trọng<br>","t1":"Cung cấp cách định giá sản phẩm, nguồn giá tham chiếu, dữ liệu thị trường để pricing.<br>Đưa ra ý kiến thêm với mô hình định giá<br>Đưa ra khả năng mua bán/phòng ngừa rủi ro với sản phẩm, tự đánh giá thanh khoản thị trường","t2":"Thẩm định lại định giá sản phẩm, dữ liệu thị trường, nguồn giá tham chiếu - IPV, mô hình định giá - làm việc với MHCC, xây dựng các mô hình Mark-to-Market, Mark-to-Model<br>Tự đánh giá lại thanh khoản thị trường.","t3":"<br>","gap":"N"},{"ref":"g","title":"Đánh giá khả năng phòng ngừa rủi ro","summary":"Đánh giá liệu các RRTT đã nhận dạng có thể được phòng ngừa hay không. Quy chế yêu cầu <b>đánh giá khả năng<\/b> phòng ngừa, không bắt buộc mọi rủi ro phải được phòng ngừa; việc thực hiện phòng ngừa thuộc phạm vi Điều 17. (một trong các tiêu chí để sp thuộc TB)","vbcs":"QĐ.RR.014, QC.RR.022","thuchien":"Có năng lực hedge (Spot, Fw, Swap, Option, Futures, công cụ MM)","t1":"T1 tự đánh giá khả năng phòng ngừa rủi ro thị trường của sản phẩm","t2":"Thẩm định lại đánh giá của T1 về khả năng phòng ngừa rủi ro của sản phẩm","t3":"<br>","gap":"N"}],"u":""},"d10|2":{"r":[{"ref":"a","title":"Rà soát theo Bảng ma trận rủi ro toàn diện","summary":"Nhận dạng thông qua rà soát sản phẩm, giao dịch, danh mục, trading desk và nghiệp vụ trọng yếu, đối chiếu với Bảng ma trận rủi ro toàn diện tại Phụ lục thuộc QC.RR.008.","vbcs":"QC.RR.008","thuchien":"Định kỳ rà soát từng loại sản phẩm, rủi ro theo bảng ma trận rủi ro toàn diện tại QC.RR.008.","t1":"<b>K3.a(i)<\/b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.","t2":"<b>K3.b(i)<\/b> — Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT.","t3":"Đánh giá tính đầy đủ của phạm vi rà soát rủi ro.","gap":"N","note":"Quy chế dẫn chiếu <b>PL01/QC.RR.008<\/b> là <b>sai<\/b>. Đã đối chiếu QC.RR.008 (Lần 11): PL01 là <i>Cấu trúc hệ thống văn bản QLRR và thẩm quyền phê duyệt<\/i>; <b>PL03 mới là Bảng ma trận rủi ro toàn diện<\/b>. Đề xuất sửa dẫn chiếu thành <b>PL03/QC.RR.008<\/b>. Đây là lỗi dẫn chiếu, không phải GAP thực hiện."},{"ref":"b","title":"Nhận dạng trong khâu lập kế hoạch","summary":"Nhận dạng ngay trong quá trình lập kế hoạch kinh doanh, thiết lập khẩu vị rủi ro, hạn mức, chiến lược danh mục và kế hoạch phòng ngừa — quản trị rủi ro đi trước hoặc đi cùng quyết định kinh doanh.","vbcs":"QC.RR.008, QĐ.7731, QĐ.RR.012","thuchien":"","t1":"<b>K3.a(ii)<\/b> — Nhận dạng RRTT ngay từ giai đoạn xây dựng kế hoạch kinh doanh, phát triển sản phẩm mới, nghiệp vụ mới, thị trường mới hoặc thay đổi trọng yếu có liên quan.","t2":"<b>K3.b(ii)<\/b> — Đánh giá độc lập và thách thức tính đầy đủ, phù hợp của việc nhận dạng RRTT do Tuyến 1 thực hiện.","t3":"Đánh giá việc tuân thủ quy trình nhận dạng tại khâu lập kế hoạch.","gap":"N"},{"ref":"c","title":"Nhận dạng khi phê duyệt sản phẩm, nghiệp vụ, thị trường mới","summary":"Nhận dạng khi phê duyệt, triển khai hoặc thay đổi trọng yếu đối với sản phẩm, nghiệp vụ, thị trường mới, mô hình định giá, nguồn dữ liệu, hệ thống hoặc cơ chế kiểm soát. Quy chế yêu cầu RRTT được nhận dạng trong quá trình phê duyệt, không giao quyền phê duyệt cuối cùng cho QLRRTT.","vbcs":"QC.RR.008, QC.RR.022","thuchien":"Khi nhận được thông tin sản phẩm/nghiệp vụ mới, QLRR nhận diện rủi ro, đo lường tính toán (rà soát bộ chỉ số, mô hình), đánh giá phù hợp quy định, tuân thủ hạn mức trước khi đưa vào giao dịch.","t1":"<b>K3.a(ii)<\/b> — Nhận dạng RRTT ngay từ giai đoạn xây dựng kế hoạch kinh doanh, phát triển sản phẩm mới, nghiệp vụ mới, thị trường mới hoặc thay đổi trọng yếu có liên quan.","t2":"<b>K3.b(ii)<\/b> — Đánh giá độc lập và thách thức tính đầy đủ, phù hợp của việc nhận dạng RRTT do Tuyến 1 thực hiện.","t3":"Kiểm tra việc tuân thủ quy trình phê duyệt sản phẩm và nghiệp vụ mới.","gap":"N"},{"ref":"d","title":"Theo dõi thị trường và cảnh báo sớm (Điều 14)","summary":"Nhận dạng liên tục trong quá trình theo dõi và kiểm soát theo Điều 14: diễn biến thị trường, sự kiện bất thường, sự kiện vĩ mô và giám sát hệ thống chỉ số cảnh báo sớm. Tần suất cập nhật phù hợp với tốc độ và mức độ trọng yếu của sự kiện, không bắt buộc real time.","vbcs":"QC.RR.022, QĐ.RR.012","thuchien":"","t1":"<b>K3.a(i)<\/b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.","t2":"<b>K3.b(iii)<\/b> — Nhận dạng, cập nhật các rủi ro mới phát sinh, rủi ro tiềm ẩn hoặc rủi ro chưa được nhận diện đầy đủ thông qua theo dõi thị trường, chỉ số cảnh báo sớm, kết quả đo lường, kiểm tra giá độc lập, stress testing và các sự kiện rủi ro liên quan.","t3":"Đánh giá hiệu lực của cơ chế theo dõi và cảnh báo sớm.","gap":"N"},{"ref":"e","title":"Kiểm tra sức chịu đựng và phân tích kịch bản","summary":"Nhận dạng qua kiểm tra sức chịu đựng và phân tích kịch bản bất lợi, bao gồm đánh giá mức độ thanh khoản theo khối lượng và thời gian thoát vị thế. \"Thanh khoản\" tại đây gồm cả market liquidity, không chỉ funding liquidity.","vbcs":"QC.RR.024, QĐ.RR.072, QT.TC.019","thuchien":"VaR95%/99% theo 1/10/20 ngày (historical simulation, 252 kịch bản); kịch bản khảo sát VIRA đối chiếu dự báo thị trường (báo cáo RRTT hằng ngày mục 4).","t1":"<b>K3.a(iv)<\/b> — Cung cấp đầy đủ, kịp thời thông tin cần thiết phục vụ nhận dạng RRTT theo yêu cầu của Tuyến 2.","t2":"<b>K3.b(iii)<\/b> — Nhận dạng, cập nhật các rủi ro mới phát sinh, rủi ro tiềm ẩn hoặc rủi ro chưa được nhận diện đầy đủ thông qua theo dõi thị trường, chỉ số cảnh báo sớm, kết quả đo lường, kiểm tra giá độc lập, stress testing và các sự kiện rủi ro liên quan.","t3":"Đánh giá phương pháp và quy trình thực hiện stress test.","gap":"N"},{"ref":"f","title":"Backtesting, IPV, validation và sự kiện thực tế","summary":"Nhận dạng qua rà soát kết quả đo lường (backtesting), kiểm tra giá độc lập (IPV), đánh giá mô hình (validation), vi phạm hạn mức, tổn thất thực tế và ngoại lệ. Không bắt buộc mọi sản phẩm đồng thời có đủ ba công cụ; công cụ nào có áp dụng thì kết quả phải được phản hồi vào quản trị.","vbcs":"QĐ.RR.012, QĐ.RR.044","thuchien":"MR phối hợp với MHCC (Mô hình & Công cụ) backtest và IPV định kỳ. Vi phạm hạn mức và ngoại lệ được ghi nhận, phân tích nguyên nhân và backdate khi cần.","t1":"<b>K3.a(iv)<\/b> — Cung cấp đầy đủ, kịp thời thông tin cần thiết phục vụ nhận dạng RRTT theo yêu cầu của Tuyến 2.","t2":"<b>K3.b(iii)<\/b> — Nhận dạng, cập nhật các rủi ro mới phát sinh, rủi ro tiềm ẩn hoặc rủi ro chưa được nhận diện đầy đủ thông qua theo dõi thị trường, chỉ số cảnh báo sớm, kết quả đo lường, kiểm tra giá độc lập, stress testing và các sự kiện rủi ro liên quan.","t3":"Kiểm toán tính hợp lệ của backtesting, kiểm tra giá độc lập và đánh giá mô hình.","gap":"N"},{"ref":"g","title":"Thông tin và khuyến nghị từ các đơn vị liên quan","summary":"Nhận dạng qua thông tin, báo cáo, cảnh báo hoặc khuyến nghị từ các đơn vị liên quan, bao gồm cả kiểm toán nội bộ. Không bắt buộc mỗi đơn vị lập một báo cáo RRTT riêng; việc liệt kê KTNB không biến Tuyến 3 thành đơn vị nhận dạng thường xuyên.","vbcs":"QC.RR.008, QC.RR.022","thuchien":"Tiếp nhận thông tin qua hệ thống, số liệu quản lý hiệu suất (QLHS) và đội kinh doanh — các đầu mối cung cấp số liệu đầu vào cho nhận dạng RRTT.","t1":"<b>K3.a(iv)<\/b> — Cung cấp đầy đủ, kịp thời thông tin cần thiết phục vụ nhận dạng RRTT theo yêu cầu của Tuyến 2.","t2":"<b>K3.b(v)<\/b> — Tổng hợp các vấn đề trọng yếu trong nhận dạng RRTT để phục vụ các bước đo lường, giám sát, kiểm soát và báo cáo theo quy định.","t3":"Cung cấp cảnh báo, khuyến nghị từ kết quả kiểm toán làm đầu vào nhận dạng.","gap":"N"},{"ref":"h(i)","title":"Tương tác chéo — Rủi ro thanh khoản","summary":"Suy giảm thanh khoản nguồn vốn hoặc thanh khoản thị trường có thể làm giảm khả năng đóng/mở trạng thái, mở rộng bid-ask spread, tăng haircut hoặc buộc phải đóng trạng thái trong điều kiện bất lợi. QLRRTT chịu trách nhiệm đánh giá phần tác động tới trạng thái, P&amp;L, vốn và hạn mức.","vbcs":"QC.RR.021, QC.RR.024","thuchien":"","t1":"<b>K3.a(iii)<\/b> — Xác định nguồn gốc phát sinh rủi ro, yếu tố rủi ro thị trường tác động và cơ chế ảnh hưởng đến sản phẩm, giao dịch, danh mục hoặc hoạt động nghiệp vụ.","t2":"<b>K3.b(iv)<\/b> — Phân tích mức độ tương tác chéo giữa RRTT với các rủi ro trọng yếu khác.","t3":"Đánh giá sự phối hợp giữa quản lý RRTT và rủi ro thanh khoản.","gap":"N"},{"ref":"h(ii)","title":"Tương tác chéo — Rủi ro tín dụng đối tác và thanh toán","summary":"Đối tác không thực hiện hoặc không có khả năng thực hiện nghĩa vụ có thể làm phát sinh, thay đổi hoặc kéo dài trạng thái RRTT ngoài dự kiến, đặc biệt với phái sinh, ngoại hối, repo và các giao dịch chưa hoàn tất thanh toán.","vbcs":"QC.RR.008, QC.RR.022","thuchien":"Phối hợp với đội Back Office (BO) đối với các giao dịch chưa hoàn tất, chậm thanh toán hoặc đối tác không thực hiện nghĩa vụ.","t1":"<b>K3.a(iv)<\/b> — Cung cấp đầy đủ, kịp thời thông tin cần thiết phục vụ nhận dạng RRTT theo yêu cầu của Tuyến 2.","t2":"<b>K3.b(iv)<\/b> — Phân tích mức độ tương tác chéo giữa RRTT với các rủi ro trọng yếu khác.","t3":"Đánh giá sự phối hợp giữa quản lý RRTT và rủi ro tín dụng đối tác.","gap":"N","note":"Các điểm <b>h(iii) đến h(vii)<\/b> (credit spread; mô hình – dữ liệu – định giá; rủi ro hoạt động, pháp lý, tuân thủ; rủi ro lãi suất trên sổ ngân hàng; các rủi ro trọng yếu khác) <b>thuộc phạm vi phụ trách của PIC khác<\/b>, không đánh giá tại đây."}],"u":""},"d10|3":{"r":[{"ref":"3","title":"Cơ chế phối hợp theo mô hình ba tuyến bảo vệ","summary":"Xác lập cơ chế phối hợp nhận dạng RRTT theo mô hình ba tuyến bảo vệ, phù hợp với chức năng, nhiệm vụ và thẩm quyền của từng đơn vị. Tuyến 1 sở hữu rủi ro và nhận dạng tại nguồn; Tuyến 2 thiết lập phương pháp, đánh giá độc lập và tổng hợp; Tuyến 3 đánh giá độc lập hiệu lực của khung quản trị, không tham gia vận hành thường xuyên.","vbcs":"QC.RR.008, QC.RR.022","thuchien":"Tham chiếu chức năng nhiệm vụ → xem QC.RR.008.","t1":"<b>K3.a<\/b> — <b>(i)<\/b> Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý. <b>(ii)<\/b> Nhận dạng RRTT ngay từ giai đoạn xây dựng kế hoạch kinh doanh, phát triển sản phẩm mới, nghiệp vụ mới, thị trường mới hoặc thay đổi trọng yếu có liên quan. <b>(iii)<\/b> Xác định nguồn gốc phát sinh rủi ro, yếu tố rủi ro thị trường tác động và cơ chế ảnh hưởng đến sản phẩm, giao dịch, danh mục hoặc hoạt động nghiệp vụ. <b>(iv)<\/b> Cung cấp đầy đủ, kịp thời thông tin cần thiết phục vụ nhận dạng RRTT theo yêu cầu của Tuyến 2.","t2":"<b>K3.b<\/b> — <b>(i)<\/b> Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT. <b>(ii)<\/b> Đánh giá độc lập và thách thức tính đầy đủ, phù hợp của việc nhận dạng RRTT do Tuyến 1 thực hiện. <b>(iii)<\/b> Nhận dạng, cập nhật các rủi ro mới phát sinh, rủi ro tiềm ẩn hoặc rủi ro chưa được nhận diện đầy đủ thông qua theo dõi thị trường, chỉ số cảnh báo sớm, kết quả đo lường, kiểm tra giá độc lập, stress testing và các sự kiện rủi ro liên quan. <b>(iv)<\/b> Phân tích mức độ tương tác chéo giữa RRTT với các rủi ro trọng yếu khác. <b>(v)<\/b> Tổng hợp các vấn đề trọng yếu trong nhận dạng RRTT để phục vụ các bước đo lường, giám sát, kiểm soát và báo cáo theo quy định.","t3":"Đánh giá độc lập, định kỳ tính đầy đủ và hiệu lực của cơ chế nhận dạng RRTT do Tuyến 1 và Tuyến 2 thực hiện.","gap":"N","note":"<b>1.<\/b> Khoản 3 nêu \"mô hình ba tuyến bảo vệ\" nhưng chỉ liệt kê Tuyến 1 và Tuyến 2. Đề xuất bổ sung điểm c) — <i>Tuyến 3: Đánh giá độc lập, định kỳ tính đầy đủ và hiệu lực của cơ chế nhận dạng RRTT do Tuyến 1 và Tuyến 2 thực hiện.<\/i><br><b>2.<\/b> Điểm a(iv): bổ sung trách nhiệm Tuyến 1 <b>chủ động thông báo<\/b> khi phát hiện rủi ro mới hoặc sự kiện bất thường, không chỉ cung cấp theo yêu cầu của Tuyến 2.<br><b>3.<\/b> Điểm b(i): cân nhắc sửa động từ <b>\"thiết lập\"<\/b> thành <b>\"xây dựng, trình cấp có thẩm quyền phê duyệt và hướng dẫn\"<\/b> cho phù hợp phân cấp thẩm quyền."}],"u":""}};</script></head><body class="navhidden hl-on">
 <aside class="sidebar">
 <div class="sb-brand"><h2>QC.RR.022</h2>
 <p>Quy chế Quản lý Rủi ro thị trường<br>Nội dung &amp; Đánh giá GAP<br>PIC: Lâm (lampd3)</p></div>
 <div class="sb-lbl">Nội dung quy chế</div>
-<nav id="nav1"></nav>
+<nav id="nav1"><button class="ni" data-id="d1" onclick="go('d1')">Điều 1<small>Mục đích ban hành</small></button><button class="ni" data-id="d2" onclick="go('d2')">Điều 2<small>Phạm vi điều chỉnh</small></button><button class="ni" data-id="d3" onclick="go('d3')">Điều 3<small>Đối tượng áp dụng</small></button><button class="ni" data-id="d9" onclick="go('d9')">Điều 9<small>Phân tách sổ NH và sổ KD</small></button><button class="ni active" data-id="d10" onclick="go('d10')">Điều 10<small>Nhận dạng rủi ro thị trường</small></button></nav>
 <div class="sb-lbl">Tra cứu</div>
-<nav id="nav2"></nav>
-<div class="sb-foot" id="sbfoot"></div>
+<nav id="nav2"><button class="ni ref" data-id="d4" onclick="go('d4')">Điều 4<small>Giải thích từ ngữ · có tìm kiếm</small></button></nav>
+<div class="sb-foot" id="sbfoot">Đã thực hiện: <b>Điều 1, 2, 3, 9, 10</b><br>Tổng GAP ghi nhận: <b>0</b><br>Định nghĩa: <b>31 khoản</b> (Điều 4)</div>
 </aside>
+<button class="navtoggle" id="navBtn" onclick="toggleNav()" title="Ẩn/hiện danh mục">▸</button>
 <main id="main"></main>
-<div class="hlhint" id="hlhint"></div>
+<div class="hlhint show" id="hlhint">Bôi đen đoạn chữ muốn đánh dấu</div>
 <div class="hltb">
   <span class="tbl">Đánh dấu</span>
-  <button class="hlbtn" id="btnHL" onclick="toggleHL()">🖍 Bôi vàng</button>
+  <button class="hlbtn on" id="btnHL" onclick="toggleHL()">🖍 Bôi vàng</button>
   <button class="hlbtn er" id="btnER" onclick="toggleER()">🧽 Tẩy</button>
   <button class="hlbtn ghost" onclick="clearHL()">Xóa tất cả</button>
+</div>
+<div class="savebar">
+  <span id="sv_msg" class="dirty">Có thay đổi chưa lưu — bấm "Xuất HTML" để lưu thành file mới</span>
+  <button class="sbtn on" id="splitBtn" onclick="toggleSplit()">⇹ Đang xem song song</button>
+  <button class="sbtn" id="editBtn" onclick="toggleEdit()">✏️ Chỉnh sửa nội dung</button>
+  <button class="sbtn primary" onclick="exportHTML()">💾 Xuất HTML</button>
 </div>
 <script>
 const P=(l,t)=>({l,t});
@@ -311,7 +473,7 @@ const ARTS=[
 
 /* ---------------- ĐIỀU 9 ---------------- */
 {id:'d9',tab:'Điều 9',sub:'Phân tách sổ NH và sổ KD',chap:'Chương II. HỆ THỐNG QUẢN LÝ RỦI RO THỊ TRƯỜNG',
- eyebrow:'Điều 9',title:'Nguyên tắc phân tách sổ ngân hàng và sổ kinh doanh',gapCount:2,
+ eyebrow:'Điều 9',title:'Nguyên tắc phân tách sổ ngân hàng và sổ kinh doanh',gapCount:0,
  kh:[
  {n:'1',t:'Mục đích phân tách',paras:[
    P(0,'1. MSB thực hiện phân loại, quản lý và kiểm soát các khoản mục giữa Sổ ngân hàng và Sổ kinh doanh nhằm:'),
@@ -328,33 +490,16 @@ const ARTS=[
    P(1,'b) Các khoản mục thuộc Sổ ngân hàng được nắm giữ chủ yếu phục vụ hoạt động ngân hàng truyền thống, quản trị bảng cân đối, quản trị thanh khoản và rủi ro thanh khoản, đầu tư nắm giữ hoặc phòng ngừa rủi ro cho các khoản mục thuộc Sổ ngân hàng.')],
   defs:[['11','Sổ kinh doanh'],['12','Giao dịch tự doanh']],
   arrow:'trục phân tách là <b>mục đích nắm giữ</b>: ăn chênh giá ngắn hạn / tạo lập / hedge cho Sổ KD / phục vụ khách hàng → <b>Sổ KD</b>; nghiệp vụ ngân hàng, quản trị bảng cân đối, thanh khoản, đầu tư nắm giữ → <b>Sổ NH</b>.',
-  gap:{status:'Y',ref:'Điều 9 Khoản 2b',
-   t1:'Phân loại khoản mục vào đúng sổ tại thời điểm ghi nhận giao dịch theo tiêu chí được ban hành',
-   t2:'Xây dựng, diễn giải và duy trì tiêu chí phân tách 2 sổ; kiểm soát độc lập việc phân loại',
-   t3:'Rà soát, đánh giá độc lập tính nhất quán của việc phân loại',
-   gapT2:'Khái niệm <b>"hoạt động ngân hàng truyền thống"</b> được dùng làm tiêu chí phân loại Sổ ngân hàng nhưng <b>không được định nghĩa</b> tại Điều 4 hay bất kỳ điều nào khác; cũng không có định nghĩa pháp lý trực tiếp cho chữ "truyền thống".',
-   naT2:'Làm rõ phạm vi "hoạt động ngân hàng truyền thống" trong quy định chi tiết.',
-   cls:{vb:true,bc:false,ht:false},
-   unit:'Bộ phận QLRRTT',
-   pic:'Lâm (lampd3)'}},
+  gap:{status:'N',
+   reason:'Không phải GAP so với thực tế vận hành — chỉ là quy định chưa đầy đủ tại văn bản này. Khái niệm "hoạt động ngân hàng truyền thống" đã được quy định cụ thể hơn tại văn bản riêng về Banking Book.'}},
 
  {n:'3',t:'Kiểm soát việc chuyển đổi giữa hai sổ',paras:[
    P(0,'3. Ngân hàng kiểm soát chặt chẽ và hạn chế việc chuyển đổi các khoản mục giữa Sổ kinh doanh và Sổ ngân hàng nhằm tránh việc làm sai lệch trạng thái rủi ro, kết quả kinh doanh hoặc yêu cầu vốn/rủi ro của Ngân hàng.'),
    P(0,'Việc chuyển đổi từ Sổ kinh doanh sang Sổ ngân hàng chỉ được thực hiện trong các trường hợp thực sự cần thiết, có cơ sở hợp lý, phản ánh bản chất rủi ro, khoản mục đó không còn đáp ứng được điều kiện, tiêu chí thuộc Sổ kinh doanh theo quy định, được đánh giá đầy đủ tác động rủi ro, yêu cầu về vốn và phê duyệt theo thẩm quyền quy định nội bộ của MSB phù hợp với quy định của pháp luật trong từng thời kỳ.')],
   defs:[['14','Trạng thái rủi ro'],['23','Cấp có thẩm quyền'],['11','Sổ kinh doanh']],
   arrow:'chuyển đổi bị <b>hạn chế</b>; chiều KD→NH chỉ khi thực sự cần thiết, có cơ sở, không còn đạt tiêu chí Sổ KD, <b>đã đánh giá tác động rủi ro & vốn</b> và được phê duyệt đúng thẩm quyền.',
-  gap:{status:'Y',ref:'Điều 9 Khoản 3',
-   t1:'Thực hiện chuyển đổi khoản mục đúng điều kiện; thông báo QLRRTT khi phát sinh',
-   t2:'Theo dõi, đánh giá tác động của việc chuyển đổi tới trạng thái rủi ro thị trường',
-   t3:'Rà soát độc lập việc tuân thủ nguyên tắc chuyển đổi',
-   gapT1:'Đã phát sinh trường hợp ĐVKD thay đổi sổ ghi nhận thông qua giao dịch với <b>bên thứ ba</b> nhưng <b>không thông báo Bộ phận QLRRTT</b>; QLRRTT phải tự phát hiện và theo dõi.',
-   gapT2:'Khoản 3 và Khoản 4 chỉ điều chỉnh việc chuyển đổi sổ nội bộ một cách <b>trực tiếp</b>. Trường hợp thông qua giao dịch bán/mua lại với <b>bên thứ ba</b> chưa được đề cập → QLRRTT không nắm được thay đổi trạng thái rủi ro phát sinh từ nhóm giao dịch này.',
-   naT1:'ĐVKD thông báo Bộ phận QLRRTT khi phát sinh giao dịch với bên thứ ba làm thay đổi sổ ghi nhận.',
-   naT2:'QLRRTT tiếp nhận thông báo, ghi nhận và theo dõi.',
-   cls:{vb:false,bc:true,ht:false},
-   unit:'Bộ phận QLRRTT · ĐVKD (NH ĐCTC)',
-   pic:'Lâm (lampd3)',
-   qa:'(1) Cơ chế thông báo áp dụng theo hình thức nào (ngay khi phát sinh / định kỳ)? (2) Cơ chế chỉ dừng ở thông báo – theo dõi, không có cơ sở văn bản ràng buộc — cần thống nhất với ĐVKD để đảm bảo được thực hiện.'}},
+  gap:{status:'N',
+   reason:'Không coi là GAP nhưng theo dõi thêm. Trước đây chỉ suy đoán qua theo dõi rằng ĐVKD chuyển sổ qua bên thứ ba, không được ĐVKD xác nhận và không có bằng chứng chứng minh. Việc siết chặt bằng văn bản có thể hạn chế các nhu cầu điều chuyển hợp lý (mục đích nội bộ, thanh khoản ngân hàng...); pháp luật Việt Nam cũng không yêu cầu chặt chẽ tới mức này, nên không tự đặt ràng buộc vượt yêu cầu NHNN.'}},
 
  {n:'4',t:'Cấm chuyển từ Sổ ngân hàng sang Sổ kinh doanh',paras:[
    P(0,'4. MSB không được chuyển các công cụ tài chính từ Sổ ngân hàng sang Sổ kinh doanh.')],
@@ -416,6 +561,8 @@ const ARTS=[
   P(1,'g) Đánh giá khả năng có thể phòng ngừa rủi ro cho các rủi ro thị trường được nhận dạng.')],
  defs:[['11','Sổ kinh doanh'],['1','RRTT'],['7','Rủi ro delta'],['8','Rủi ro vega'],['9','Rủi ro curvature'],['3','GIRR'],['4','CSR'],['6','Curve risk'],['5','Basis risk'],['2','Rủi ro tập trung'],['10','Yếu tố RRTT'],['21','Trading Desks']],
  arrow:'nội dung nhận dạng tối thiểu: xác định khoản mục Sổ KD (a) · phân loại rủi ro theo <b>risk class</b> và theo <b>độ nhạy delta/vega/curvature (SBM Basel)</b>, bổ sung GIRR/CSR/curve/basis khi cần (b) · nhận dạng rủi ro tập trung tự doanh gồm cả khoản mục chưa hạch toán (c) · yếu tố RRTT (d) · hệ thống & nguồn dữ liệu (e) · khả năng định giá và nguồn giá (f) · khả năng phòng ngừa (g).',
+ review:[{"ref": "a", "title": "Xác định khoản mục thuộc Sổ kinh doanh", "summary": "Xác định đúng sản phẩm, giao dịch, danh mục hoặc khoản mục thuộc Sổ kinh doanh theo quy định nội bộ của MSB — bước nền để xác định đúng đối tượng chịu rủi ro.", "vbcs": "QĐ.RR.014, QC.RR.022", "thuchien": "Định kỳ Market Risk gửi email các bên liên quan xác nhận tiêu chí phân tách. Quản lý và báo cáo dựa trên phân tách book.", "t1": "<b>K3.a(i)</b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.", "t2": "<b>K3.b(ii)</b> — Đánh giá độc lập và thách thức tính đầy đủ, phù hợp của việc nhận dạng RRTT do Tuyến 1 thực hiện.", "t3": "Đánh giá tính chính xác của việc xác định đối tượng thuộc Sổ kinh doanh.", "gap": "N"}, {"ref": "b(i)", "title": "Phân loại theo risk class", "summary": "Phân loại RRTT theo bốn nhóm rủi ro chính: lãi suất, ngoại hối, giá cổ phiếu và giá hàng hóa. Quy chế bao phủ trọn phạm vi, không yêu cầu MSB phải phát sinh hoạt động ở cả bốn nhóm.", "vbcs": "QC.RR.022, QĐ.7731", "thuchien": "", "t1": "<b>K3.a(i)</b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.", "t2": "<b>K3.b(i)</b> — Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT.", "t3": "Đánh giá tính đầy đủ của việc phân loại theo bản chất rủi ro chính.", "gap": "N"}, {"ref": "b(ii)", "title": "Phân loại theo Delta, Vega và Curvature", "summary": "Phân loại RRTT theo ba đặc tính độ nhạy Delta, Vega và Curvature, phù hợp với phương pháp luận SBM của Basel, áp dụng cho từng risk class phù hợp. Yêu cầu tại đây là <b>nhận dạng và phân loại</b> theo độ nhạy; việc thực hiện đầy đủ phép tính SBM thuộc phạm vi đo lường tại Điều 11.", "vbcs": "QC.RR.022, QĐ.7731", "thuchien": "", "t1": "<b>K3.a(i)</b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.", "t2": "<b>K3.b(i)</b> — Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT.", "t3": "Đánh giá tính phù hợp của khung phân loại rủi ro theo độ nhạy.", "gap": "N", "note": "Điều 10 b(ii) mô tả rủi ro vega là <b>\"giá trị công cụ thay đổi...\"</b>, trong khi Điều 4 Khoản 8 định nghĩa đầy đủ là <b>\"giá trị công cụ, giao dịch hoặc danh mục thay đổi...\"</b>. Rủi ro delta ngay trong cùng b(ii) đã chép đúng đủ cụm này. Đề xuất bổ sung cụm <b>\"giao dịch hoặc danh mục\"</b> vào phần vega — và cân nhắc cả curvature — để đồng bộ với Điều 4."}, {"ref": "b(iii)", "title": "Phân loại bổ sung GIRR, CSR, Curve risk và Basis risk", "summary": "Cụm <b>\"có thể\"</b> trao quyền phân loại bổ sung theo mục tiêu quản trị từng thời kỳ, không tạo nghĩa vụ bắt buộc phải triển khai đồng thời cả bốn nhóm rủi ro thành phần.", "vbcs": "QC.RR.022", "thuchien": "Chưa tách riêng GIRR/CSR/curve/basis; hiện theo dõi qua PV01 tổng theo kỳ hạn (báo cáo RRTT hằng ngày mục 2, 3.1–3.2).", "t1": "<b>K3.a(i)</b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.", "t2": "<b>K3.b(i)</b> — Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT.", "t3": "Đánh giá sự phù hợp giữa phạm vi phân loại bổ sung và nhu cầu quản trị.", "gap": "N"}, {"ref": "b(iv)", "title": "Các phân loại RRTT khác", "summary": "Điều khoản mở, cho phép bổ sung cách phân loại khác theo quy định pháp luật và nhu cầu quản trị; không bắt buộc hình thành ngay một nhóm phân loại mới.", "vbcs": "QC.RR.008, QC.RR.022", "thuchien": "", "t1": "<b>K3.a(i)</b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.", "t2": "<b>K3.b(i)</b> — Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT.", "t3": "Đánh giá khả năng tiếp nhận các phân loại rủi ro mới của hệ thống hiện hành.", "gap": "N"}, {"ref": "c", "title": "Nhận dạng rủi ro tập trung trong hoạt động tự doanh", "summary": "Nhận dạng rủi ro tập trung đối với hoạt động giao dịch tự doanh trên đủ ba phạm vi ghi nhận: khoản mục nội bảng, khoản mục ngoại bảng và khoản mục chưa được hạch toán theo pháp luật về kế toán. Phạm vi tại đây là rủi ro tập trung <b>theo sản phẩm</b> trong hoạt động tự doanh, không mở rộng sang mọi loại concentration risk.", "vbcs": "QC.RR.022, QĐ.7731", "thuchien": "Theo dõi trạng thái rủi ro tập trung trên 3 lớp: nội bảng đã thanh toán, ngoại bảng đã valid chưa thanh toán, ngoài BS chưa valid (báo cáo RRTT hằng ngày mục 7.2, 3.3). Bucket theo kỳ hạn (Tenor), tổ chức phát hành (issuer, rating), loại hình phát hành (TPCP/TPCPBL/TPCQDP).", "t1": "<b>K3.a(i)</b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.", "t2": "<b>K3.b(i)</b> — Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT.", "t3": "Đánh giá tính đầy đủ của phạm vi nhận dạng rủi ro tập trung.", "gap": "N"}, {"ref": "d", "title": "Nhận dạng các yếu tố rủi ro thị trường", "summary": "Nhận dạng các yếu tố rủi ro thị trường tác động đến sản phẩm, giao dịch hoặc danh mục. Danh sách trong quy chế là danh sách mở (\"bao gồm nhưng không giới hạn\"), cho phép bổ sung yếu tố khác khi phù hợp. Năng lực tính toán chi tiết từng sensitivity thuộc phần đo lường tại Điều 11.", "vbcs": "QC.RR.022, QĐ.7731", "thuchien": "Theo dõi hằng ngày: lãi suất trúng thầu sơ cấp, yield thứ cấp theo kỳ hạn, bid-ask spread, tương quan lợi suất danh mục và chi phí nguồn Repo (báo cáo RRTT hằng ngày mục 5, 6.2, 6.3).", "t1": "<b>K3.a(iii)</b> — Xác định nguồn gốc phát sinh rủi ro, yếu tố rủi ro thị trường tác động và cơ chế ảnh hưởng đến sản phẩm, giao dịch, danh mục hoặc hoạt động nghiệp vụ.", "t2": "<b>K3.b(i)</b> — Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT.", "t3": "Đánh giá tính đầy đủ của các yếu tố rủi ro được nhận dạng.", "gap": "N"}, {"ref": "e", "title": "Hệ thống, dữ liệu và nguồn thông tin", "summary": "Xác định và truy vết được hệ thống ghi nhận giao dịch, kho dữ liệu, nguồn giá và nguồn thông tin phục vụ quản lý, đo lường, giám sát và báo cáo RRTT.", "vbcs": "QĐ.RR.014, QC.RR.022", "thuchien": "Hệ thống realtime: Kondor. Database tập trung: Baselmart, Workzone có khả năng truy xuất và đối chiếu.", "t1": "<b>K3.a(iv)</b> — Cung cấp đầy đủ, kịp thời thông tin cần thiết phục vụ nhận dạng RRTT theo yêu cầu của Tuyến 2.", "t2": "<b>K3.b(i)</b> — Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT.", "t3": "Đánh giá tính tin cậy và khả năng truy vết của hệ thống dữ liệu RRTT.", "gap": "N"}, {"ref": "f", "title": "Đánh giá khả năng định giá", "summary": "Đánh giá khả năng định giá, nguồn giá, dữ liệu thị trường, mô hình định giá, mức độ thanh khoản và các yếu tố có thể làm sai lệch giá trị ghi nhận hoặc lãi/lỗ đánh giá lại. Nghĩa vụ là <b>thực hiện việc đánh giá</b>, không phải bảo đảm mọi tài sản đều định giá được.", "vbcs": "QĐ.RR.014, QĐ.RR.012, QĐ.RR.044", "thuchien": "MR phối hợp với MHCC (Mô hình & Công cụ) xây dựng mô hình, IPV và backtest định kỳ. Trường hợp thiếu nguồn giá: đo lường bằng phương pháp khác với dữ liệu tối đa và lựa chọn mức thận trọng.", "t1": "<b>K3.a(iv)</b> — Cung cấp đầy đủ, kịp thời thông tin cần thiết phục vụ nhận dạng RRTT theo yêu cầu của Tuyến 2.", "t2": "<b>K3.b(iii)</b> — Nhận dạng, cập nhật các rủi ro mới phát sinh, rủi ro tiềm ẩn hoặc rủi ro chưa được nhận diện đầy đủ thông qua theo dõi thị trường, chỉ số cảnh báo sớm, kết quả đo lường, kiểm tra giá độc lập, stress testing và các sự kiện rủi ro liên quan.", "t3": "Kiểm toán tính hợp lệ của nguồn giá và mô hình định giá.", "gap": "N"}, {"ref": "g", "title": "Đánh giá khả năng phòng ngừa rủi ro", "summary": "Đánh giá liệu các RRTT đã nhận dạng có thể được phòng ngừa hay không. Quy chế yêu cầu <b>đánh giá khả năng</b> phòng ngừa, không bắt buộc mọi rủi ro phải được phòng ngừa; việc thực hiện phòng ngừa thuộc phạm vi Điều 17.", "vbcs": "QĐ.RR.014, QC.RR.022", "thuchien": "Có năng lực hedge (Spot, Fw, Swap, Option, Futures, công cụ MM); tại thời điểm báo cáo chưa phát sinh giao dịch hedge.", "t1": "<b>K3.a(i)</b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.", "t2": "<b>K3.b(ii)</b> — Đánh giá độc lập và thách thức tính đầy đủ, phù hợp của việc nhận dạng RRTT do Tuyến 1 thực hiện.", "t3": "Đánh giá tính phù hợp của cơ chế đánh giá khả năng phòng ngừa.", "gap": "N"}],
+ rows:[[[0, 1, 2], null, "Dẫn nhập"], [[3], 0, ""], [[4], null, "b) Phân loại rủi ro thị trường"], [[5, 6, 7, 8, 9], 1, ""], [[10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22], 2, ""], [[23, 24, 25, 26, 27], 3, ""], [[28], 4, ""], [[29], 5, ""], [[30], 6, ""], [[31], 7, ""], [[32], 8, ""], [[33], 9, ""]],
  gap:{status:'N',reason:'Nội dung nhận dạng đã bám theo chuẩn Basel (risk class + SBM delta/vega/curvature + nhóm rủi ro thành phần). Không phát sinh nghĩa vụ chưa được đáp ứng. Năng lực đo lường thực tế thuộc phạm vi Điều 11.'}},
 
  {n:'2',t:'Phương thức thực hiện nhận dạng RRTT',paras:[
@@ -441,6 +588,8 @@ const ARTS=[
   P(2,'vii) Các rủi ro trọng yếu khác: các rủi ro khác có khả năng ảnh hưởng đến sản phẩm, giao dịch, danh mục hoặc hoạt động thuộc phạm vi quản lý RRTT được xem xét thông qua phân tích kịch bản, stress testing hoặc các đánh giá rủi ro phù hợp')],
  defs:[['19','Ma trận rủi ro toàn diện'],['20','Stress-test'],['17','Vi phạm hạn mức'],['18','Trường hợp ngoại lệ'],['21','Trading Desks']],
  arrow:'<b>8 kênh nhận dạng</b>: rà soát theo ma trận rủi ro toàn diện (a) · kế hoạch KD & khẩu vị / hạn mức (b) · phê duyệt sản phẩm–mô hình–hệ thống mới (c) · theo dõi & kiểm soát theo Điều 14, gồm cảnh báo sớm (d) · stress test & thanh khoản thoát vị thế (e) · backtesting / IPV / validation / vi phạm hạn mức / tổn thất (f) · thông tin từ các đơn vị gồm KTNB (g) · tương tác chéo với 7 nhóm rủi ro khác (h).',
+ review:[{"ref": "a", "title": "Rà soát theo Bảng ma trận rủi ro toàn diện", "summary": "Nhận dạng thông qua rà soát sản phẩm, giao dịch, danh mục, trading desk và nghiệp vụ trọng yếu, đối chiếu với Bảng ma trận rủi ro toàn diện tại Phụ lục thuộc QC.RR.008.", "vbcs": "QC.RR.008", "thuchien": "Định kỳ rà soát từng loại sản phẩm, rủi ro theo bảng ma trận rủi ro toàn diện tại QC.RR.008.", "t1": "<b>K3.a(i)</b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.", "t2": "<b>K3.b(i)</b> — Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT.", "t3": "Đánh giá tính đầy đủ của phạm vi rà soát rủi ro.", "gap": "N", "note": "Quy chế dẫn chiếu <b>PL01/QC.RR.008</b> là <b>sai</b>. Đã đối chiếu QC.RR.008 (Lần 11): PL01 là <i>Cấu trúc hệ thống văn bản QLRR và thẩm quyền phê duyệt</i>; <b>PL03 mới là Bảng ma trận rủi ro toàn diện</b>. Đề xuất sửa dẫn chiếu thành <b>PL03/QC.RR.008</b>. Đây là lỗi dẫn chiếu, không phải GAP thực hiện."}, {"ref": "b", "title": "Nhận dạng trong khâu lập kế hoạch", "summary": "Nhận dạng ngay trong quá trình lập kế hoạch kinh doanh, thiết lập khẩu vị rủi ro, hạn mức, chiến lược danh mục và kế hoạch phòng ngừa — quản trị rủi ro đi trước hoặc đi cùng quyết định kinh doanh.", "vbcs": "QC.RR.008, QĐ.7731, QĐ.RR.012", "thuchien": "", "t1": "<b>K3.a(ii)</b> — Nhận dạng RRTT ngay từ giai đoạn xây dựng kế hoạch kinh doanh, phát triển sản phẩm mới, nghiệp vụ mới, thị trường mới hoặc thay đổi trọng yếu có liên quan.", "t2": "<b>K3.b(ii)</b> — Đánh giá độc lập và thách thức tính đầy đủ, phù hợp của việc nhận dạng RRTT do Tuyến 1 thực hiện.", "t3": "Đánh giá việc tuân thủ quy trình nhận dạng tại khâu lập kế hoạch.", "gap": "N"}, {"ref": "c", "title": "Nhận dạng khi phê duyệt sản phẩm, nghiệp vụ, thị trường mới", "summary": "Nhận dạng khi phê duyệt, triển khai hoặc thay đổi trọng yếu đối với sản phẩm, nghiệp vụ, thị trường mới, mô hình định giá, nguồn dữ liệu, hệ thống hoặc cơ chế kiểm soát. Quy chế yêu cầu RRTT được nhận dạng trong quá trình phê duyệt, không giao quyền phê duyệt cuối cùng cho QLRRTT.", "vbcs": "QC.RR.008, QC.RR.022", "thuchien": "Khi nhận được thông tin sản phẩm/nghiệp vụ mới, QLRR nhận diện rủi ro, đo lường tính toán (rà soát bộ chỉ số, mô hình), đánh giá phù hợp quy định, tuân thủ hạn mức trước khi đưa vào giao dịch.", "t1": "<b>K3.a(ii)</b> — Nhận dạng RRTT ngay từ giai đoạn xây dựng kế hoạch kinh doanh, phát triển sản phẩm mới, nghiệp vụ mới, thị trường mới hoặc thay đổi trọng yếu có liên quan.", "t2": "<b>K3.b(ii)</b> — Đánh giá độc lập và thách thức tính đầy đủ, phù hợp của việc nhận dạng RRTT do Tuyến 1 thực hiện.", "t3": "Kiểm tra việc tuân thủ quy trình phê duyệt sản phẩm và nghiệp vụ mới.", "gap": "N"}, {"ref": "d", "title": "Theo dõi thị trường và cảnh báo sớm (Điều 14)", "summary": "Nhận dạng liên tục trong quá trình theo dõi và kiểm soát theo Điều 14: diễn biến thị trường, sự kiện bất thường, sự kiện vĩ mô và giám sát hệ thống chỉ số cảnh báo sớm. Tần suất cập nhật phù hợp với tốc độ và mức độ trọng yếu của sự kiện, không bắt buộc real time.", "vbcs": "QC.RR.022, QĐ.RR.012", "thuchien": "", "t1": "<b>K3.a(i)</b> — Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý.", "t2": "<b>K3.b(iii)</b> — Nhận dạng, cập nhật các rủi ro mới phát sinh, rủi ro tiềm ẩn hoặc rủi ro chưa được nhận diện đầy đủ thông qua theo dõi thị trường, chỉ số cảnh báo sớm, kết quả đo lường, kiểm tra giá độc lập, stress testing và các sự kiện rủi ro liên quan.", "t3": "Đánh giá hiệu lực của cơ chế theo dõi và cảnh báo sớm.", "gap": "N"}, {"ref": "e", "title": "Kiểm tra sức chịu đựng và phân tích kịch bản", "summary": "Nhận dạng qua kiểm tra sức chịu đựng và phân tích kịch bản bất lợi, bao gồm đánh giá mức độ thanh khoản theo khối lượng và thời gian thoát vị thế. \"Thanh khoản\" tại đây gồm cả market liquidity, không chỉ funding liquidity.", "vbcs": "QC.RR.024, QĐ.RR.072, QT.TC.019", "thuchien": "VaR95%/99% theo 1/10/20 ngày (historical simulation, 252 kịch bản); kịch bản khảo sát VIRA đối chiếu dự báo thị trường (báo cáo RRTT hằng ngày mục 4).", "t1": "<b>K3.a(iv)</b> — Cung cấp đầy đủ, kịp thời thông tin cần thiết phục vụ nhận dạng RRTT theo yêu cầu của Tuyến 2.", "t2": "<b>K3.b(iii)</b> — Nhận dạng, cập nhật các rủi ro mới phát sinh, rủi ro tiềm ẩn hoặc rủi ro chưa được nhận diện đầy đủ thông qua theo dõi thị trường, chỉ số cảnh báo sớm, kết quả đo lường, kiểm tra giá độc lập, stress testing và các sự kiện rủi ro liên quan.", "t3": "Đánh giá phương pháp và quy trình thực hiện stress test.", "gap": "N"}, {"ref": "f", "title": "Backtesting, IPV, validation và sự kiện thực tế", "summary": "Nhận dạng qua rà soát kết quả đo lường (backtesting), kiểm tra giá độc lập (IPV), đánh giá mô hình (validation), vi phạm hạn mức, tổn thất thực tế và ngoại lệ. Không bắt buộc mọi sản phẩm đồng thời có đủ ba công cụ; công cụ nào có áp dụng thì kết quả phải được phản hồi vào quản trị.", "vbcs": "QĐ.RR.012, QĐ.RR.044", "thuchien": "MR phối hợp với MHCC (Mô hình & Công cụ) backtest và IPV định kỳ. Vi phạm hạn mức và ngoại lệ được ghi nhận, phân tích nguyên nhân và backdate khi cần.", "t1": "<b>K3.a(iv)</b> — Cung cấp đầy đủ, kịp thời thông tin cần thiết phục vụ nhận dạng RRTT theo yêu cầu của Tuyến 2.", "t2": "<b>K3.b(iii)</b> — Nhận dạng, cập nhật các rủi ro mới phát sinh, rủi ro tiềm ẩn hoặc rủi ro chưa được nhận diện đầy đủ thông qua theo dõi thị trường, chỉ số cảnh báo sớm, kết quả đo lường, kiểm tra giá độc lập, stress testing và các sự kiện rủi ro liên quan.", "t3": "Kiểm toán tính hợp lệ của backtesting, kiểm tra giá độc lập và đánh giá mô hình.", "gap": "N"}, {"ref": "g", "title": "Thông tin và khuyến nghị từ các đơn vị liên quan", "summary": "Nhận dạng qua thông tin, báo cáo, cảnh báo hoặc khuyến nghị từ các đơn vị liên quan, bao gồm cả kiểm toán nội bộ. Không bắt buộc mỗi đơn vị lập một báo cáo RRTT riêng; việc liệt kê KTNB không biến Tuyến 3 thành đơn vị nhận dạng thường xuyên.", "vbcs": "QC.RR.008, QC.RR.022", "thuchien": "Tiếp nhận thông tin qua hệ thống, số liệu quản lý hiệu suất (QLHS) và đội kinh doanh — các đầu mối cung cấp số liệu đầu vào cho nhận dạng RRTT.", "t1": "<b>K3.a(iv)</b> — Cung cấp đầy đủ, kịp thời thông tin cần thiết phục vụ nhận dạng RRTT theo yêu cầu của Tuyến 2.", "t2": "<b>K3.b(v)</b> — Tổng hợp các vấn đề trọng yếu trong nhận dạng RRTT để phục vụ các bước đo lường, giám sát, kiểm soát và báo cáo theo quy định.", "t3": "Cung cấp cảnh báo, khuyến nghị từ kết quả kiểm toán làm đầu vào nhận dạng.", "gap": "N"}, {"ref": "h(i)", "title": "Tương tác chéo — Rủi ro thanh khoản", "summary": "Suy giảm thanh khoản nguồn vốn hoặc thanh khoản thị trường có thể làm giảm khả năng đóng/mở trạng thái, mở rộng bid-ask spread, tăng haircut hoặc buộc phải đóng trạng thái trong điều kiện bất lợi. QLRRTT chịu trách nhiệm đánh giá phần tác động tới trạng thái, P&amp;L, vốn và hạn mức.", "vbcs": "QC.RR.021, QC.RR.024", "thuchien": "", "t1": "<b>K3.a(iii)</b> — Xác định nguồn gốc phát sinh rủi ro, yếu tố rủi ro thị trường tác động và cơ chế ảnh hưởng đến sản phẩm, giao dịch, danh mục hoặc hoạt động nghiệp vụ.", "t2": "<b>K3.b(iv)</b> — Phân tích mức độ tương tác chéo giữa RRTT với các rủi ro trọng yếu khác.", "t3": "Đánh giá sự phối hợp giữa quản lý RRTT và rủi ro thanh khoản.", "gap": "N"}, {"ref": "h(ii)", "title": "Tương tác chéo — Rủi ro tín dụng đối tác và thanh toán", "summary": "Đối tác không thực hiện hoặc không có khả năng thực hiện nghĩa vụ có thể làm phát sinh, thay đổi hoặc kéo dài trạng thái RRTT ngoài dự kiến, đặc biệt với phái sinh, ngoại hối, repo và các giao dịch chưa hoàn tất thanh toán.", "vbcs": "QC.RR.008, QC.RR.022", "thuchien": "Phối hợp với đội Back Office (BO) đối với các giao dịch chưa hoàn tất, chậm thanh toán hoặc đối tác không thực hiện nghĩa vụ.", "t1": "<b>K3.a(iv)</b> — Cung cấp đầy đủ, kịp thời thông tin cần thiết phục vụ nhận dạng RRTT theo yêu cầu của Tuyến 2.", "t2": "<b>K3.b(iv)</b> — Phân tích mức độ tương tác chéo giữa RRTT với các rủi ro trọng yếu khác.", "t3": "Đánh giá sự phối hợp giữa quản lý RRTT và rủi ro tín dụng đối tác.", "gap": "N", "note": "Các điểm <b>h(iii) đến h(vii)</b> (credit spread; mô hình – dữ liệu – định giá; rủi ro hoạt động, pháp lý, tuân thủ; rủi ro lãi suất trên sổ ngân hàng; các rủi ro trọng yếu khác) <b>thuộc phạm vi phụ trách của PIC khác</b>, không đánh giá tại đây."}],
+ rows:[[[0, 1], null, "Dẫn nhập"], [[2], 0, ""], [[3], 1, ""], [[4], 2, ""], [[5, 6, 7, 8], 3, ""], [[9], 4, ""], [[10], 5, ""], [[11], 6, ""], [[12], null, "h) Tương tác chéo với rủi ro khác"], [[13], 7, ""], [[14], 8, ""], [[15, 16, 17, 18, 19], null, "h(iii)–h(vii) — thuộc phạm vi PIC khác"]],
  gap:{status:'N'}},
 
  {n:'3',t:'Cơ chế phối hợp thực hiện',paras:[
@@ -459,6 +608,8 @@ const ARTS=[
   P(2,'v) Tổng hợp các vấn đề trọng yếu trong nhận dạng RRTT để phục vụ các bước đo lường, giám sát, kiểm soát và báo cáo theo quy định.')],
  defs:[['21','Trading Desks'],['29','Bộ phận QLRRTT']],
  arrow:'<b>Tuyến 1</b> (đơn vị tự doanh): chủ động nhận dạng, nhận dạng sớm từ khâu kế hoạch/sản phẩm mới, xác định nguồn gốc rủi ro, cung cấp thông tin cho Tuyến 2 · <b>Tuyến 2</b> (Bộ phận QLRRTT): thiết lập phương pháp & tiêu chí, đánh giá độc lập và thách thức Tuyến 1, cập nhật rủi ro mới, phân tích tương tác chéo, tổng hợp cho bước đo lường – giám sát – báo cáo.',
+ review:[{"ref": "3", "title": "Cơ chế phối hợp theo mô hình ba tuyến bảo vệ", "summary": "Xác lập cơ chế phối hợp nhận dạng RRTT theo mô hình ba tuyến bảo vệ, phù hợp với chức năng, nhiệm vụ và thẩm quyền của từng đơn vị. Tuyến 1 sở hữu rủi ro và nhận dạng tại nguồn; Tuyến 2 thiết lập phương pháp, đánh giá độc lập và tổng hợp; Tuyến 3 đánh giá độc lập hiệu lực của khung quản trị, không tham gia vận hành thường xuyên.", "vbcs": "QC.RR.008, QC.RR.022", "thuchien": "Tham chiếu chức năng nhiệm vụ → xem QC.RR.008.", "t1": "<b>K3.a</b> — <b>(i)</b> Chủ động nhận dạng rủi ro theo quy định tại Khoản 1 Điều này trong phạm vi nghiệp vụ quản lý. <b>(ii)</b> Nhận dạng RRTT ngay từ giai đoạn xây dựng kế hoạch kinh doanh, phát triển sản phẩm mới, nghiệp vụ mới, thị trường mới hoặc thay đổi trọng yếu có liên quan. <b>(iii)</b> Xác định nguồn gốc phát sinh rủi ro, yếu tố rủi ro thị trường tác động và cơ chế ảnh hưởng đến sản phẩm, giao dịch, danh mục hoặc hoạt động nghiệp vụ. <b>(iv)</b> Cung cấp đầy đủ, kịp thời thông tin cần thiết phục vụ nhận dạng RRTT theo yêu cầu của Tuyến 2.", "t2": "<b>K3.b</b> — <b>(i)</b> Thiết lập, hướng dẫn phương pháp, tiêu chí và yêu cầu thông tin phục vụ nhận dạng RRTT. <b>(ii)</b> Đánh giá độc lập và thách thức tính đầy đủ, phù hợp của việc nhận dạng RRTT do Tuyến 1 thực hiện. <b>(iii)</b> Nhận dạng, cập nhật các rủi ro mới phát sinh, rủi ro tiềm ẩn hoặc rủi ro chưa được nhận diện đầy đủ thông qua theo dõi thị trường, chỉ số cảnh báo sớm, kết quả đo lường, kiểm tra giá độc lập, stress testing và các sự kiện rủi ro liên quan. <b>(iv)</b> Phân tích mức độ tương tác chéo giữa RRTT với các rủi ro trọng yếu khác. <b>(v)</b> Tổng hợp các vấn đề trọng yếu trong nhận dạng RRTT để phục vụ các bước đo lường, giám sát, kiểm soát và báo cáo theo quy định.", "t3": "Đánh giá độc lập, định kỳ tính đầy đủ và hiệu lực của cơ chế nhận dạng RRTT do Tuyến 1 và Tuyến 2 thực hiện.", "gap": "N", "note": "<b>1.</b> Khoản 3 nêu \"mô hình ba tuyến bảo vệ\" nhưng chỉ liệt kê Tuyến 1 và Tuyến 2. Đề xuất bổ sung điểm c) — <i>Tuyến 3: Đánh giá độc lập, định kỳ tính đầy đủ và hiệu lực của cơ chế nhận dạng RRTT do Tuyến 1 và Tuyến 2 thực hiện.</i><br><b>2.</b> Điểm a(iv): bổ sung trách nhiệm Tuyến 1 <b>chủ động thông báo</b> khi phát hiện rủi ro mới hoặc sự kiện bất thường, không chỉ cung cấp theo yêu cầu của Tuyến 2.<br><b>3.</b> Điểm b(i): cân nhắc sửa động từ <b>\"thiết lập\"</b> thành <b>\"xây dựng, trình cấp có thẩm quyền phê duyệt và hướng dẫn\"</b> cho phù hợp phân cấp thẩm quyền."}],
+ rows:[[[0, 1], null, "Dẫn nhập"], [[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], 0, ""]],
  gap:{status:'N'}}]}
 ];
 
@@ -470,6 +621,141 @@ function defbarHTML(defs){
   return `<div class="defbar"><span class="lb">Định nghĩa liên quan</span>`+
     defs.map(d=>`<button class="defchip" onclick="goDef('${d[0]}')">Đ4 K${d[0]} · ${d[1]} ↗</button>`).join('')+`</div>`;
 }
+
+function reviewHTML(items,artId,khN){
+  if(!items||!items.length) return '';
+  const ed=editing;
+  const nY=items.filter(x=>x.gap==='Y').length;
+  const meta=`${items.length} mục · ${nY?nY+' GAP':'không có GAP'}`;
+  const ce=(ri,f)=>ed?` contenteditable="true" data-art="${artId}" data-k="${khN}" data-ri="${ri}" data-f="${f}"`:'';
+  const t=(lbl,v,ri,f)=>`<div class="tcard"><h5>${lbl}</h5><p${ce(ri,f)}>${v||''}</p></div>`;
+  const boxCls = ed ? 'reviewbox' : 'reviewbox collapsed';
+  let s=`<div class="${boxCls}" data-art="${artId}" data-k="${khN}">`;
+  s+=`<div class="reviewbox-hd" onclick="toggleBox(this)">
+        <span class="rbt">Tổng hợp thẩm định GAP</span>
+        <span class="rbmeta${nY?' y':''}">${meta}</span>
+        <span class="rbchev">▾</span></div>`;
+  s+=`<div class="reviewbody">`;
+  s+=`<div class="rbtools"><button onclick="toggleAllItems(this)">Thu gọn tất cả mục</button></div>`;
+  items.forEach((x,ri)=>{
+    s+=`<div class="reviewitem">`;
+    s+=`<div class="reviewtitle" onclick="toggleItem(event,this)">`;
+    s+=`<span class="itchev">▾</span>`;
+    s+=`<span${ce(ri,'ref')}>${x.ref}</span> · <span${ce(ri,'title')}>${x.title}</span>`;
+    s+=`<span class="itgap${x.gap==='Y'?' y':''}">${x.gap||'N'}</span>`;
+    if(ed) s+=`<button class="delitem" title="Xóa mục này" onclick="event.stopPropagation();delReview('${artId}','${khN}',${ri})">✕</button>`;
+    s+=`</div>`;
+    s+=`<div class="itembody">`;
+    s+=`<div class="reviewsummary"${ce(ri,'summary')}>${x.summary||''}</div>`;
+    s+=`<div class="dgrid">
+        <div class="dcell"><div class="dlbl">VBCS</div><div class="dval${(x.vbcs||'')?'':' ph'}"${ce(ri,'vbcs')}>${x.vbcs||(ed?'':'—')}</div></div>
+        <div class="dcell"><div class="dlbl">Thực hiện</div><div class="dval${(x.thuchien||'')?'':' ph'}"${ce(ri,'thuchien')}>${x.thuchien||(ed?'':'—')}</div></div>
+       </div>`;
+    s+=`<div class="glbl" style="color:#276749">Trách nhiệm thực hiện / phối hợp</div><div class="tuyen">`;
+    s+=t('Tuyến 1',x.t1,ri,'t1')+t('Tuyến 2',x.t2,ri,'t2')+t('Tuyến 3',x.t3,ri,'t3');
+    s+=`</div>`;
+    if(x.note||ed){
+      s+=`<div class="rnote${(x.note||'')?'':' ph'}"><span class="rntag">Note sửa VBCS</span>
+          <div${ce(ri,'note')}>${x.note||(ed?'':'')}</div></div>`;
+    }
+    if(ed){
+      s+=`<div class="gapsel">Đánh giá GAP —
+          <select onchange="setGap('${artId}','${khN}',${ri},this.value)">
+            <option value="N"${(x.gap||'N')==='N'?' selected':''}>N</option>
+            <option value="Y"${x.gap==='Y'?' selected':''}>Y</option></select></div>`;
+    } else {
+      s+=`<span class="reviewgap${x.gap==='Y'?' y':''}">Đánh giá GAP — ${x.gap||'N'}</span>`;
+    }
+    s+=`</div></div>`;
+  });
+  if(ed) s+=`<div class="additem"><button onclick="addReview('${artId}','${khN}')">+ Thêm mục</button></div>`;
+  return s+`</div></div>`;
+}
+
+
+
+/* ============ XEM SONG SONG ============ */
+var splitView=true, navHidden=false;
+function toggleSplit(){
+  splitView=!splitView;
+  var b=document.getElementById('splitBtn');
+  b.textContent = splitView?'⇹ Đang xem song song':'☰ Đang xem tuần tự';
+  b.classList.toggle('on',splitView);
+  rerender();
+}
+function toggleNav(){
+  navHidden=!navHidden;
+  document.body.classList.toggle('navhidden',navHidden);
+  var b=document.getElementById('navBtn');
+  if(b) b.textContent = navHidden?'▸':'◂';
+}
+function asmCell(x,ri,artId,khN){
+  var ed=editing;
+  var ce=function(f){return ed?' contenteditable="true" data-art="'+artId+'" data-k="'+khN+'" data-ri="'+ri+'" data-f="'+f+'"':'';};
+  var s='<div class="asm">';
+  s+='<div class="asmhd"><span class="asmref"'+ce('ref')+'>'+x.ref+'</span>'
+    +'<span class="asmtit"'+ce('title')+'>'+x.title+'</span>';
+  if(ed){ s+='<select class="asmsel" onchange="setGap(\''+artId+'\',\''+khN+'\','+ri+',this.value)">'
+    +'<option value="N"'+((x.gap||'N')==='N'?' selected':'')+'>N</option>'
+    +'<option value="Y"'+(x.gap==='Y'?' selected':'')+'>Y</option></select>'; }
+  else { s+='<span class="asmgap'+(x.gap==='Y'?' y':'')+'">'+(x.gap||'N')+'</span>'; }
+  s+='</div>';
+  s+='<div class="asmsum"'+ce('summary')+'>'+(x.summary||'')+'</div>';
+  s+='<div class="asmkv"><b>VBCS</b><span'+ce('vbcs')+'>'+(x.vbcs||'—')+'</span></div>';
+  s+='<div class="asmkv"><b>Thực hiện</b><span class="'+((x.thuchien||'')?'':'ph')+'"'+ce('thuchien')+'>'+(x.thuchien||'—')+'</span></div>';
+  s+='<div class="asmt"><b>T1</b><span'+ce('t1')+'>'+(x.t1||'')+'</span></div>';
+  s+='<div class="asmt"><b>T2</b><span'+ce('t2')+'>'+(x.t2||'')+'</span></div>';
+  s+='<div class="asmt"><b>T3</b><span'+ce('t3')+'>'+(x.t3||'')+'</span></div>';
+  if(x.note||ed) s+='<div class="asmnote"><b>Note sửa VBCS</b><div'+ce('note')+'>'+(x.note||'')+'</div></div>';
+  return s+'</div>';
+}
+function khSplitHTML(k,artId){
+  if(!k.rows||!k.review) return khHTML(k,false,artId);
+  var yflag=k.review.some(function(x){return x.gap==='Y';})?'<span class="ygap">GAP</span>':'';
+  var s='<div class="kh" data-n="'+k.n+'"><div class="kh-hd"><span class="knum">'+k.n+'</span> '+k.t+yflag+'</div>';
+  s+='<div class="splitwrap"><div class="splithd"><div>Nội dung quy chế</div><div>Thẩm định GAP</div></div>';
+  k.rows.forEach(function(r){
+    var idxs=r[0], ri=r[1], label=r[2];
+    var left=idxs.map(function(n){var p=k.paras[n];return p?'<div class="p'+p.l+'">'+p.t+'</div>':'';}).join('');
+    var right = (ri===null||ri===undefined)
+        ? '<div class="asmnone">'+(label||'—')+'</div>'
+        : asmCell(k.review[ri],ri,artId,k.n);
+    s+='<div class="srow"><div class="scl">'+left+'</div><div class="scr">'+right+'</div></div>';
+  });
+  s+='</div>';
+  s+=userNoteHTML(artId,k);
+  return s+'</div>';
+}
+
+function userNoteHTML(artId,k){
+  var has=(k.usernote||'').trim().length>0;
+  var open = editing || has;
+  var s='<div class="unbox'+(open?'':' collapsed')+'" data-art="'+artId+'" data-k="'+k.n+'">';
+  s+='<div class="unhd" onclick="toggleUN(this)"><span class="unchev">▾</span>'
+    +'<span class="untitle">Ghi chú của tôi — Khoản '+k.n+'</span>'
+    +(has?'<span class="unflag">đã có nội dung</span>':'<span class="unflag empty">trống</span>')
+    +'</div>';
+  s+='<div class="unbody"><div class="unval'+(has?'':' ph')+'" contenteditable="true" '
+    +'data-un-art="'+artId+'" data-un-k="'+k.n+'">'+(k.usernote||'')+'</div>'
+    +'<div class="unhint">Bấm vào vùng trên để gõ. Nội dung được lưu khi bấm “Xuất HTML”.</div></div>';
+  return s+'</div>';
+}
+function toggleUN(hd){ hd.parentElement.classList.toggle('collapsed'); }
+
+function toggleBox(hd){ hd.parentElement.classList.toggle('collapsed'); }
+function toggleItem(ev,el){
+  if(ev.target.hasAttribute&&ev.target.hasAttribute('contenteditable')) return;
+  if(ev.target.tagName==='BUTTON') return;
+  el.parentElement.classList.toggle('collapsed');
+}
+function toggleAllItems(btn){
+  var box=btn.closest('.reviewbox');
+  var its=box.querySelectorAll('.reviewitem');
+  var anyOpen=[...its].some(function(i){return !i.classList.contains('collapsed');});
+  its.forEach(function(i){i.classList.toggle('collapsed',anyOpen);});
+  btn.textContent=anyOpen?'Mở rộng tất cả mục':'Thu gọn tất cả mục';
+}
+
 function gapHTML(g){
   if(!g) return '';
   if(g.status==='N'){
@@ -497,14 +783,15 @@ function gapHTML(g){
   s+=`</div></div>`;
   return s;
 }
-function khHTML(k,isDef){
+function khHTML(k,isDef,artId){
   let inner=k.paras.map(paraHTML).join('');
   if(k.chart) inner+=`<div class="chart">${k.chart}${k.chartCap?`<div class="chart-cap">${k.chartCap}</div>`:''}</div>`;
   if(k.note) inner+=`<div class="nbox"><span class="tag">${k.note.tag}</span><div>${k.note.html}</div></div>`;
   if(k.ex) inner+=`<div class="ex-num"><span class="tag">Ví dụ minh họa</span><div>${k.ex}</div></div>`;
   if(k.defs) inner+=defbarHTML(k.defs);
   if(k.arrow) inner+=`<div class="arrow"><span class="ld">→</span>${k.arrow}</div>`;
-  if(k.gap) inner+=gapHTML(k.gap);
+  if(k.review){ inner+=reviewHTML(k.review,artId,k.n); inner+=userNoteHTML(artId,k); }
+  else if(k.gap) inner+=gapHTML(k.gap);
   const yflag=(k.gap&&k.gap.status==='Y')?`<span class="ygap">GAP</span>`:'';
   const id=isDef?` id="k4-${k.n}"`:'';
   return `<div class="kh"${id} data-n="${k.n}"><div class="kh-hd"><span class="knum">${k.n}</span> ${k.t}${yflag}</div><div class="kh-bd">${inner}</div></div>`;
@@ -520,7 +807,7 @@ function artPage(a,i,all){
     : `<div class="gapsum clean"><b>Không phát sinh GAP</b> tại điều này</div>`;
   s+=gs;
   if(a.lead) s+=`<div class="lead">${a.lead}</div>`; else s+=`<div style="height:18px"></div>`;
-  s+=a.kh.map(k=>khHTML(k,false)).join('');
+  s+=a.kh.map(k=>(splitView&&k.rows&&k.review)?khSplitHTML(k,a.id):khHTML(k,false,a.id)).join('');
   const prev=i>0?`<button class="navbtn" onclick="go('${all[i-1].id}')"><small>← Trước</small>${all[i-1].tab} · ${all[i-1].sub}</button>`:`<button class="navbtn" disabled><small>←</small>Đầu chuỗi</button>`;
   const next=i<all.length-1?`<button class="navbtn next" onclick="go('${all[i+1].id}')"><small>Tiếp →</small>${all[i+1].tab} · ${all[i+1].sub}</button>`:`<button class="navbtn next" disabled><small>→</small>Hết phần đã thực hiện</button>`;
   s+=`<div class="navfoot">${prev}${next}</div>`;
@@ -554,12 +841,12 @@ function renderNav(){
 function renderMain(){
   document.getElementById('main').innerHTML=ARTS.map((a,i)=>artPage(a,i,ARTS)).join('')+defPage();
 }
-function go(id){
+function go(id,noScroll){ curPage=id;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   const pg=document.getElementById(id); if(pg) pg.classList.add('active');
   const nb=document.querySelector(`.ni[data-id="${id}"]`); if(nb) nb.classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
+  if(!noScroll) window.scrollTo({top:0,behavior:'smooth'});
 }
 function goDef(n){
   go('d4');
@@ -664,5 +951,128 @@ function clearHL(){
   ms.forEach(unwrapMark);
 }
 
+
+/* ================= CHẾ ĐỘ CHỈNH SỬA ================= */
+var editing=false, dirty=false, curPage='d1';
+function findKh(artId,khN){
+  var a=ARTS.find(function(x){return x.id===artId;}); if(!a) return null;
+  return a.kh.find(function(k){return String(k.n)===String(khN);})||null;
+}
+function markDirty(){dirty=true;upSave();}
+function upSave(){
+  var m=document.getElementById('sv_msg'); if(!m) return;
+  m.textContent = dirty ? 'Có thay đổi chưa lưu — bấm "Xuất HTML" để lưu thành file mới' : 'Chưa có thay đổi';
+  m.classList.toggle('dirty',dirty);
+}
+function rerender(){ renderMain(); go(curPage,true); }
+function toggleEdit(){
+  editing=!editing;
+  document.body.classList.toggle('editing',editing);
+  var b=document.getElementById('editBtn');
+  b.textContent = editing?'✓ Xong chỉnh sửa':'✏️ Chỉnh sửa nội dung';
+  b.classList.toggle('on',editing);
+  rerender();
+}
+function addReview(artId,khN){
+  var k=findKh(artId,khN); if(!k) return;
+  if(!k.review) k.review=[];
+  k.review.push({ref:'mới',title:'Tiêu đề mục',summary:'',vbcs:'',thuchien:'',t1:'',t2:'',t3:'',gap:'N'});
+  markDirty(); rerender();
+}
+function delReview(artId,khN,ri){
+  var k=findKh(artId,khN); if(!k||!k.review) return;
+  var nm=(k.review[ri]&&k.review[ri].title)||'';
+  if(!confirm('Xóa mục "'+nm+'"?')) return;
+  k.review.splice(ri,1); markDirty(); rerender();
+}
+function setGap(artId,khN,ri,v){
+  var k=findKh(artId,khN); if(!k||!k.review||!k.review[ri]) return;
+  k.review[ri].gap=v; markDirty();
+}
+var ALLOW=['B','STRONG','I','EM','U','BR'];
+function cleanHTML(s){
+  var d=document.createElement('div'); d.innerHTML=s;
+  (function walk(n){
+    Array.prototype.slice.call(n.children).forEach(function(c){
+      walk(c);
+      if(ALLOW.indexOf(c.tagName)<0){
+        while(c.firstChild) n.insertBefore(c.firstChild,c);
+        n.removeChild(c);
+      } else {
+        Array.prototype.slice.call(c.attributes).forEach(function(a){c.removeAttribute(a.name);});
+      }
+    });
+  })(d);
+  return d.innerHTML.replace(/\s+/g,' ').trim();
+}
+/* dán luôn ở dạng chữ thuần, không kéo theo định dạng Word/Excel */
+document.addEventListener('paste',function(e){
+  var t=e.target;
+  if(!t||!t.hasAttribute||!t.hasAttribute('contenteditable')) return;
+  e.preventDefault();
+  var txt=((e.clipboardData||window.clipboardData).getData('text/plain')||'').replace(/\s+/g,' ');
+  document.execCommand('insertText',false,txt);
+});
+document.addEventListener('input',function(e){
+  var t=e.target;
+  if(t.dataset && t.dataset.unArt!==undefined){
+    var kk=findKh(t.dataset.unArt,t.dataset.unK);
+    if(kk){ kk.usernote=cleanHTML(t.innerHTML); markDirty(); }
+    return;
+  }
+  if(!t.hasAttribute||!t.hasAttribute('contenteditable')) return;
+  var art=t.dataset.art, kn=t.dataset.k, ri=t.dataset.ri, f=t.dataset.f;
+  if(art===undefined||ri===undefined) return;
+  var k=findKh(art,kn); if(!k||!k.review||!k.review[ri]) return;
+  k.review[ri][f]=cleanHTML(t.innerHTML);
+  markDirty();
+});
+function exportHTML(){
+  var wasEd=editing;
+  if(editing){editing=false;document.body.classList.remove('editing');
+    var b=document.getElementById('editBtn');b.textContent='✏️ Chỉnh sửa nội dung';b.classList.remove('on');rerender();}
+  var saved={};
+  ARTS.forEach(function(a){a.kh.forEach(function(k){ if(k.review) saved[a.id+'|'+k.n]={r:k.review,u:k.usernote||''}; });});
+  var SID='saved'+'rev';
+  var OPEN='<'+'script id="'+SID+'">', CLOSE='<'+'/'+'script>';
+  var mainEl=document.getElementById('main'); var keep=mainEl.innerHTML; mainEl.innerHTML='';
+  var html=document.documentElement.outerHTML;
+  mainEl.innerHTML=keep;
+  var oi=html.indexOf('id="'+SID+'"');
+  if(oi>-1){
+    var os=html.lastIndexOf('<'+'script',oi), oe=html.indexOf(CLOSE,oi);
+    if(os>-1&&oe>-1) html=html.slice(0,os)+html.slice(oe+CLOSE.length);
+  }
+  var payload=OPEN+'window.__SAVED_REVIEWS='+JSON.stringify(saved).replace(/<\//g,'<\\/')+';'+CLOSE;
+  var hi=html.lastIndexOf('<'+'/head>');
+  html=html.slice(0,hi)+payload+html.slice(hi);
+  var blob=new Blob(['<!DOCTYPE html>\n'+html],{type:'text/html;charset=utf-8'});
+  var pad=function(n){return String(n).padStart(2,'0');};
+  var ts=new Date();
+  var fname='QC_RR_022_Dieu10_'+ts.getFullYear()+pad(ts.getMonth()+1)+pad(ts.getDate())
+            +'_'+pad(ts.getHours())+pad(ts.getMinutes())+pad(ts.getSeconds())+'.html';
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download=fname;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);},5000);
+  dirty=false;upSave();
+  var m=document.getElementById('sv_msg');
+  if(m){m.textContent='Đã xuất: '+fname; m.classList.remove('dirty');}
+  if(wasEd){editing=true;document.body.classList.add('editing');
+    var b2=document.getElementById('editBtn');b2.textContent='✓ Xong chỉnh sửa';b2.classList.add('on');rerender();}
+}
+/* nạp lại nội dung đã lưu nếu có */
+(function(){
+  if(!window.__SAVED_REVIEWS) return;
+  Object.keys(window.__SAVED_REVIEWS).forEach(function(key){
+    var p=key.split('|'), k=findKh(p[0],p[1]);
+    if(!k) return;
+    var v=window.__SAVED_REVIEWS[key];
+    if(v&&v.r){ k.review=v.r; k.usernote=v.u||''; } else { k.review=v; }
+  });
+})();
+
 renderNav(); renderMain(); go('d1');
-</script></body></html>
+</script>
+
+</body></html>
