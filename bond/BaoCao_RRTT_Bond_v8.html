@@ -50,6 +50,16 @@ table th *{color:#fff!important}
 [data-hdr] [data-scope]{color:rgba(255,255,255,.78)!important;border-color:rgba(255,255,255,.5)!important;background:transparent!important}
 [data-hdr] [data-scope][data-active]{background:#fff!important;color:var(--wine-d)!important;font-weight:700}
 
+
+/* ---- v9: nền bảng xám ấm, header bảng đậm hơn ---- */
+:root{--tbl-bg:#EFECE7;--tbl-tot:#E4E0D9}
+table{background:var(--tbl-bg)}
+table tbody tr[style*="rgba(182,130,53,.05)"]{background:var(--tbl-tot)!important}
+table th{font-weight:700!important;letter-spacing:.07em}
+/* ---- v9: thông tin báo cáo trong header ---- */
+[data-hdr] .hdrmeta{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:7px;font-size:11.5px;line-height:1.4}
+[data-hdr] .hdrmeta span.l{font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.72;margin-right:6px}
+[data-hdr] .hdrmeta b{font-weight:600}
 </style>
 </head><body><div id="app" style="min-height:100vh;background:#f3f2f2;"></div>
 <script>
@@ -126,6 +136,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     railTop: 'Quản lý rủi ro thị trường', railTitle: 'Desk Bond',
     unitNote: 'Đơn vị: tỷ VND, trừ khi ghi khác. Giá trị âm là lỗ.',
     lblDate: 'Ngày báo cáo', lblScope: 'Phạm vi',
+    lblUnit: 'Đơn vị báo cáo', hdrUnit: 'QLRR Thị trường', lblAudience: 'Đối tượng nhận', hdrAudience: 'ĐVKD', lblFreq: 'Tần suất', hdrFreq: 'Daily',
     /* --- Nav --- */
     navP1: 'Highlight', navP2: 'Chi tiết danh mục', navP3: 'QTRR theo kịch bản',
     navP4: 'Thị trường TPCP', navP5: 'FI Bond & CD',
@@ -209,6 +220,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
       <div>
         <div style="font-family:var(--f-body);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8d877c;">Báo cáo rủi ro thị trường</div>
         <h1 style="font-family:var(--f-head);font-size:26px;font-weight:600;margin:4px 0 0;letter-spacing:-.012em;">Báo cáo Desk Bond</h1>
+        <div class="hdrmeta"><div><span class="l" data-k="lblUnit">Đơn vị báo cáo</span><b data-k="hdrUnit">QLRR Thị trường</b></div><div><span class="l" data-k="lblAudience">Đối tượng nhận</span><b data-k="hdrAudience">ĐVKD</b></div><div><span class="l" data-k="lblFreq">Tần suất</span><b data-k="hdrFreq">Daily</b></div></div>
       </div>
       <div style="display:flex;align-items:flex-end;gap:22px;">
         <div style="text-align:right;line-height:1.35;">
@@ -240,8 +252,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
           <button type="button" data-sub="donhay" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_donhay">Độ nhạy · PV01</button>
           <button type="button" data-sub="itd" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_itd">ItD Unrealized</button>
           <button type="button" data-sub="laiLo" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_laiLo">Lãi / lỗ</button>
-          <button type="button" data-sub="von" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_von">Cơ cấu &amp; sử dụng vốn</button>
-          <button type="button" data-sub="thoigian" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_thoigian">Thời gian nắm giữ</button>
+          <button type="button" data-sub="von" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_von">Sử dụng vốn</button>
         </div>
 
         <div data-subpage="ind" style="min-width:0;display:grid;gap:20px;">
@@ -288,6 +299,36 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
             </div>
             <div style="min-width:0;overflow-x:auto;"><div id="tblBS"></div></div>
             <div id="bsNote" style="font-size:12.5px;color:#6b665e;line-height:1.6;margin-top:12px;max-width:90ch;"></div>
+          </section>
+          <div style="min-width:0;display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
+                <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_von_02">Tổ chức phát hành · Trading</h2>
+                <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">tỷ VND</span>
+              </div>
+              <div style="min-width:0;overflow-x:auto;"><div id="tblIssTB"></div></div>
+            </section>
+            <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
+                <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_von_03">Tổ chức phát hành · Banking</h2>
+                <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">tỷ VND</span>
+              </div>
+              <div style="min-width:0;overflow-x:auto;"><div id="tblIssBB"></div></div>
+            </section>
+          </div>
+          <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
+              <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_thoigian_01">Cơ cấu danh mục theo thời gian nắm giữ</h2>
+              <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">tỷ VND</span>
+            </div>
+            <div id="holdMeta" style="margin-bottom:14px;"></div>
+            <div style="min-width:0;overflow-x:auto;"><div id="tblHold"></div></div>
+          </section>
+          <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
+            <div style="border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
+              <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_thoigian_02">Trạng thái &amp; ItD theo nhóm thời gian nắm giữ</h2>
+            </div>
+            <div id="ch_hold" style="height:310px;"></div>
           </section>
           <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
             <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
@@ -408,22 +449,6 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
             </div>
             <div style="min-width:0;overflow-x:auto;"><div id="tblVon"></div></div>
           </section>
-          <div style="min-width:0;display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-            <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
-              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
-                <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_von_02">Tổ chức phát hành · Trading</h2>
-                <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">tỷ VND</span>
-              </div>
-              <div style="min-width:0;overflow-x:auto;"><div id="tblIssTB"></div></div>
-            </section>
-            <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
-              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
-                <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_von_03">Tổ chức phát hành · Banking</h2>
-                <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">tỷ VND</span>
-              </div>
-              <div style="min-width:0;overflow-x:auto;"><div id="tblIssBB"></div></div>
-            </section>
-          </div>
           <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
             <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
               <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_von_04">Dữ liệu lịch sử · mức độ sử dụng vốn theo ngày</h2>
@@ -433,23 +458,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
           </section>
         </div>
 
-        <div data-subpage="thoigian" style="min-width:0;display:grid;gap:20px;">
-          <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
-            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
-              <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_thoigian_01">Cơ cấu danh mục theo thời gian nắm giữ</h2>
-              <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">tỷ VND</span>
-            </div>
-            <div id="holdMeta" style="margin-bottom:14px;"></div>
-            <div style="min-width:0;overflow-x:auto;"><div id="tblHold"></div></div>
-          </section>
-          <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
-            <div style="border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
-              <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_thoigian_02">Trạng thái &amp; ItD theo nhóm thời gian nắm giữ</h2>
-            </div>
-            <div id="ch_hold" style="height:310px;"></div>
-          </section>
-        </div>
-      </section>
+              </section>
 
       <section data-page="p3" data-screen-label="QTRR theo kịch bản" style="display:grid;gap:20px;">
         <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
@@ -571,12 +580,6 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
             </div>
             <div id="ch_primary" style="height:300px;"></div>
           </section>
-          <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:20px 24px 22px;">
-            <div style="border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
-              <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_liq_03">Nhận định thị trường</h2>
-            </div>
-            <div id="cmtMarket" style="white-space:pre-wrap;font-size:14px;line-height:1.78;color:#33312e;max-width:85ch;"></div>
-          </section>
         </div>
 
         <div data-subpage="vol" style="min-width:0;display:grid;gap:20px;">
@@ -601,6 +604,13 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
       <section data-page="p5" data-screen-label="FI Bond &amp; CD" style="display:grid;gap:20px;">
         <div id="cmtFi"></div>
         <div id="fiCard"></div>
+        <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
+            <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_fi_ind">Chỉ tiêu tuân thủ hạn mức · FI Bond &amp; CD</h2>
+            <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">tỷ VND</span>
+          </div>
+          <div style="min-width:0;overflow-x:auto;"><div id="tblFiInd"></div></div>
+        </section>
         <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
           <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
             <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_vol_03">Trạng thái trên bảng cân đối &amp; điều chỉnh đối ứng</h2>
@@ -823,11 +833,6 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
         + '<div style="min-width:0;overflow-x:auto;"><table style="width:100%;min-width:max-content;border-collapse:collapse;font-size:13px;font-family:var(--f-body);">' + indicatorTable(b) + '</table></div>'
         + noteUnder(/^2\.1/.test(b.title) ? CMT.tb : /^2\.2/.test(b.title) ? CMT.bb : '') + '</div>';
     });
-    if (SCOPE === 'MSB') {
-      h += '<div style="margin-top:26px;"><h3 style="font-family:var(--f-head);font-size:14.5px;font-weight:600;margin:0 0 10px;">2.x FIBond &amp; CD</h3>'
-        + '<div style="min-width:0;overflow-x:auto;"><table style="width:100%;min-width:max-content;border-collapse:collapse;font-size:13px;font-family:var(--f-body);">'
-        + indicatorTable({ rows: R.other.concat(R.fibond.map(f => Object.assign({ cat: '' }, f))) }) + '</table></div></div>';
-    }
     setHtml('indHost', h);
 
     /* chart mức sử dụng hạn mức */
@@ -1277,12 +1282,12 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
       xAxis: axX(vol.tenors), yAxis: axY('bps / năm'),
       series: vol.annual.map((r, i) => ({ name: r.k, type: 'line', data: r.v, smooth: true, symbol: 'none', lineStyle: { width: i === 3 ? 2.4 : 1.5, color: [K.gold, 'rgba(182,130,53,.5)', K.blue, K.ink][i] } }))
     }));
-    setHtml('cmtMarket', esc(R.reportMarket));
   }
 
   /* =================== 5. FI BOND & CD =================== */
   function renderFI() {
     const R = RPT(), f = R.fibond;
+    setTbl('tblFiInd', indicatorTable({ rows: R.other.concat(R.fibond.map(f => Object.assign({ cat: '' }, f))) }), 13);
     /* 1 card gộp: face value + hạn mức */
     const cell = (l, v, s, u) => '<div style="min-width:0;padding:13px 16px 15px;">'
       + '<div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:' + K.faint + ';line-height:1.4;">' + esc(l) + '</div>'
@@ -1494,10 +1499,6 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
      ban xuat serialise ca DOM nen thuoc tinh se theo sang file moi va chan viec gan lai. */
   var navLocked = false;
   var editWired = false;
-  /* Chuỗi biểu đồ nào file key không có -> trang vẫn vẽ bằng số nhúng sẵn từ kỳ dựng file.
-     Phải nói ra, không được im lặng dùng số cũ. */
-  var TS_STALE = null;
-  var TS_MISS = [];
   var SRC = window.RRTT_SRC || null;
 
   function $(s, r) { return (r || document).querySelector(s); }
@@ -1757,7 +1758,6 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
     if (t['txt.noteFI']) R.highlight.fibond = t['txt.noteFI'];
     if (t['txt.note10d']) R.highlight.riskPrice = t['txt.note10d'];
     if (t['txt.noteRealized']) R.highlight.riskNim = t['txt.noteRealized'];
-    if (t['txt.market']) R.reportMarket = t['txt.market'];
     if (t['txt.noteFV']) R.fvNote = t['txt.noteFV'];
     if (t['txt.noteRating']) R.fiNote = t['txt.noteRating'];
     if (t['txt.note10d']) R.note10d = t['txt.note10d'];
@@ -2100,23 +2100,6 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
       };
     }
 
-  /* Tên trường trong file key là tiêu đề cột bên Excel, còn HTML đọc theo tên rút gọn
-     của riêng nó. Lệch tên thì trường đó lặng lẽ giữ số nhúng sẵn của kỳ dựng file.
-     Bảng này khớp hai bên lại; TS_MISS ghi lại chỗ nào vẫn không khớp được. */
-  var FIELD_ALIAS = {
-    tdpnl:   { ItD: 'ItD PnL', YtD: 'YtD PnL 2026' },
-    bkpnl:   { ItD: 'ItD PnL', YtD: 'YtD PnL 2026' },
-    corr:    { SoCap: 'LS sơ cấp' },
-    gdTPDN:  { FIBond: 'FI Bond' },
-    fiPos:   { FIBond: 'FI Bond', Limit: 'Hạn mức' },
-    fiCoupon:{ FIBond: 'FI Bond' },
-    qlhsFi:  { Realized: 'Realized PnL' },
-    qlhsGov: { Realized: 'Realized PnL' },
-    primary: { SoCap: 'GTTT sơ cấp', ThuCap: 'GTGD thứ cấp' },
-    ytmRepo: { tenor: '@date', gov: 'YTM GovBond', fi: 'YTM FIBond', repo: 'RepoRate' },
-    vonSD:   { RealizedNIM: 'Realized&NIM lũy kế năm', RealizedChua: 'Realized&NIM chưa ghi nhận',
-               LoTiemAn: 'Lỗ tiềm ẩn', VonYeuCau: 'Vốn yêu cầu', Tong: 'Tổng' }
-  };
     if (Object.keys(K.ts).length) {
       var TS = window.TS || {};
       var MAP = {
@@ -2125,15 +2108,11 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
         bidAskSpread: 'spreadTs', tuongQuanLs10y: 'corr', gdTpdn: 'gdTPDN',
         posiFibondCd: 'fiPos', couponBqFibondCd: 'fiCoupon', yieldFiBond: 'fiYield',
         mucDoSuDungVon: 'vonSD', qlhsFibondCd: 'qlhsFi', qlhsGovbond: 'qlhsGov',
-        tuongQuanYtmVsRepo: 'ytmRepo', soCapThuCapBond: 'primary', month: 'primary'
+        tuongQuanYtmVsRepo: 'ytmRepo'
       };
-      TS_STALE = Object.keys(TS).slice();
-      TS_MISS = [];
       Object.keys(K.ts).forEach(function (s) {
         var target = MAP[s];
         if (!target || !TS[target]) return;
-        var ix = TS_STALE.indexOf(target);
-        if (ix >= 0) TS_STALE.splice(ix, 1);
         var src = K.ts[s], dst = {};
         Object.keys(src).forEach(function (f) { dst[f] = src[f]; });
         var raw = src.date.map(function (d) { return xlDate(d); });
@@ -2143,14 +2122,8 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
           if (!m) return String(d).slice(0, 8);
           return mon ? (m[2] + '/' + m[3].slice(2)) : (m[1] + '/' + m[2]);
         });
-        var al = FIELD_ALIAS[target] || {};
-        Object.keys(al).forEach(function (f) {
-          var from = al[f];
-          if (from === '@date') { if (raw.length) dst[f] = raw.slice(); return; }
-          if (src[from] !== undefined) dst[f] = src[from];
-        });
         Object.keys(TS[target]).forEach(function (f) {
-          if (dst[f] === undefined) { dst[f] = TS[target][f]; TS_MISS.push(target + '.' + f); }
+          if (dst[f] === undefined) dst[f] = TS[target][f];
         });
         TS[target] = dst;
       });
@@ -2536,20 +2509,6 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
         items.push([Math.abs(diff) < 0.5 ? 'ok' : 'no', spec[0],
           fm(a) + ' vs ' + fm(b) + (Math.abs(diff) < 0.5 ? '' : ' · lệch ' + fm(diff))]);
       });
-
-    if (TS_MISS.length) {
-      items.push(['no', 'Trường biểu đồ file key không có — đang vẽ bằng số nhúng sẵn',
-        TS_MISS.join(' · ')]);
-    }
-    if (TS_STALE && TS_STALE.length) {
-      var NICE = {
-        primary: 'Sơ cấp / thứ cấp bond', lsttPrimary: 'Lãi suất trúng thầu sơ cấp',
-        gdTPDN: 'Giao dịch TPDN', ytmRepo: 'Tương quan YTM vs repo',
-        qlhsGov: 'QLHS GovBond', qlhsFi: 'QLHS FIBond & CD'
-      };
-      items.push(['no', 'Chuỗi biểu đồ không có trong file key — đang vẽ bằng số nhúng sẵn',
-        TS_STALE.map(function (k) { return NICE[k] || k; }).join(' · ')]);
-    }
 
     var breach = [];
     ['MSB', 'SBV'].forEach(function (sc) {
