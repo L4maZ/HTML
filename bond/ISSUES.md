@@ -53,7 +53,7 @@ Chạy bộ trích xuất trên 3 bản File 02: **12/08 · 13/08 · 14/08**.
 |---|---|
 | E2 | `Report!B254` (`txt.noteRating`) **rỗng ở bản 12/08**, có nội dung ở 13 và 14. Macro phải chịu được ô trống, không được lỗi runtime |
 | E3 | `txt.itdBB` (nhận định lỗ MtM Banking) giống hệt cả ba ngày trong khi `txt.itdTB` đổi mỗi ngày. Không phải lỗi công cụ — cần Jak xác nhận có phải quên cập nhật không |
-| E4 | Chưa test được **file thưa**. Ba bản này đều đủ dữ liệu. Bản 13/02 mà briefing nhắc (2 deal, cột AK rỗng, từng gây VBA runtime error) vẫn nên chạy thử trước khi chốt macro |
+| E4 | Chưa test được **file thưa**. Ba bản này đều đủ dữ liệu. Bản 13/02 mà briefing nhắc (2 deal, cột AK rỗng, từng gây VBA runtime error) vẫn nên chạy thử trước khi chốt macro | **(Jak 30/09: bỏ qua, không xử lý)** |
 
 ## Đã đóng
 
@@ -132,5 +132,5 @@ số từ mô hình VaR mục 21 sheet `Trading`. Hệ quả trên mặt báo c�
 
 | # | Cần Jak xác nhận (phía Excel) |
 |---|---|
-| E4 | Sheet `Chart data`, khối "Sơ cấp/thứ cấp bond" (cột AX–AZ): hai dòng **01/03/2026 và 29/03/2026 trùng hoàn toàn số liệu** (19,560 và 272,650), các tháng sau lệch sang ngày 29. Nghi dòng bị sao chép; HTML đã báo cảnh báo khi nạp |
+| E4 | Sheet `Chart data`, khối "Sơ cấp/thứ cấp bond" (cột AX–AZ): hai dòng **01/03/2026 và 29/03/2026 trùng hoàn toàn số liệu** (19,560 và 272,650), các tháng sau lệch sang ngày 29. Nghi dòng bị sao chép; HTML đã báo cảnh báo khi nạp | **(Jak 30/09: bỏ qua, không xử lý)** |
 

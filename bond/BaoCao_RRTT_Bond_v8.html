@@ -69,16 +69,13 @@ table td,table th{overflow-wrap:break-word}
 @media (max-width:1320px){table td[style*="min-width:190px"]{min-width:120px!important}table td,table th{padding-left:5px!important;padding-right:5px!important}table th{white-space:normal!important}}
 @media (max-width:1200px){table{font-size:11.5px!important}table td[style*="min-width:190px"]{min-width:90px!important}table td,table th{padding-left:3px!important;padding-right:3px!important}table th{letter-spacing:.02em!important;max-width:none!important}}
 
-/* ---- v9: thu gọn / mở rộng ---- */
-[data-cx-h]{position:relative;cursor:pointer;user-select:none;padding-right:26px!important}
-[data-cx-h]::after{content:"";position:absolute;right:4px;top:50%;width:7px;height:7px;border-right:2px solid #8d877c;border-bottom:2px solid #8d877c;transform:translateY(-70%) rotate(45deg);transition:transform .15s}
-[data-cx][data-collapsed]>[data-cx-h]::after{transform:translateY(-50%) rotate(-45deg)}
-[data-cx][data-collapsed]{align-self:start}
-[data-cx-h]:hover::after{border-color:var(--wine)}
-[data-cx-h]:hover h2,[data-cx-h]:hover h3{color:var(--wine)}
-[data-cx-h]:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
-[data-cx][data-collapsed]>*:not([data-cx-h]){display:none!important}
-[data-cx][data-collapsed]>[data-cx-h]{border-bottom-color:transparent!important;margin-bottom:0!important;padding-bottom:0!important}
+/* ---- v9: đóng/mở nhóm chỉ tiêu ở 2 bảng Indicator ---- */
+.gt{cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:6px}
+.gt::before{content:"";flex:none;width:6px;height:6px;border-right:2px solid #8d877c;border-bottom:2px solid #8d877c;transform:rotate(45deg) translateY(-2px);transition:transform .15s}
+tr[data-gc] .gt::before{transform:rotate(-45deg)}
+.gt:hover::before{border-color:var(--wine)}
+.gt:hover span{color:var(--wine)!important}
+.gt:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 [data-cx-all]:hover{border-color:var(--wine)!important;color:var(--wine)!important}
 .fi2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
 @media (max-width:1420px){.fi2{grid-template-columns:minmax(0,1fr)}}
@@ -232,7 +229,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
       <button type="button" data-nav="p5" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;appearance:none;border:none;border-left:3px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:9px 18px 9px 15px;background:transparent;color:#6b665e;transition:background .18s,color .18s,border-color .18s;"><span data-rail-text>FI Bond &amp; CD</span></button>
     </nav>
     <div data-rail-text style="padding:12px 16px 14px;border-top:1px solid rgba(32,31,29,.12);">
-      <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8d877c;margin-bottom:7px;">Hiển thị bảng</div>
+      <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8d877c;margin-bottom:7px;">Bảng Indicator</div>
       <div style="display:flex;gap:6px;">
         <button type="button" data-cx-all="open" style="flex:1;appearance:none;background:#fff;border:1px solid rgba(32,31,29,.2);border-radius:4px;padding:6px 0;font-family:var(--f-body);font-size:12px;cursor:pointer;color:#6b665e;">Mở hết</button>
         <button type="button" data-cx-all="close" style="flex:1;appearance:none;background:#fff;border:1px solid rgba(32,31,29,.2);border-radius:4px;padding:6px 0;font-family:var(--f-body);font-size:12px;cursor:pointer;color:#6b665e;">Đóng hết</button>
@@ -823,14 +820,27 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     const c = s === 'breach' ? K.red : s === 'warn' ? K.amber : K.green;
     return '<span title="' + (s === 'breach' ? 'Vi phạm hạn mức' : s === 'warn' ? '≥ 80% hạn mức' : 'Trong hạn mức') + '" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + c + ';box-shadow:0 0 0 3px ' + (s === 'breach' ? 'rgba(155,44,44,.14)' : s === 'warn' ? 'rgba(183,121,31,.14)' : 'rgba(76,107,60,.13)') + ';"></span>';
   }
-  function indicatorTable(book) {
-    const d = RPT().colDates;
-    let h = '<thead><tr>' + th('Nhóm', 1) + th('Indicator', 1) + th(d.today) + th('+/− DtD') + th(d.yest) + th(d.lm) + th(d.lq) + th(d.ly) + th('Hạn mức') + th('% sử dụng') + th('Đèn') + '</tr></thead><tbody>';
-    book.rows.forEach(r => {
+  function indicatorTable(book, opt) {
+    opt = opt || {};
+    const d = RPT().colDates, rows = book.rows;
+    let gn = 0, gid = null;
+    let h = '<thead><tr>' + (opt.noCat ? '' : th('Nhóm', 1)) + th('Indicator', 1) + th(d.today) + th('+/− DtD') + th(d.yest) + th(d.lm) + th(d.lq) + th(d.ly) + th('Hạn mức') + th('% sử dụng') + th('Đèn') + '</tr></thead><tbody>';
+    rows.forEach((r, ri) => {
       const st = lightOf(r.used);
       const rowBg = st === 'breach' ? 'background:rgba(155,44,44,.05);' : st === 'warn' ? 'background:rgba(183,121,31,.05);' : '';
-      h += '<tr style="' + rowBg + '">'
-        + tdL(r.cat ? '<span style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:' + K.faint + ';">' + esc(r.cat) + '</span>' : '', 'white-space:nowrap;')
+      let members = 0, gattr = '';
+      if (opt.groups) {
+        /* Nhóm thật của File 02 là các ô gộp: Trạng thái mở, Vốn yêu cầu, PnL. PV01/Duration/VaR/CVaR chỉ là nhãn một dòng. */
+        if (r.cat) {
+          if (/^(trạng thái mở|vốn yêu cầu|pnl)$/i.test(String(r.cat).trim())) {
+            gn++; gid = 'g' + gn; for (let j = ri + 1; j < rows.length && !rows[j].cat; j++) members++;
+            if (members) gattr = ' data-gh="' + gid + '"';
+          } else gid = null;
+        } else if (gid) gattr = ' data-gm="' + gid + '"';
+      }
+      const catTxt = r.cat ? '<span style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:' + K.faint + ';">' + esc(r.cat) + '</span>' : '';
+      h += '<tr' + gattr + ' style="' + rowBg + '">'
+        + (opt.noCat ? '' : tdL(members ? '<span class="gt" role="button" tabindex="0" aria-expanded="true">' + catTxt + '</span>' : catTxt, 'white-space:nowrap;'))
         + tdL((r.sub ? '<span style="color:' + K.muted + ';padding-left:12px;">' : '<span>') + esc(r.label) + '</span>'
           + (r.note ? '<div style="font-size:11.5px;color:' + K.faint + ';margin-top:2px;line-height:1.45;">' + esc(r.note) + '</div>' : '')
           + (r.warn ? '<div style="font-size:11.5px;color:' + K.amber + ';margin-top:2px;line-height:1.45;">' + esc(r.warn) + '</div>' : ''), 'min-width:190px;')
@@ -851,7 +861,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     books.forEach((b, i) => {
       h += '<div style="' + (i ? 'margin-top:26px;' : '') + '">'
         + '<h3 style="font-family:var(--f-head);font-size:14.5px;font-weight:600;margin:0 0 10px;">' + esc(b.title) + '</h3>'
-        + '<div style="min-width:0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;font-family:var(--f-body);">' + indicatorTable(b) + '</table></div>'
+        + '<div style="min-width:0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;font-family:var(--f-body);">' + indicatorTable(b, { groups: true }) + '</table></div>'
         + noteUnder(/^2\.1/.test(b.title) ? CMT.tb : /^2\.2/.test(b.title) ? CMT.bb : '') + '</div>';
     });
     setHtml('indHost', h);
@@ -1315,7 +1325,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
         { name: 'FI Bond&CD · Realized', type: 'bar', data: q.Realized, itemStyle: { color: 'rgba(182,130,53,.4)' }, barMaxWidth: 18 },
         { name: 'FI Bond&CD · Tổng', type: 'line', data: q.Total, smooth: true, symbol: 'circle', symbolSize: 5, lineStyle: { width: 2, color: K.blue } }]
       })); }
-    setTbl('tblFiInd', indicatorTable({ rows: R.other.concat(R.fibond.map(f => Object.assign({ cat: '' }, f))) }), 13);
+    setTbl('tblFiInd', indicatorTable({ rows: R.other.concat(R.fibond).map(f => Object.assign({}, f, { cat: '' })) }, { noCat: true }), 13);
     /* 1 card gộp: face value + hạn mức */
     const cell = (l, v, s, u) => '<div style="min-width:0;padding:13px 16px 15px;">'
       + '<div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:' + K.faint + ';line-height:1.4;">' + esc(l) + '</div>'
@@ -1397,37 +1407,27 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
   function loadState() { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch (e) { return {}; } }
   function saveState(s) { try { localStorage.setItem(LS, JSON.stringify(s)); } catch (e) { } }
 
-  /* =================== THU GỌN / MỞ RỘNG =================== */
-  function cxSet(box, closed) {
-    if (closed) box.setAttribute('data-collapsed', ''); else box.removeAttribute('data-collapsed');
-    const h = box.querySelector(':scope > [data-cx-h]'); if (h) h.setAttribute('aria-expanded', closed ? 'false' : 'true');
+  /* =================== ĐÓNG / MỞ NHÓM CHỈ TIÊU (2 bảng Indicator) =================== */
+  /* Mỗi nhóm (Trạng thái mở, Vốn yêu cầu, PnL, PV01…) đóng lại thì chỉ còn dòng đầu nhóm. */
+  function gSet(hd, closed) {
+    const tb = hd.closest('table'), id = hd.getAttribute('data-gh');
+    tb.querySelectorAll('tr[data-gm="' + id + '"]').forEach(r => { r.style.display = closed ? 'none' : ''; });
+    if (closed) hd.setAttribute('data-gc', ''); else hd.removeAttribute('data-gc');
+    const g = hd.querySelector('.gt'); if (g) g.setAttribute('aria-expanded', closed ? 'false' : 'true');
   }
-  function cxAll(closed) { document.querySelectorAll('[data-cx]').forEach(b => cxSet(b, closed)); resizeSoon(); }
+  function groupsAll(closed) { document.querySelectorAll('#indHost tr[data-gh]').forEach(hd => gSet(hd, closed)); resizeSoon(); }
   function setupCollapsible() {
-    const mark = (box, head) => {
-      if (!box || !head || box.hasAttribute('data-cx')) return;
-      box.setAttribute('data-cx', ''); head.setAttribute('data-cx-h', '');
-      head.setAttribute('role', 'button'); head.setAttribute('tabindex', '0'); head.setAttribute('aria-expanded', 'true');
-    };
-    document.querySelectorAll('[data-page="p2"] section,[data-page="p3"] section,[data-page="p4"] section,[data-page="p5"] section').forEach(sec => {
-      const h = sec.firstElementChild;
-      if (h && h.tagName === 'DIV' && h.querySelector('h2,h3') && sec.children.length > 1) mark(sec, h);
-    });
-    document.querySelectorAll('#indHost > div').forEach(b => {
-      const h = b.firstElementChild;
-      if (h && h.tagName === 'H3' && b.children.length > 1) mark(b, h);
-    });
     if (window.__cxWired) return; window.__cxWired = true;
-    const toggle = h => { const box = h.parentElement; cxSet(box, !box.hasAttribute('data-collapsed')); resizeSoon(); };
+    const toggle = g => { const hd = g.closest('tr[data-gh]'); if (hd) { gSet(hd, !hd.hasAttribute('data-gc')); resizeSoon(); } };
     document.addEventListener('click', e => {
-      const h = e.target.closest && e.target.closest('[data-cx-h]'); if (h) { toggle(h); return; }
-      const b = e.target.closest && e.target.closest('[data-cx-all]'); if (b) cxAll(b.dataset.cxAll === 'close');
+      const g = e.target.closest && e.target.closest('.gt'); if (g) { toggle(g); return; }
+      const b = e.target.closest && e.target.closest('[data-cx-all]'); if (b) groupsAll(b.dataset.cxAll === 'close');
     });
     document.addEventListener('keydown', e => {
       if (e.key !== 'Enter' && e.key !== ' ') return;
-      const h = e.target.closest && e.target.closest('[data-cx-h]'); if (h && e.target === h) { e.preventDefault(); toggle(h); }
+      const g = e.target.closest && e.target.closest('.gt'); if (g && e.target === g) { e.preventDefault(); toggle(g); }
     });
-    window.addEventListener('beforeprint', () => cxAll(false));
+    window.addEventListener('beforeprint', () => groupsAll(false));
   }
 
   function goPage(id) {
@@ -1542,7 +1542,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
   }
 
   window.__afterRender = applyDataKeys;
-  window.RRTT = { mount: mount, resizeAll: resizeAll, goPage: goPage, expandAll: function () { cxAll(false); }, collapseAll: function () { cxAll(true); }, setScope: setScope, rerender: function(){ applyNavKeys(); renderAll(); resizeSoon(); }, keys: function(){ return Object.assign({}, KEY_DEF, window.RRTT_KEYS||{}); } };
+  window.RRTT = { mount: mount, resizeAll: resizeAll, goPage: goPage, expandAll: function () { groupsAll(false); }, collapseAll: function () { groupsAll(true); }, setScope: setScope, rerender: function(){ applyNavKeys(); renderAll(); resizeSoon(); }, keys: function(){ return Object.assign({}, KEY_DEF, window.RRTT_KEYS||{}); } };
 
 })();
 </script>
