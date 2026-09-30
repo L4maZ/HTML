@@ -123,3 +123,14 @@ số từ mô hình VaR mục 21 sheet `Trading`. Hệ quả trên mặt báo c�
 - **Excel đảo ngày/tháng khi macro ghi key** (ví dụ 03/08 thành 08/03, chỉ với ngày ≤ 12): macro ghi ngày dạng chuỗi vào ô định dạng chung nên Excel đọc theo locale. Trục ngày biểu đồ vì thế sai. `XuatFileKey.bas` nay đặt cột ngày (META, VIRA4, RATING, TS) là định dạng Text trước khi ghi. HTML tự báo đỏ khi ngày trong chuỗi không tăng dần. `make_key.py` không bị (ghi chuỗi thẳng).
 - "Kiểm tra trước khi gửi" chỉ hiện khi có lỗi/cảnh báo; ẩn Volatility trên báo cáo; tiêu đề cột ngày thống nhất dd/mm/yyyy.
 
+### Rà số 30/09/2026 (đợt 3–4)
+Đối chiếu HTML (nạp `Key_20260929.xlsx`) với File 02 ngày 29/09, đọc thẳng từ sheet `Linked` / `Linked (1)` / `Chart data`:
+- **731** giá trị cấp dữ liệu (Position, Nắm giữ, Cơ cấu phát hành, PnL, Sử dụng vốn, BS, FI trên BS, Kịch bản, đường cong, Xếp hạng, Khối 2) và **460** ô hiển thị thật trên bảng (Trạng thái, ItD, PV01, Nắm giữ, Vốn, PnL, Kịch bản, FI): **0 lệch**.
+- **6,515** điểm chuỗi biểu đồ (21 chuỗi trong `Chart data`): **0 lệch**, riêng chuỗi `lsttSoCap` có 5 ngày cuối (26/08–23/09) trống trong Excel nên không vẽ.
+- **Lỗi tìm thấy và đã sửa:** bảng "FI Bond trên bảng cân đối" hiện dòng "4. Giảm trừ đối ứng" hai lần (dòng bắt đầu bằng "4." bị lọc nhầm vào phần thân bảng).
+- Trục nhãn chuỗi theo tháng: `month` (sơ cấp/thứ cấp) trước đây hiện dd/mm, nay hiện mm/yy.
+
+| # | Cần Jak xác nhận (phía Excel) |
+|---|---|
+| E4 | Sheet `Chart data`, khối "Sơ cấp/thứ cấp bond" (cột AX–AZ): hai dòng **01/03/2026 và 29/03/2026 trùng hoàn toàn số liệu** (19,560 và 272,650), các tháng sau lệch sang ngày 29. Nghi dòng bị sao chép; HTML đã báo cảnh báo khi nạp |
+

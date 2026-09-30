@@ -68,6 +68,20 @@ table td,table th{overflow-wrap:break-word}
 @media (max-width:1400px){table td,table th{padding-left:6px!important;padding-right:6px!important}}
 @media (max-width:1320px){table td[style*="min-width:190px"]{min-width:120px!important}table td,table th{padding-left:5px!important;padding-right:5px!important}table th{white-space:normal!important}}
 @media (max-width:1200px){table{font-size:11.5px!important}table td[style*="min-width:190px"]{min-width:90px!important}table td,table th{padding-left:3px!important;padding-right:3px!important}table th{letter-spacing:.02em!important;max-width:none!important}}
+
+/* ---- v9: thu gọn / mở rộng ---- */
+[data-cx-h]{position:relative;cursor:pointer;user-select:none;padding-right:26px!important}
+[data-cx-h]::after{content:"";position:absolute;right:4px;top:50%;width:7px;height:7px;border-right:2px solid #8d877c;border-bottom:2px solid #8d877c;transform:translateY(-70%) rotate(45deg);transition:transform .15s}
+[data-cx][data-collapsed]>[data-cx-h]::after{transform:translateY(-50%) rotate(-45deg)}
+[data-cx][data-collapsed]{align-self:start}
+[data-cx-h]:hover::after{border-color:var(--wine)}
+[data-cx-h]:hover h2,[data-cx-h]:hover h3{color:var(--wine)}
+[data-cx-h]:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
+[data-cx][data-collapsed]>*:not([data-cx-h]){display:none!important}
+[data-cx][data-collapsed]>[data-cx-h]{border-bottom-color:transparent!important;margin-bottom:0!important;padding-bottom:0!important}
+[data-cx-all]:hover{border-color:var(--wine)!important;color:var(--wine)!important}
+.fi2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:1420px){.fi2{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head><body><div id="app" style="min-height:100vh;background:#f3f2f2;"></div>
 <script>
@@ -217,6 +231,13 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
       <button type="button" data-nav="p4" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;appearance:none;border:none;border-left:3px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:9px 18px 9px 15px;background:transparent;color:#6b665e;transition:background .18s,color .18s,border-color .18s;"><span data-rail-text>Thị trường TPCP</span></button>
       <button type="button" data-nav="p5" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;appearance:none;border:none;border-left:3px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:9px 18px 9px 15px;background:transparent;color:#6b665e;transition:background .18s,color .18s,border-color .18s;"><span data-rail-text>FI Bond &amp; CD</span></button>
     </nav>
+    <div data-rail-text style="padding:12px 16px 14px;border-top:1px solid rgba(32,31,29,.12);">
+      <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8d877c;margin-bottom:7px;">Hiển thị bảng</div>
+      <div style="display:flex;gap:6px;">
+        <button type="button" data-cx-all="open" style="flex:1;appearance:none;background:#fff;border:1px solid rgba(32,31,29,.2);border-radius:4px;padding:6px 0;font-family:var(--f-body);font-size:12px;cursor:pointer;color:#6b665e;">Mở hết</button>
+        <button type="button" data-cx-all="close" style="flex:1;appearance:none;background:#fff;border:1px solid rgba(32,31,29,.2);border-radius:4px;padding:6px 0;font-family:var(--f-body);font-size:12px;cursor:pointer;color:#6b665e;">Đóng hết</button>
+      </div>
+    </div>
     <div style="margin-top:auto;padding:14px 16px 18px;border-top:1px solid rgba(32,31,29,.12);font-size:11.5px;color:#8d877c;line-height:1.6;">
       <div data-rail-text>Đơn vị: tỷ VND, trừ khi ghi khác. Giá trị âm là lỗ.</div>
     </div>
@@ -599,6 +620,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
           </div>
           <div style="min-width:0;overflow-x:auto;"><div id="tblFiInd"></div></div>
         </section>
+        <div class="fi2" style="min-width:0;">
         <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
           <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
             <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_vol_03">Trạng thái trên bảng cân đối &amp; điều chỉnh đối ứng</h2>
@@ -613,6 +635,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
           </div>
           <div style="min-width:0;overflow-x:auto;"><div id="tblFiTenor"></div></div>
         </section>
+        </div>
         <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
           <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
             <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_vol_05">Cơ cấu theo tổ chức phát hành &amp; xếp hạng nội bộ</h2>
@@ -1374,6 +1397,39 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
   function loadState() { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch (e) { return {}; } }
   function saveState(s) { try { localStorage.setItem(LS, JSON.stringify(s)); } catch (e) { } }
 
+  /* =================== THU GỌN / MỞ RỘNG =================== */
+  function cxSet(box, closed) {
+    if (closed) box.setAttribute('data-collapsed', ''); else box.removeAttribute('data-collapsed');
+    const h = box.querySelector(':scope > [data-cx-h]'); if (h) h.setAttribute('aria-expanded', closed ? 'false' : 'true');
+  }
+  function cxAll(closed) { document.querySelectorAll('[data-cx]').forEach(b => cxSet(b, closed)); resizeSoon(); }
+  function setupCollapsible() {
+    const mark = (box, head) => {
+      if (!box || !head || box.hasAttribute('data-cx')) return;
+      box.setAttribute('data-cx', ''); head.setAttribute('data-cx-h', '');
+      head.setAttribute('role', 'button'); head.setAttribute('tabindex', '0'); head.setAttribute('aria-expanded', 'true');
+    };
+    document.querySelectorAll('[data-page="p2"] section,[data-page="p3"] section,[data-page="p4"] section,[data-page="p5"] section').forEach(sec => {
+      const h = sec.firstElementChild;
+      if (h && h.tagName === 'DIV' && h.querySelector('h2,h3') && sec.children.length > 1) mark(sec, h);
+    });
+    document.querySelectorAll('#indHost > div').forEach(b => {
+      const h = b.firstElementChild;
+      if (h && h.tagName === 'H3' && b.children.length > 1) mark(b, h);
+    });
+    if (window.__cxWired) return; window.__cxWired = true;
+    const toggle = h => { const box = h.parentElement; cxSet(box, !box.hasAttribute('data-collapsed')); resizeSoon(); };
+    document.addEventListener('click', e => {
+      const h = e.target.closest && e.target.closest('[data-cx-h]'); if (h) { toggle(h); return; }
+      const b = e.target.closest && e.target.closest('[data-cx-all]'); if (b) cxAll(b.dataset.cxAll === 'close');
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const h = e.target.closest && e.target.closest('[data-cx-h]'); if (h && e.target === h) { e.preventDefault(); toggle(h); }
+    });
+    window.addEventListener('beforeprint', () => cxAll(false));
+  }
+
   function goPage(id) {
     document.querySelectorAll('[data-page]').forEach(p => {
       const on = p.dataset.page === id;
@@ -1410,6 +1466,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     [['highlight',renderHighlight],['indicator',renderIndicator],['trangthai',renderTrangThai],['donhay',renderDoNhay],['itd',renderItd],
      ['laiLo',renderLaiLo],['von',renderVon],['thoigian',renderThoiGian],['scenario',renderScenario],['market',renderMarket],['fi',renderFI]]
       .forEach(([n, f]) => { try { f(); } catch (err) { console.error('[rrtt] ' + n + ': ' + err.message, err); } });
+    setupCollapsible();
     applyDataKeys();
     resizeSoon();
   }
@@ -1485,7 +1542,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
   }
 
   window.__afterRender = applyDataKeys;
-  window.RRTT = { mount: mount, resizeAll: resizeAll, goPage: goPage, setScope: setScope, rerender: function(){ applyNavKeys(); renderAll(); resizeSoon(); }, keys: function(){ return Object.assign({}, KEY_DEF, window.RRTT_KEYS||{}); } };
+  window.RRTT = { mount: mount, resizeAll: resizeAll, goPage: goPage, expandAll: function () { cxAll(false); }, collapseAll: function () { cxAll(true); }, setScope: setScope, rerender: function(){ applyNavKeys(); renderAll(); resizeSoon(); }, keys: function(){ return Object.assign({}, KEY_DEF, window.RRTT_KEYS||{}); } };
 
 })();
 </script>
@@ -1976,7 +2033,7 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
     var fio = grid(K.grid, 'FIONBS');
     if (fio.length) {
       R.fiOnBS = R.fiOnBS || {};
-      R.fiOnBS.rows = fio.filter(function (r) { return /^\d\./.test(String(r.Label).trim()); })
+      R.fiOnBS.rows = fio.filter(function (r) { return /^\d\./.test(String(r.Label).trim()) && !/Giảm trừ/i.test(String(r.Label)); })
         .map(function (r) {
           return { k: String(r.Label).trim(), on: num(r.C1), off: num(r.C2), out: num(r.C3), total: num(r.C4) };
         });
@@ -2186,6 +2243,13 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
         });
         if (dec) K.problems.push('Biểu đồ "' + s + '": ngày không tăng dần (' + dec + ' chỗ) — nghi Excel đảo ngày/tháng khi ghi key (ngày ≤ 12). Tạo lại key bằng macro mới (cột ngày ghi dạng chữ).');
         var mon = isMonthly(raw);
+        if (mon) {
+          var fs = Object.keys(src).filter(function (f) { return f !== 'date'; });
+          for (var q = 1; q < raw.length; q++) {
+            if (fs.length >= 2 && fs.every(function (f) { return src[f][q] != null && src[f][q] === src[f][q - 1]; }))
+              K.problems.push('Biểu đồ "' + s + '": hai dòng liên tiếp (' + raw[q - 1] + ' và ' + raw[q] + ') trùng hoàn toàn số liệu — nghi dòng sao chép trong sheet Chart data');
+          }
+        }
         dst.date = raw.map(function (d) {
           var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(d);
           if (!m) return String(d).slice(0, 8);
@@ -2225,15 +2289,17 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
   }
   /* Chuoi theo thang thi nhan truc la mm/yy, theo ngay thi dd/mm */
   function isMonthly(list) {
-    if (!list.length || list.length > 40) return false;
-    var seen = {}, ok = 0;
+    if (list.length < 2 || list.length > 40) return false;
+    var prev = null, gapOk = true, seen = {}, uniq = 0;
     for (var i = 0; i < list.length; i++) {
       var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(list[i]);
       if (!m) return false;
-      seen[m[2] + m[3]] = 1;
-      ok++;
+      var day = Date.UTC(+m[3], +m[2] - 1, +m[1]) / 86400000;
+      if (prev !== null && day - prev < 20) gapOk = false;
+      prev = day;
+      if (!seen[m[2] + m[3]]) { seen[m[2] + m[3]] = 1; uniq++; }
     }
-    return Object.keys(seen).length === ok;
+    return gapOk || uniq === list.length;   /* cách nhau ≥ 20 ngày, hoặc mỗi điểm một tháng khác nhau */
   }
 
   function ageDays(d) {
@@ -2758,6 +2824,7 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
 
     $('#rrttExport').addEventListener('click', function () {
       if (window.RRTT && window.RRTT.goPage) window.RRTT.goPage('p1');
+      if (window.RRTT && window.RRTT.expandAll) window.RRTT.expandAll();   /* bản gửi đi luôn mở hết */
       var clone = document.documentElement.cloneNode(true);
       var inject = document.createElement('script');
       LOG.push({ at: new Date().toLocaleString('en-GB', { hour12: false }).replace(',', ''),
