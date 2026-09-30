@@ -134,3 +134,9 @@ số từ mô hình VaR mục 21 sheet `Trading`. Hệ quả trên mặt báo c�
 |---|---|
 | E4 | Sheet `Chart data`, khối "Sơ cấp/thứ cấp bond" (cột AX–AZ): hai dòng **01/03/2026 và 29/03/2026 trùng hoàn toàn số liệu** (19,560 và 272,650), các tháng sau lệch sang ngày 29. Nghi dòng bị sao chép; HTML đã báo cảnh báo khi nạp | **(Jak 30/09: bỏ qua, không xử lý)** |
 
+### Kế hoạch còn lại
+| Đợt | Nội dung | Trạng thái |
+|---|---|---|
+| 5 | Tên chỉ số đầy đủ | Đã lập bảng đề xuất `TEN_CHI_SO_DE_XUAT.md`, **chờ Jak duyệt** |
+| 6 | Rules cảnh báo biến động so với ngày hôm trước ở "Kiểm tra trước khi gửi" | **Hoãn (Jak 30/09: log lại, chưa làm).** Cần: báo cáo mới nhất và ngưỡng cho từng chỉ số. Đã có sẵn: khung kiểm tra và cảnh báo hạn mức; tính phân bố biến động ngày từ lịch sử `Chart data` để đề xuất ngưỡng |
+
