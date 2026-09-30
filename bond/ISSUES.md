@@ -137,6 +137,6 @@ số từ mô hình VaR mục 21 sheet `Trading`. Hệ quả trên mặt báo c�
 ### Kế hoạch còn lại
 | Đợt | Nội dung | Trạng thái |
 |---|---|---|
-| 5 | Tên chỉ số đầy đủ | Đã lập bảng đề xuất `TEN_CHI_SO_DE_XUAT.md`, **chờ Jak duyệt** |
+| 5 | Tên chỉ số đầy đủ | **Xong 30/09:** chỉ sửa `ItD` thành `ItD Unrealized PnL` (10 chỗ); các tên khác giữ nguyên theo Jak. Bảng đề xuất lưu ở `TEN_CHI_SO_DE_XUAT.md` |
 | 6 | Rules cảnh báo biến động so với ngày hôm trước ở "Kiểm tra trước khi gửi" | **Hoãn (Jak 30/09: log lại, chưa làm).** Cần: báo cáo mới nhất và ngưỡng cho từng chỉ số. Đã có sẵn: khung kiểm tra và cảnh báo hạn mức; tính phân bố biến động ngày từ lịch sử `Chart data` để đề xuất ngưỡng |
 

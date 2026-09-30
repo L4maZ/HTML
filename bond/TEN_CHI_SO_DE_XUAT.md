@@ -1,4 +1,6 @@
-# Đợt 5 — Bảng đề xuất tên chỉ số đầy đủ (chờ Jak duyệt)
+# Đợt 5 — Bảng đề xuất tên chỉ số đầy đủ
+
+> **Kết quả (30/09/2026):** Jak chỉ duyệt nhóm A (chỉ sửa `ItD` thành `ItD Unrealized PnL`, đã áp dụng). Các nhóm B–G **không sửa**, giữ nguyên tên hiện tại. Bảng này giữ lại để tham khảo.
 
 Quét 30/09/2026 trên toàn bộ chữ hiển thị của báo cáo (tab, tiêu đề, tên cột, tên dòng, nhãn KPI, chú giải chart, trục chart), nạp `Key_20260929.xlsx`. Có **139 nhãn** chứa từ viết tắt hoặc thuật ngữ, gom lại còn các nhóm dưới đây.
 

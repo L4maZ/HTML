@@ -350,7 +350,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
           </section>
           <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
             <div style="border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
-              <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_thoigian_02">Trạng thái &amp; ItD theo nhóm thời gian nắm giữ</h2>
+              <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_thoigian_02">Trạng thái &amp; ItD Unrealized PnL theo nhóm thời gian nắm giữ</h2>
             </div>
             <div id="ch_hold" style="height:310px;"></div>
           </section>
@@ -513,7 +513,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
           <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
             <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
               <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_thoigian_06">Kịch bản Trading Book · biến động các ngày gần đây</h2>
-              <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">tác động ItD · tỷ VND</span>
+              <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">tác động ItD Unrealized PnL · tỷ VND</span>
             </div>
             <div style="min-width:0;overflow-x:auto;"><div id="tblScenRecent"></div></div>
             <div id="scenNote10d" style="font-size:12.5px;color:#6b665e;line-height:1.6;margin-top:12px;max-width:95ch;"></div>
@@ -964,7 +964,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
   /* =================== ItD UNREALIZED =================== */
   function itdTable(id, rows, tot) {
     const d = RPT().colDates;
-    let h = '<thead><tr>' + th('Kỳ hạn', 1) + th('Trạng thái') + th('PV01') + th('ItD ' + d.today) + th('ItD ' + d.yest) + th('ItD ' + d.lm) + th('+/− MtD') + th('+/− YtD') + '</tr></thead><tbody>';
+    let h = '<thead><tr>' + th('Kỳ hạn', 1) + th('Trạng thái') + th('PV01') + th('ItD Unrealized PnL<br>' + d.today) + th('ItD Unrealized PnL<br>' + d.yest) + th('ItD Unrealized PnL<br>' + d.lm) + th('+/− MtD') + th('+/− YtD') + '</tr></thead><tbody>';
     rows.forEach(r => {
       h += '<tr>' + tdL(r.t) + tdR(n0(r.face), 'color:' + K.muted) + tdR(n2(r.pv01), 'color:' + K.muted + ';' + negCol(r.pv01))
         + tdR(n1(r.itd), 'font-weight:600;' + negCol(r.itd)) + tdR(n1(r.itdYest), 'color:' + K.muted) + tdR(n1(r.itdLM), 'color:' + K.muted)
@@ -996,8 +996,8 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
       : 'AFS ' + n1(sp.afs) + (sp.htm == null ? '' : ' + HTM ' + n1(sp.htm));
     setHtml('itdSummary',
       ['<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;background:' + K.grid + ';border:1px solid ' + K.grid + ';border-radius:4px;overflow:hidden;">',
-        [['ItD toàn book Trading', tb.today, spNote],
-        ['ItD toàn book Banking', R.posBankingTotal.itd, ''],
+        [['ItD Unrealized PnL toàn book Trading', tb.today, spNote],
+        ['ItD Unrealized PnL toàn book Banking', R.posBankingTotal.itd, ''],
         ['Tổng GBond', tb.today + R.posBankingTotal.itd, 'Trading + Banking']]
           .map(([l, v, s]) => '<div style="background:' + K.paper + ';padding:12px 14px 13px;"><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:' + K.faint + ';">' + l + '</div>'
             + '<div data-num style="font-size:22px;font-weight:600;margin-top:5px;color:' + (v == null ? K.faint : K.red) + ';">' + (v == null ? '—' : n0(v)) + '</div>'
@@ -1073,7 +1073,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     c.rows.forEach(r => {
       h += '<tr' + (r.adj ? ' style="background:rgba(182,130,53,.06);"' : '') + '>'
         + tdL((r.sub ? '<span style="color:' + K.muted + ';padding-left:12px;">' : '<span style="font-weight:500;">') + esc(r.k) + '</span>'
-          + (r.adj ? '<div style="font-size:11.5px;color:' + K.gold7 + ';margin-top:2px;">Đã điều chỉnh cùng ItD toàn book (AFS + HTM)</div>' : ''))
+          + (r.adj ? '<div style="font-size:11.5px;color:' + K.gold7 + ';margin-top:2px;">Đã điều chỉnh cùng ItD Unrealized PnL toàn book (AFS + HTM)</div>' : ''))
         + tdR(n1(r.today), 'font-weight:' + (r.sub ? '400' : '600')) + tdR(n1(r.yest), 'color:' + K.muted)
         + tdR(sgn(r.dtd), 'color:' + (r.dtd > 0 ? K.red : r.dtd < 0 ? K.green : K.faint)) + tdR(n1(r.lm), 'color:' + K.muted)
         + tdR(sgn(r.mtd), 'color:' + (r.mtd > 0 ? K.red : r.mtd < 0 ? K.green : K.faint)) + '</tr>';
@@ -1097,7 +1097,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     };
     mixTable('tblIssTB', m.TB); mixTable('tblIssBB', m.BB);
 
-    const VK = [['RealizedNIM', 'Realized & NIM lũy kế', K.amber], ['RealizedChua', 'Realized & NIM chưa ghi nhận', K.blue], ['LoTiemAn', 'Lỗ tiềm ẩn (ItD)', K.red], ['VonYeuCau', 'Vốn yêu cầu TT41', 'rgba(182,130,53,.55)']];
+    const VK = [['RealizedNIM', 'Realized & NIM lũy kế', K.amber], ['RealizedChua', 'Realized & NIM chưa ghi nhận', K.blue], ['LoTiemAn', 'Lỗ tiềm ẩn (ItD Unrealized PnL)', K.red], ['VonYeuCau', 'Vốn yêu cầu TT41', 'rgba(182,130,53,.55)']];
     const v = TS().vonSD;
     mk('ch_vonHist', baseOpt({
       xAxis: axX(v.date), yAxis: axY('tỷ VND'),
@@ -1109,7 +1109,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
   /* =================== THỜI GIAN NẮM GIỮ =================== */
   function renderThoiGian() {
     const R = RPT(), rows = R.holdTime, t = R.holdTimeTotal;
-    let h = '<thead><tr>' + th('Thời gian nắm giữ', 1) + th('Trading · trạng thái') + th('Trading · ItD') + th('Banking · trạng thái') + th('Banking · ItD') + '</tr></thead><tbody>';
+    let h = '<thead><tr>' + th('Thời gian nắm giữ', 1) + th('Trading · trạng thái') + th('Trading · ItD Unrealized PnL') + th('Banking · trạng thái') + th('Banking · ItD Unrealized PnL') + '</tr></thead><tbody>';
     rows.forEach(r => {
       h += '<tr>' + tdL(r.t) + tdR(r.tb ? n0(r.tb) : '—', r.tb ? 'font-weight:500;' : 'color:' + K.faint)
         + tdR(r.tbItd ? n1(r.tbItd) : '—', negCol(r.tbItd)) + tdR(r.bb ? n0(r.bb) : '—', r.bb ? 'font-weight:500;' : 'color:' + K.faint)
@@ -1124,12 +1124,12 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
       + '<span>Time holding bình quân Trading: <b data-num style="color:' + K.ink + ';">' + n0(tbRow.today) + ' ngày</b> · hạn mức ' + esc(tbRow.limit) + '</span>'
       + '<span>Banking: <b data-num style="color:' + K.ink + ';">' + n0(bbRow.today) + ' ngày</b></span></div>');
     mk('ch_hold', baseOpt({
-      xAxis: axX(rows.map(r => r.t)), yAxis: [axY('trạng thái · tỷ'), Object.assign(axY('ItD · tỷ'), { splitLine: { show: false } })],
+      xAxis: axX(rows.map(r => r.t)), yAxis: [axY('trạng thái · tỷ'), Object.assign(axY('ItD Unrealized PnL · tỷ'), { splitLine: { show: false } })],
       series: [
         { name: 'Trading', type: 'bar', data: rows.map(r => r.tb), itemStyle: { color: K.gold }, barMaxWidth: 20 },
         { name: 'Banking', type: 'bar', data: rows.map(r => r.bb), itemStyle: { color: K.blue }, barMaxWidth: 20 },
-        { name: 'ItD Trading', type: 'line', yAxisIndex: 1, data: rows.map(r => r.tbItd), symbol: 'circle', symbolSize: 5, lineStyle: { width: 1.5, color: K.red } },
-        { name: 'ItD Banking', type: 'line', yAxisIndex: 1, data: rows.map(r => r.bbItd), symbol: 'circle', symbolSize: 5, lineStyle: { width: 1.5, color: K.red, type: 'dashed' } }
+        { name: 'ItD Unrealized PnL · Trading', type: 'line', yAxisIndex: 1, data: rows.map(r => r.tbItd), symbol: 'circle', symbolSize: 5, lineStyle: { width: 1.5, color: K.red } },
+        { name: 'ItD Unrealized PnL · Banking', type: 'line', yAxisIndex: 1, data: rows.map(r => r.bbItd), symbol: 'circle', symbolSize: 5, lineStyle: { width: 1.5, color: K.red, type: 'dashed' } }
       ]
     }));
   }
@@ -1142,7 +1142,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
 
     /* VIRA: dự báo thị trường → tác động đến DM */
     const v = R.vira;
-    let h = '<thead><tr>' + th('Book', 1) + th('PV01') + th('ItD hiện tại') + v.scenarios.map(x => th(x.k)).join('') + '</tr></thead><tbody>';
+    let h = '<thead><tr>' + th('Book', 1) + th('PV01') + th('ItD Unrealized PnL hiện tại') + v.scenarios.map(x => th(x.k)).join('') + '</tr></thead><tbody>';
     v.books.forEach(b => {
       h += '<tr>' + tdL('<span style="font-weight:500;">' + esc(b.k) + '</span>') + tdR(n2(b.pv01), negCol(b.pv01)) + tdR(n1(b.base), 'font-weight:600;' + negCol(b.base))
         + b.v.map((x, i) => tdR(n1(x) + '<div style="font-size:11px;color:' + K.red + ';margin-top:1px;">' + sgn(x - b.base) + '</div>', negCol(x))).join('') + '</tr>';
