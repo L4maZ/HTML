@@ -153,3 +153,8 @@ số từ mô hình VaR mục 21 sheet `Trading`. Hệ quả trên mặt báo c�
 - **Chưa thử với hộp thoại thật** (chỉ thử logic bằng giả lập): cần Jak thử một lần trên Edge ở máy làm việc.
 - Đã sửa cùng lúc: ghi chú kịch bản 10 ngày, VaR và ghi chú VIRA nay lấy từ file key (trước đây hiện chữ cũ nhúng sẵn của 24/07); ghi chú Repo cũ (số 4.45% của 24/07) không còn hiện vì file key không có ghi chú này.
 
+
+## v10 — hiệu ứng UX (30/09)
+Đã áp dụng từ skill html-dashboard-factory (chỉ lớp trình bày, không đổi số liệu): motion tokens `:root`, row hover có vạch wine, reveal-on-enter (lần vào đầu tiên mỗi tab), View Transitions cho chuyển tab + đóng/mở nhóm Indicator (có `@supports`/reduced-motion), tab `role=tab` + phím ←/→/Home/End, `aria-current`, tắt hiệu ứng khi in / reduced-motion.
+Không áp dụng: thanh hạn mức, popover giải nghĩa (Jak bỏ), dark mode, number tweening, localStorage cho dữ liệu, CDN font.
+Đã chạy lại: overflow 4 độ rộng, recon 731 + TS 2428 (0 lệch), empty state, lưu đè/export.

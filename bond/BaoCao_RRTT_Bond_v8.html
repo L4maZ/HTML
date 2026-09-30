@@ -83,6 +83,27 @@ tr[data-gc] .gt::before{transform:rotate(-45deg)}
 /* ---- v9: chưa có dữ liệu thì không hiển thị gì ---- */
 [data-empty] [data-page]:not([data-page="p6"]){display:none!important}
 #rrttEmpty{display:none}
+
+/* ---- v10: motion tokens + hiệu ứng (chỉ là lớp trình bày, tắt được) ---- */
+:root{--ease:cubic-bezier(.22,.61,.36,1);--t-fast:.15s;--t-row:.12s;--t-reveal:.32s;--stagger:36ms}
+table tbody td{transition:background-color var(--t-row) var(--ease)}
+table tbody tr:hover td:first-child{box-shadow:inset 2px 0 0 var(--wine)}
+[data-sub],[data-nav],[data-scope],.gt{transition:color var(--t-fast) var(--ease),background-color var(--t-fast) var(--ease),border-color var(--t-fast) var(--ease)}
+[data-sub]:focus-visible,[data-scope]:focus-visible,.gt:focus-visible,[data-cx-all]:focus-visible{outline:2px solid var(--wine);outline-offset:2px}
+@keyframes rrttRv{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.rv{animation:rrttRv var(--t-reveal) var(--ease) both;animation-delay:calc(var(--i,0)*var(--stagger))}
+@supports (view-transition-name:none){
+  ::view-transition-old(root),::view-transition-new(root){animation-duration:.16s;animation-timing-function:var(--ease)}
+}
+@media (prefers-reduced-motion:reduce){
+  .rv{animation:none!important}
+  *,*::before,*::after{transition-duration:.001ms!important;animation-duration:.001ms!important;animation-delay:0s!important}
+  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}
+}
+@media print{
+  .rv{animation:none!important;opacity:1!important;transform:none!important}
+  *{transition:none!important}
+}
 </style>
 </head><body><div id="app" style="min-height:100vh;background:#f3f2f2;"></div>
 <script>
@@ -1409,6 +1430,43 @@ window.TS = {"tdpv01":{"date":[],"<5Y":[],"5Y":[],"7Y":[],"10Y":[],"15Y":[],">20
   function loadState() { try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch (e) { return {}; } }
   function saveState(s) { try { localStorage.setItem(LS, JSON.stringify(s)); } catch (e) { } }
 
+  /* =================== HIỆU ỨNG (an toàn: hỏng thì trang vẫn hiện đủ) =================== */
+  const RM = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+  function vt(fn) {
+    try {
+      if (!RM.matches && document.startViewTransition && !document.documentElement.hasAttribute('data-empty')) { document.startViewTransition(fn); return; }
+    } catch (e) { }
+    fn();
+  }
+  const seenRv = new WeakSet();
+  function revealActive() {
+    document.querySelectorAll('.rv').forEach(e => { if (!e.offsetParent && !e.getClientRects().length) { e.classList.remove('rv'); e.style.removeProperty('--i'); } });
+    if (RM.matches) return;
+    const pg = document.querySelector('[data-page][data-active]'); if (!pg) return;
+    const tg = pg.querySelector('[data-subpage][data-active]') || pg;
+    if (seenRv.has(tg)) return; seenRv.add(tg);
+    Array.prototype.slice.call(tg.children).forEach((k, i) => {
+      k.style.setProperty('--i', Math.min(i, 8)); k.classList.add('rv');
+      k.addEventListener('animationend', function f(ev) { if (ev.target !== k) return; k.classList.remove('rv'); k.style.removeProperty('--i'); k.removeEventListener('animationend', f); });
+    });
+  }
+  function syncA11y() {
+    document.querySelectorAll('[data-nav]').forEach(b => { if (b.hasAttribute('data-active')) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+    document.querySelectorAll('[data-page]').forEach(pg => {
+      const tabs = pg.querySelectorAll('[data-sub]'); if (!tabs.length) return;
+      if (tabs[0].parentNode) tabs[0].parentNode.setAttribute('role', 'tablist');
+      tabs.forEach(b => { const on = b.hasAttribute('data-active'); b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; });
+    });
+  }
+  document.addEventListener('keydown', e => {
+    const t = e.target.closest && e.target.closest('[data-sub]'); if (!t) return;
+    const k = e.key; if (k !== 'ArrowRight' && k !== 'ArrowLeft' && k !== 'Home' && k !== 'End') return;
+    const tabs = Array.prototype.slice.call(t.closest('[data-page]').querySelectorAll('[data-sub]'));
+    let i = tabs.indexOf(t);
+    i = k === 'Home' ? 0 : k === 'End' ? tabs.length - 1 : (i + (k === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    e.preventDefault(); const n = tabs[i]; vt(() => goSub(n.closest('[data-page]').dataset.page, n.dataset.sub)); n.focus();
+  });
+
   /* =================== ĐÓNG / MỞ NHÓM CHỈ TIÊU (2 bảng Indicator) =================== */
   /* Mỗi nhóm (Trạng thái mở, Vốn yêu cầu, PnL, PV01…) đóng lại thì chỉ còn dòng đầu nhóm. */
   function gSet(hd, closed) {
@@ -1420,10 +1478,10 @@ window.TS = {"tdpv01":{"date":[],"<5Y":[],"5Y":[],"7Y":[],"10Y":[],"15Y":[],">20
   function groupsAll(closed) { document.querySelectorAll('#indHost tr[data-gh]').forEach(hd => gSet(hd, closed)); resizeSoon(); }
   function setupCollapsible() {
     if (window.__cxWired) return; window.__cxWired = true;
-    const toggle = g => { const hd = g.closest('tr[data-gh]'); if (hd) { gSet(hd, !hd.hasAttribute('data-gc')); resizeSoon(); } };
+    const toggle = g => { const hd = g.closest('tr[data-gh]'); if (hd) { vt(() => gSet(hd, !hd.hasAttribute('data-gc'))); resizeSoon(); } };
     document.addEventListener('click', e => {
       const g = e.target.closest && e.target.closest('.gt'); if (g) { toggle(g); return; }
-      const b = e.target.closest && e.target.closest('[data-cx-all]'); if (b) groupsAll(b.dataset.cxAll === 'close');
+      const b = e.target.closest && e.target.closest('[data-cx-all]'); if (b) vt(() => groupsAll(b.dataset.cxAll === 'close'));
     });
     document.addEventListener('keydown', e => {
       if (e.key !== 'Enter' && e.key !== ' ') return;
@@ -1436,13 +1494,13 @@ window.TS = {"tdpv01":{"date":[],"<5Y":[],"5Y":[],"7Y":[],"10Y":[],"15Y":[],">20
     document.querySelectorAll('[data-page]').forEach(p => {
       const on = p.dataset.page === id;
       if (on) p.setAttribute('data-active', ''); else p.removeAttribute('data-active');
-      if (on) { p.style.animation = 'none'; void p.offsetWidth; p.style.animation = 'rrttFade .26s ease'; }
     });
     document.querySelectorAll('[data-nav]').forEach(b => { if (b.dataset.nav === id) b.setAttribute('data-active', ''); else b.removeAttribute('data-active'); });
     const st = loadState(); st.page = id; saveState(st);
     syncEmpty();
     syncScopeVisible();
     resizeSoon();
+    syncA11y(); revealActive();
   }
   function syncScopeVisible() {
     const w = document.querySelector('[data-scopewrap]'); if (!w) return;
@@ -1459,6 +1517,7 @@ window.TS = {"tdpv01":{"date":[],"<5Y":[],"5Y":[],"7Y":[],"10Y":[],"15Y":[],">20
     const st = loadState(); st.subs = st.subs || {}; st.subs[pageId] = subId; saveState(st);
     syncScopeVisible();
     resizeSoon();
+    syncA11y(); if (page.hasAttribute('data-active')) revealActive();
   }
 
   function syncEmpty() {
@@ -1508,9 +1567,9 @@ window.TS = {"tdpv01":{"date":[],"<5Y":[],"5Y":[],"7Y":[],"10Y":[],"15Y":[],">20
       bound = true;
       document.addEventListener('click', ev => {
         const nav = ev.target.closest && ev.target.closest('[data-nav]');
-        if (nav) { goPage(nav.dataset.nav); return; }
+        if (nav) { vt(() => goPage(nav.dataset.nav)); return; }
         const sub = ev.target.closest && ev.target.closest('[data-sub]');
-        if (sub) { const pg = sub.closest('[data-page]'); if (pg) goSub(pg.dataset.page, sub.dataset.sub); return; }
+        if (sub) { const pg = sub.closest('[data-page]'); if (pg) vt(() => goSub(pg.dataset.page, sub.dataset.sub)); return; }
         const sc = ev.target.closest && ev.target.closest('[data-scope]');
         if (sc) { setScope(sc.dataset.scope); return; }
         const rl = ev.target.closest && ev.target.closest('[data-rail-toggle]');
