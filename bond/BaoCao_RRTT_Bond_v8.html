@@ -158,7 +158,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     lblUnit: 'Đơn vị báo cáo', hdrUnit: 'QLRR Thị trường', lblAudience: 'Đối tượng nhận', hdrAudience: 'ĐVKD', lblFreq: 'Tần suất', hdrFreq: 'Daily',
     /* --- Nav --- */
     navP1: 'Highlight', navP2: 'Chi tiết danh mục', navP3: 'QTRR theo kịch bản',
-    navP4: 'Thị trường TPCP', navP5: 'FI Bond & CD',
+    navP4: 'Thông tin thị trường', navP5: 'FI Bond & CD',
     /* --- Highlight: tiêu đề khối --- */
     hiComplianceTitle: 'Rủi ro tuân thủ',
     hiTbTitle: 'GovBond · Trading Book', hiBbTitle: 'GovBond · Banking Book',
@@ -225,7 +225,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
       <button type="button" data-nav="p1" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;appearance:none;border:none;border-left:3px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:9px 18px 9px 15px;background:transparent;color:#6b665e;transition:background .18s,color .18s,border-color .18s;"><span data-rail-text>Highlight</span></button>
       <button type="button" data-nav="p2" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;appearance:none;border:none;border-left:3px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:9px 18px 9px 15px;background:transparent;color:#6b665e;transition:background .18s,color .18s,border-color .18s;"><span data-rail-text>Chi tiết danh mục</span></button>
       <button type="button" data-nav="p3" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;appearance:none;border:none;border-left:3px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:9px 18px 9px 15px;background:transparent;color:#6b665e;transition:background .18s,color .18s,border-color .18s;"><span data-rail-text>QTRR theo kịch bản</span></button>
-      <button type="button" data-nav="p4" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;appearance:none;border:none;border-left:3px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:9px 18px 9px 15px;background:transparent;color:#6b665e;transition:background .18s,color .18s,border-color .18s;"><span data-rail-text>Thị trường TPCP</span></button>
+      <button type="button" data-nav="p4" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;appearance:none;border:none;border-left:3px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:9px 18px 9px 15px;background:transparent;color:#6b665e;transition:background .18s,color .18s,border-color .18s;"><span data-rail-text>Thông tin thị trường</span></button>
       <button type="button" data-nav="p5" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;appearance:none;border:none;border-left:3px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:9px 18px 9px 15px;background:transparent;color:#6b665e;transition:background .18s,color .18s,border-color .18s;"><span data-rail-text>FI Bond &amp; CD</span></button>
     </nav>
     <div data-rail-text style="padding:12px 16px 14px;border-top:1px solid rgba(32,31,29,.12);">
@@ -530,7 +530,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
         </section>
       </section>
 
-      <section data-page="p4" data-screen-label="Thị trường TPCP">
+      <section data-page="p4" data-screen-label="Thông tin thị trường">
         <div style="display:flex;flex-wrap:wrap;border-bottom:1px solid rgba(32,31,29,.12);margin-bottom:20px;">
           <button type="button" data-sub="yield" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_yield">Đường cong &amp; lợi suất</button>
           <button type="button" data-sub="repo" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_repo">Repo &amp; chi phí vốn</button>
@@ -822,9 +822,9 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
   }
   function indicatorTable(book, opt) {
     opt = opt || {};
-    const d = RPT().colDates, rows = book.rows;
+    const d = RPT().colDates, rows = book.rows, noLM = d.yest === d.lm;   /* trùng ngày T-1 → chỉ hiện một cột */
     let gn = 0, gid = null;
-    let h = '<thead><tr>' + (opt.noCat ? '' : th('Nhóm', 1)) + th('Indicator', 1) + th(d.today) + th('+/− DtD') + th(d.yest) + th(d.lm) + th(d.lq) + th(d.ly) + th('Hạn mức') + th('% sử dụng') + th('Đèn') + '</tr></thead><tbody>';
+    let h = '<thead><tr>' + (opt.noCat ? '' : th('Nhóm', 1)) + th('Indicator', 1) + th(d.today) + th('+/− DtD') + th(d.yest) + (noLM ? '' : th(d.lm)) + th(d.lq) + th(d.ly) + th('Hạn mức') + th('% sử dụng') + th('Đèn') + '</tr></thead><tbody>';
     rows.forEach((r, ri) => {
       const st = lightOf(r.used);
       const rowBg = st === 'breach' ? 'background:rgba(155,44,44,.05);' : st === 'warn' ? 'background:rgba(183,121,31,.05);' : '';
@@ -844,9 +844,9 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
         + tdL((r.sub ? '<span style="color:' + K.muted + ';padding-left:12px;">' : '<span>') + esc(r.label) + '</span>'
           + (r.note ? '<div style="font-size:11.5px;color:' + K.faint + ';margin-top:2px;line-height:1.45;">' + esc(r.note) + '</div>' : '')
           + (r.warn ? '<div style="font-size:11.5px;color:' + K.amber + ';margin-top:2px;line-height:1.45;">' + esc(r.warn) + '</div>' : ''), 'min-width:190px;')
-        + tdR(fmtRow(r, r.today), 'font-weight:700;' + negCol(r.today))
+        + tdR(fmtRow(r, r.today), 'font-weight:700;background:rgba(32,31,29,.11)!important;' + negCol(r.today))
         + tdR(r.dtd == null ? '—' : sgn(r.dtd, v => fmtRow(r, v)), 'color:' + (r.dtd > 0 ? K.green : r.dtd < 0 ? K.red : K.faint) + ';font-size:12.5px;font-weight:700;')
-        + tdR(fmtRow(r, r.yest), 'color:' + K.muted) + tdR(fmtRow(r, r.lm), 'color:' + K.muted)
+        + tdR(fmtRow(r, r.yest), 'color:' + K.muted) + (noLM ? '' : tdR(fmtRow(r, r.lm), 'color:' + K.muted))
         + tdR(fmtRow(r, r.lq), 'color:' + K.muted) + tdR(fmtRow(r, r.ly), 'color:' + K.muted)
         + tdR(r.limit ? esc(r.limit) : '', 'color:' + K.gold7 + ';font-size:12.5px;')
         + tdR(r.used == null ? '' : pct1(r.used), 'font-weight:600;color:' + (st === 'breach' ? K.red : st === 'warn' ? K.amber : K.ink) + ';')
@@ -886,14 +886,14 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
 
   /* =================== 2. TRẠNG THÁI =================== */
   function tenorPosTable(id, rows, tot, label) {
-    const d = RPT().colDates;
-    let h = '<thead><tr>' + th('Kỳ hạn', 1) + th(d.today) + th(d.yest) + th(d.lm) + th('+/− DtD') + th('+/− MtD') + '</tr></thead><tbody>';
+    const d = RPT().colDates, noLM = d.yest === d.lm;
+    let h = '<thead><tr>' + th('Kỳ hạn', 1) + th(d.today) + th(d.yest) + (noLM ? '' : th(d.lm)) + th('+/− DtD') + th('+/− MtD') + '</tr></thead><tbody>';
     rows.forEach(r => {
-      h += '<tr>' + tdL(r.t) + tdR(n0(r.face), 'font-weight:500;') + tdR(n0(r.faceYest), 'color:' + K.muted) + tdR(n0(r.faceLM), 'color:' + K.muted)
+      h += '<tr>' + tdL(r.t) + tdR(n0(r.face), 'font-weight:500;') + tdR(n0(r.faceYest), 'color:' + K.muted) + (noLM ? '' : tdR(n0(r.faceLM), 'color:' + K.muted))
         + tdR(sgn(r.face - r.faceYest, n0), 'color:' + ((r.face - r.faceYest) > 0 ? K.green : (r.face - r.faceYest) < 0 ? K.red : K.faint))
         + tdR(sgn(r.face - r.faceLM, n0), 'color:' + ((r.face - r.faceLM) > 0 ? K.green : (r.face - r.faceLM) < 0 ? K.red : K.faint)) + '</tr>';
     });
-    h += '<tr style="' + totalRow + '">' + tdL('Tổng ' + label, totalRow) + tdR(n0(tot.face), totalRow) + tdR(n0(tot.faceYest), totalRow) + tdR(n0(tot.faceLM), totalRow)
+    h += '<tr style="' + totalRow + '">' + tdL('Tổng ' + label, totalRow) + tdR(n0(tot.face), totalRow) + tdR(n0(tot.faceYest), totalRow) + (noLM ? '' : tdR(n0(tot.faceLM), totalRow))
       + tdR(sgn(tot.face - tot.faceYest, n0), totalRow) + tdR(sgn(tot.face - tot.faceLM, n0), totalRow) + '</tr></tbody>';
     setTbl(id, h);
   }
@@ -932,14 +932,12 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
 
   /* =================== ĐỘ NHẠY (PV01) =================== */
   function pv01Table(id, rows, tot) {
-    let h = '<thead><tr>' + th('Kỳ hạn', 1) + th('Trạng thái') + th('PV01') + th('PV01 / 1,000 tỷ') + '</tr></thead><tbody>';
+    let h = '<thead><tr>' + th('Kỳ hạn', 1) + th('Trạng thái') + th('PV01') + '</tr></thead><tbody>';
     rows.forEach(r => {
-      h += '<tr>' + tdL(r.t) + tdR(n0(r.face), 'color:' + K.muted) + tdR(n2(r.pv01), 'font-weight:500;' + negCol(r.pv01))
-        + tdR(r.face ? n2(r.pv01 / r.face * 1000) : '—', 'color:' + K.muted) + '</tr>';
+      h += '<tr>' + tdL(r.t) + tdR(n0(r.face), 'color:' + K.muted) + tdR(n2(r.pv01), 'font-weight:500;' + negCol(r.pv01)) + '</tr>';
     });
-    h += '<tr style="' + totalRow + '">' + tdL('Tổng', totalRow) + tdR(n0(tot.face), totalRow) + tdR(n2(tot.pv01), totalRow + negCol(tot.pv01))
-      + tdR(n2(tot.pv01 / tot.face * 1000), totalRow) + '</tr>'
-      + '<tr>' + tdL('<span style="color:' + K.muted + ';">PV01 theo chỉ tiêu (chuẩn hoá)</span>') + tdR('') + tdR(n2(tot.stdPv01), negCol(tot.stdPv01)) + tdR('') + '</tr></tbody>';
+    h += '<tr style="' + totalRow + '">' + tdL('Tổng', totalRow) + tdR(n0(tot.face), totalRow) + tdR(n2(tot.pv01), totalRow + negCol(tot.pv01)) + '</tr>'
+      + '<tr>' + tdL('<span style="color:' + K.muted + ';">PV01 theo chỉ tiêu (chuẩn hoá)</span>') + tdR('') + tdR(n2(tot.stdPv01), negCol(tot.stdPv01)) + '</tr></tbody>';
     setTbl(id, h);
   }
   const PVKEYS = ['<5Y', '5Y', '7Y', '10Y', '15Y', '>20Y'];
@@ -963,16 +961,16 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
 
   /* =================== ItD UNREALIZED =================== */
   function itdTable(id, rows, tot) {
-    const d = RPT().colDates;
-    let h = '<thead><tr>' + th('Kỳ hạn', 1) + th('Trạng thái') + th('PV01') + th('ItD Unrealized PnL<br>' + d.today) + th('ItD Unrealized PnL<br>' + d.yest) + th('ItD Unrealized PnL<br>' + d.lm) + th('+/− MtD') + th('+/− YtD') + '</tr></thead><tbody>';
+    const d = RPT().colDates, noLM = d.yest === d.lm;
+    let h = '<thead><tr>' + th('Kỳ hạn', 1) + th('Trạng thái') + th('PV01') + th('ItD Unrealized PnL<br>' + d.today) + th('ItD Unrealized PnL<br>' + d.yest) + (noLM ? '' : th('ItD Unrealized PnL<br>' + d.lm)) + th('+/− MtD') + th('+/− YtD') + '</tr></thead><tbody>';
     rows.forEach(r => {
       h += '<tr>' + tdL(r.t) + tdR(n0(r.face), 'color:' + K.muted) + tdR(n2(r.pv01), 'color:' + K.muted + ';' + negCol(r.pv01))
-        + tdR(n1(r.itd), 'font-weight:600;' + negCol(r.itd)) + tdR(n1(r.itdYest), 'color:' + K.muted) + tdR(n1(r.itdLM), 'color:' + K.muted)
+        + tdR(n1(r.itd), 'font-weight:600;' + negCol(r.itd)) + tdR(n1(r.itdYest), 'color:' + K.muted) + (noLM ? '' : tdR(n1(r.itdLM), 'color:' + K.muted))
         + tdR(sgn(r.itdMtD), 'color:' + (r.itdMtD > 0 ? K.green : r.itdMtD < 0 ? K.red : K.faint))
         + tdR(sgn(r.itdYtD), 'color:' + (r.itdYtD > 0 ? K.green : r.itdYtD < 0 ? K.red : K.faint)) + '</tr>';
     });
     h += '<tr style="' + totalRow + '">' + tdL('Tổng', totalRow) + tdR(n0(tot.face), totalRow) + tdR(n2(tot.pv01), totalRow)
-      + tdR(n1(tot.itd), totalRow + negCol(tot.itd)) + tdR(n1(tot.itdYest), totalRow) + tdR(n1(tot.itdLM), totalRow)
+      + tdR(n1(tot.itd), totalRow + negCol(tot.itd)) + tdR(n1(tot.itdYest), totalRow) + (noLM ? '' : tdR(n1(tot.itdLM), totalRow))
       + tdR(sgn(tot.itdMtD), totalRow) + tdR(sgn(tot.itdYtD), totalRow) + '</tr></tbody>';
     setTbl(id, h);
   }
@@ -1068,18 +1066,18 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
 
   /* =================== CƠ CẤU & SỬ DỤNG VỐN =================== */
   function renderVon() {
-    const R = RPT(), c = R.capital, d = R.colDates;
-    let h = '<thead><tr>' + th('Cấu phần', 1) + th(d.today) + th(d.yest) + th('+/− DtD') + th(d.lm) + th('+/− MtD') + '</tr></thead><tbody>';
+    const R = RPT(), c = R.capital, d = R.colDates, noLM = d.yest === d.lm;
+    let h = '<thead><tr>' + th('Cấu phần', 1) + th(d.today) + th(d.yest) + th('+/− DtD') + (noLM ? '' : th(d.lm)) + th('+/− MtD') + '</tr></thead><tbody>';
     c.rows.forEach(r => {
       h += '<tr' + (r.adj ? ' style="background:rgba(182,130,53,.06);"' : '') + '>'
         + tdL((r.sub ? '<span style="color:' + K.muted + ';padding-left:12px;">' : '<span style="font-weight:500;">') + esc(r.k) + '</span>'
           + (r.adj ? '<div style="font-size:11.5px;color:' + K.gold7 + ';margin-top:2px;">Đã điều chỉnh cùng ItD Unrealized PnL toàn book (AFS + HTM)</div>' : ''))
         + tdR(n1(r.today), 'font-weight:' + (r.sub ? '400' : '600')) + tdR(n1(r.yest), 'color:' + K.muted)
-        + tdR(sgn(r.dtd), 'color:' + (r.dtd > 0 ? K.red : r.dtd < 0 ? K.green : K.faint)) + tdR(n1(r.lm), 'color:' + K.muted)
+        + tdR(sgn(r.dtd), 'color:' + (r.dtd > 0 ? K.red : r.dtd < 0 ? K.green : K.faint)) + (noLM ? '' : tdR(n1(r.lm), 'color:' + K.muted))
         + tdR(sgn(r.mtd), 'color:' + (r.mtd > 0 ? K.red : r.mtd < 0 ? K.green : K.faint)) + '</tr>';
     });
     h += '<tr style="' + totalRow + '">' + tdL(c.total.k, totalRow) + tdR(n1(c.total.today), totalRow) + tdR(n1(c.total.yest), totalRow)
-      + tdR(sgn(c.total.dtd), totalRow) + tdR(n1(c.total.lm), totalRow) + tdR(sgn(c.total.mtd), totalRow) + '</tr></tbody>';
+      + tdR(sgn(c.total.dtd), totalRow) + (noLM ? '' : tdR(n1(c.total.lm), totalRow)) + tdR(sgn(c.total.mtd), totalRow) + '</tr></tbody>';
     setTbl('tblVon', h);
 
     /* cơ cấu theo tổ chức phát hành */
@@ -1124,12 +1122,12 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
       + '<span>Time holding bình quân Trading: <b data-num style="color:' + K.ink + ';">' + n0(tbRow.today) + ' ngày</b> · hạn mức ' + esc(tbRow.limit) + '</span>'
       + '<span>Banking: <b data-num style="color:' + K.ink + ';">' + n0(bbRow.today) + ' ngày</b></span></div>');
     mk('ch_hold', baseOpt({
-      xAxis: axX(rows.map(r => r.t)), yAxis: [axY('trạng thái · tỷ'), Object.assign(axY('ItD Unrealized PnL · tỷ'), { splitLine: { show: false } })],
+      xAxis: axX(rows.map(r => r.t)), yAxis: [axY('trạng thái · tỷ'), Object.assign(axY('ItD Unrealized PnL · tỷ'), { splitLine: { show: false }, nameTextStyle: { color: K.faint, fontSize: 10.5, align: 'right' } })],
       series: [
         { name: 'Trading', type: 'bar', data: rows.map(r => r.tb), itemStyle: { color: K.gold }, barMaxWidth: 20 },
         { name: 'Banking', type: 'bar', data: rows.map(r => r.bb), itemStyle: { color: K.blue }, barMaxWidth: 20 },
-        { name: 'ItD Unrealized PnL · Trading', type: 'line', yAxisIndex: 1, data: rows.map(r => r.tbItd), symbol: 'circle', symbolSize: 5, lineStyle: { width: 1.5, color: K.red } },
-        { name: 'ItD Unrealized PnL · Banking', type: 'line', yAxisIndex: 1, data: rows.map(r => r.bbItd), symbol: 'circle', symbolSize: 5, lineStyle: { width: 1.5, color: K.red, type: 'dashed' } }
+        { name: 'ItD Unrealized PnL · Trading', type: 'line', yAxisIndex: 1, data: rows.map(r => r.tbItd), symbol: 'circle', symbolSize: 5, lineStyle: { width: 2, color: K.gold7 } },
+        { name: 'ItD Unrealized PnL · Banking', type: 'line', yAxisIndex: 1, data: rows.map(r => r.bbItd), symbol: 'circle', symbolSize: 5, lineStyle: { width: 2, color: '#1f3a52', type: 'dashed' } }
       ]
     }));
   }
@@ -1358,8 +1356,8 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     let t = '<thead><tr>' + th('Kỳ hạn', 1) + th('Yield FI Bond & CD (%)') + th('YTM GovBond (%)') + th('Repo rate (%)') + th('Spread vs GovBond (bps)') + '</tr></thead><tbody>';
     ['6M', '1Y', '2Y', '3Y'].forEach(k2 => {
       const i = ym.tenor.indexOf(k2), fv = lastOf(fy[k2]), gv = i >= 0 ? ym.gov[i] : null, rv = i >= 0 ? ym.repo[i] : null;
-      t += '<tr>' + tdL(k2) + tdR(fv == null ? '—' : fv.toFixed(3), 'font-weight:600;') + tdR(gv == null ? '—' : gv.toFixed(3), 'color:' + K.muted)
-        + tdR(rv == null ? '—' : rv.toFixed(3), 'color:' + K.muted)
+      t += '<tr>' + tdL(k2) + tdR(fv == null ? '—' : fv.toFixed(2), 'font-weight:600;') + tdR(gv == null ? '—' : gv.toFixed(2), 'color:' + K.muted)
+        + tdR(rv == null ? '—' : rv.toFixed(2), 'color:' + K.muted)
         + tdR(fv != null && gv != null ? sgn((fv - gv) * 100, v => v.toFixed(0)) : '—', 'color:' + K.gold7) + '</tr>';
     });
     t += '<tr style="' + totalRow + '">' + tdL('Coupon BQ danh mục', totalRow) + tdR(n2(lastOf(fc.FIBond)) + ' / ' + n2(lastOf(fc.CD)), totalRow)
@@ -2243,13 +2241,6 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
         });
         if (dec) K.problems.push('Biểu đồ "' + s + '": ngày không tăng dần (' + dec + ' chỗ) — nghi Excel đảo ngày/tháng khi ghi key (ngày ≤ 12). Tạo lại key bằng macro mới (cột ngày ghi dạng chữ).');
         var mon = isMonthly(raw);
-        if (mon) {
-          var fs = Object.keys(src).filter(function (f) { return f !== 'date'; });
-          for (var q = 1; q < raw.length; q++) {
-            if (fs.length >= 2 && fs.every(function (f) { return src[f][q] != null && src[f][q] === src[f][q - 1]; }))
-              K.problems.push('Biểu đồ "' + s + '": hai dòng liên tiếp (' + raw[q - 1] + ' và ' + raw[q] + ') trùng hoàn toàn số liệu — nghi dòng sao chép trong sheet Chart data');
-          }
-        }
         dst.date = raw.map(function (d) {
           var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(d);
           if (!m) return String(d).slice(0, 8);

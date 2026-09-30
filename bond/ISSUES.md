@@ -140,3 +140,9 @@ số từ mô hình VaR mục 21 sheet `Trading`. Hệ quả trên mặt báo c�
 | 5 | Tên chỉ số đầy đủ | **Xong 30/09:** chỉ sửa `ItD` thành `ItD Unrealized PnL` (10 chỗ); các tên khác giữ nguyên theo Jak. Bảng đề xuất lưu ở `TEN_CHI_SO_DE_XUAT.md` |
 | 6 | Rules cảnh báo biến động so với ngày hôm trước ở "Kiểm tra trước khi gửi" | **Hoãn (Jak 30/09: log lại, chưa làm).** Cần: báo cáo mới nhất và ngưỡng cho từng chỉ số. Đã có sẵn: khung kiểm tra và cảnh báo hạn mức; tính phân bố biến động ngày từ lịch sử `Chart data` để đề xuất ngưỡng |
 
+### Chốt 30/09/2026 (buổi tối)
+- **Bỏ qua, không xử lý (Jak):** E1 (cột `Realized&NIM lũy kế năm` 199.9 so với bảng 3.8), E2 (định nghĩa Total PnL bảng 3.5: số này có điều chỉnh tay ở tool khác khi xoá/sửa deal nên lệch YtD/MtD/DtD là bình thường, không cần cảnh báo), E4 (trùng dòng tháng 3) và cảnh báo `Biểu đồ "month": hai dòng liên tiếp trùng` (đã gỡ khỏi HTML).
+- **Đã xác nhận:** macro `XuatFileKey.bas` bản dò theo tiêu đề đã chạy thử trong Excel, ổn.
+- **Đợt 6 (rules cảnh báo biến động), lọc ngày so sánh:** bỏ qua, tính sau.
+- **Đã làm theo góp ý:** bỏ cột `PV01 / 1,000 tỷ`; chart ItD theo nhóm thời gian nắm giữ đổi màu (Trading vàng đậm, Banking xanh đậm nét đứt); đổi tên mục thành "Thông tin thị trường"; khi ngày T-1 trùng "cuối tháng trước" thì chỉ hiện một cột (Indicator, Trạng thái, ItD, Sử dụng vốn); cột ngày báo cáo ở Indicator nền xám đậm hơn; yield FI Bond & CD tối đa 2 số thập phân.
+
