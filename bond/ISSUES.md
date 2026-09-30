@@ -146,3 +146,10 @@ số từ mô hình VaR mục 21 sheet `Trading`. Hệ quả trên mặt báo c�
 - **Đợt 6 (rules cảnh báo biến động), lọc ngày so sánh:** bỏ qua, tính sau.
 - **Đã làm theo góp ý:** bỏ cột `PV01 / 1,000 tỷ`; chart ItD theo nhóm thời gian nắm giữ đổi màu (Trading vàng đậm, Banking xanh đậm nét đứt); đổi tên mục thành "Thông tin thị trường"; khi ngày T-1 trùng "cuối tháng trước" thì chỉ hiện một cột (Indicator, Trạng thái, ItD, Sử dụng vốn); cột ngày báo cáo ở Indicator nền xám đậm hơn; yield FI Bond & CD tối đa 2 số thập phân.
 
+### Lưu dữ liệu vào file (30/09/2026)
+- **Bản gốc không còn dữ liệu nhúng** (không còn số nào của 24/07). Mở file lên khi chưa nạp key: không hiện báo cáo, chỉ có dòng "Chưa có dữ liệu" và trang Quản trị dữ liệu để nạp key.
+- **Nút "Lưu đè vào file này"** (tab Quản trị dữ liệu): ghi dữ liệu hiện tại thẳng vào file, mở lại là có sẵn. Dùng File System Access (Edge/Chrome); trình duyệt không hỗ trợ thì tự tải bản mới về. Mỗi phiên chọn file một lần, không nhớ file sang phiên sau để không ghi nhầm.
+- Xuất bản và Lưu không còn làm file phình ra qua các lần (mỗi lần bỏ script dữ liệu của lần trước).
+- **Chưa thử với hộp thoại thật** (chỉ thử logic bằng giả lập): cần Jak thử một lần trên Edge ở máy làm việc.
+- Đã sửa cùng lúc: ghi chú kịch bản 10 ngày, VaR và ghi chú VIRA nay lấy từ file key (trước đây hiện chữ cũ nhúng sẵn của 24/07); ghi chú Repo cũ (số 4.45% của 24/07) không còn hiện vì file key không có ghi chú này.
+
