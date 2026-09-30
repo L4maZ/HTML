@@ -458,6 +458,8 @@ Public Sub XuatFileKey()
     gStep = "sheet META"
     Set sh = wb.Sheets(1)
     sh.Name = "META"
+    ' Ngay ghi dang chu dd/mm/yyyy: neu de dinh dang chung, Excel doc theo locale va DAO ngay-thang khi ngay <= 12
+    sh.Columns("B").NumberFormat = "@"
     sh.Range("A1:C1").Value = Array("Key", "Value", "Ghi chu")
     Dim mk As Variant, mv As Variant
     mk = Array("schema", "asOf", "dateYest", "dateLastMonth", "dateLastQuarter", _
@@ -622,6 +624,7 @@ Public Sub XuatFileKey()
     ' ---------------- VIRA4 ----------------
     Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
     sh.Name = "VIRA4"
+    sh.Columns("A").NumberFormat = "@"
     sh.Range("A1:F1").Value = Array("Month", "VIRA", "Big4", "MarketMaker", "Top3", "Actual")
     Dim av As Variant
     gStep = "VIRA4 - doc VIRA scenarios"
@@ -655,6 +658,7 @@ Public Sub XuatFileKey()
     ' ---------------- RATING ----------------
     Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
     sh.Name = "RATING"
+    sh.Columns("E").NumberFormat = "@"
     sh.Range("A1:J1").Value = Array("KeyID", "Issuer", "Amount", "Rating", "ReviewDate", _
         "Pct", "CumPct", "Fitch", "Moody", "SP")
     BufNew 10, 200
@@ -743,6 +747,7 @@ Public Sub XuatFileKey()
     Application.StatusBar = "File key 5/6 - chuoi bieu do..."
     Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
     sh.Name = "TS"
+    sh.Columns("C").NumberFormat = "@"
     sh.Range("A1:D1").Value = Array("Series", "Field", "Date", "Value")
     gStep = "TS - chuoi bieu do"
     DumpTS cd

@@ -118,3 +118,8 @@ số từ mô hình VaR mục 21 sheet `Trading`. Hệ quả trên mặt báo c�
 
 ### Hoãn (đã thống nhất, chưa làm)
 - Chọn ngày so sánh (filter) trên báo cáo. Lý do: chưa có dữ liệu lịch sử trong file, kéo hết lên sẽ nặng.
+
+### Bổ sung 30/09/2026 (chiều)
+- **Excel đảo ngày/tháng khi macro ghi key** (ví dụ 03/08 thành 08/03, chỉ với ngày ≤ 12): macro ghi ngày dạng chuỗi vào ô định dạng chung nên Excel đọc theo locale. Trục ngày biểu đồ vì thế sai. `XuatFileKey.bas` nay đặt cột ngày (META, VIRA4, RATING, TS) là định dạng Text trước khi ghi. HTML tự báo đỏ khi ngày trong chuỗi không tăng dần. `make_key.py` không bị (ghi chuỗi thẳng).
+- "Kiểm tra trước khi gửi" chỉ hiện khi có lỗi/cảnh báo; ẩn Volatility trên báo cáo; tiêu đề cột ngày thống nhất dd/mm/yyyy.
+

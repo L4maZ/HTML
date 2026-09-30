@@ -517,7 +517,6 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
           <button type="button" data-sub="yield" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_yield">Đường cong &amp; lợi suất</button>
           <button type="button" data-sub="repo" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_repo">Repo &amp; chi phí vốn</button>
           <button type="button" data-sub="liq" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_liq">Thanh khoản</button>
-          <button type="button" data-sub="vol" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_vol">Volatility</button>
         </div>
 
         <div data-subpage="yield" style="min-width:0;display:grid;gap:20px;">
@@ -588,24 +587,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
           </section>
         </div>
 
-        <div data-subpage="vol" style="min-width:0;display:grid;gap:20px;">
-          <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
-            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
-              <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_vol_01">Yield volatility · theo ngày</h2>
-              <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">bps / ngày</span>
-            </div>
-            <div style="min-width:0;overflow-x:auto;"><div id="tblVolD"></div></div>
-          </section>
-          <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
-            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
-              <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_vol_02">Yield volatility · quy năm</h2>
-              <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">bps / năm</span>
-            </div>
-            <div style="min-width:0;overflow-x:auto;"><div id="tblVolA"></div></div>
-            <div id="ch_vol" style="height:300px;margin-top:16px;"></div>
-          </section>
-        </div>
-      </section>
+              </section>
 
       <section data-page="p5" data-screen-label="FI Bond &amp; CD" style="display:grid;gap:20px;">
         <div id="cmtFi"></div>
@@ -802,7 +784,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     CMT.tb = '';
     CMT.bb = '';
     setHtml('pnlNote', bRn ? esc(bRn) : '');
-    setHtml('cmtFi', grp('grpFi', [['hiFiTitle', bFi, null]], 1));
+    setHtml('cmtFi', '');
   }
 
   /* =================== 2.x BẢNG CHỈ TIÊU (Indicator) — gộp hạn mức + %sử dụng + đèn =================== */
@@ -829,8 +811,8 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
         + tdL((r.sub ? '<span style="color:' + K.muted + ';padding-left:12px;">' : '<span>') + esc(r.label) + '</span>'
           + (r.note ? '<div style="font-size:11.5px;color:' + K.faint + ';margin-top:2px;line-height:1.45;">' + esc(r.note) + '</div>' : '')
           + (r.warn ? '<div style="font-size:11.5px;color:' + K.amber + ';margin-top:2px;line-height:1.45;">' + esc(r.warn) + '</div>' : ''), 'min-width:190px;')
-        + tdR(fmtRow(r, r.today), 'font-weight:' + (r.sub ? '400' : '600') + ';' + negCol(r.today))
-        + tdR(r.dtd == null ? '—' : sgn(r.dtd, v => fmtRow(r, v)), 'color:' + (r.dtd > 0 ? K.green : r.dtd < 0 ? K.red : K.faint) + ';font-size:12.5px;')
+        + tdR(fmtRow(r, r.today), 'font-weight:700;' + negCol(r.today))
+        + tdR(r.dtd == null ? '—' : sgn(r.dtd, v => fmtRow(r, v)), 'color:' + (r.dtd > 0 ? K.green : r.dtd < 0 ? K.red : K.faint) + ';font-size:12.5px;font-weight:700;')
         + tdR(fmtRow(r, r.yest), 'color:' + K.muted) + tdR(fmtRow(r, r.lm), 'color:' + K.muted)
         + tdR(fmtRow(r, r.lq), 'color:' + K.muted) + tdR(fmtRow(r, r.ly), 'color:' + K.muted)
         + tdR(r.limit ? esc(r.limit) : '', 'color:' + K.gold7 + ';font-size:12.5px;')
@@ -990,7 +972,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
         '</div>'].join(''));
     const t = TS().tdpnl, k = TS().bkpnl;
     mk('ch_itdHist', baseOpt({
-      xAxis: axX(t.date), yAxis: axY('tỷ VND'),
+      xAxis: axX(t.date), yAxis: axY('tỷ VND', true),
       series: [
         { name: 'Trading', type: 'line', data: t.ItD, smooth: true, symbol: 'none', lineStyle: { width: 2, color: K.gold } },
         { name: 'Banking', type: 'line', data: k.ItD, smooth: true, symbol: 'none', lineStyle: { width: 2, color: K.blue } }
@@ -1215,7 +1197,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     const R = RPT(), yc = R.yieldCurve, cats = yc.map(y => y.t);
     let h = '<thead><tr>' + th('Chỉ tiêu', 1) + cats.map(t => th(t)).join('') + '</tr></thead><tbody>';
     [['Bid', 'bid'], ['Ask', 'ask'], ['Mid', 'mid'], ['Spread', 'spread']].forEach(([l, k2]) => {
-      h += '<tr>' + tdL(l + ' (%)') + yc.map(y => tdR(y[k2].toFixed(3), k2 === 'mid' ? 'font-weight:600;' : 'color:' + K.muted)).join('') + '</tr>';
+      h += '<tr>' + tdL(l + ' (%)') + yc.map(y => tdR(y[k2].toFixed(2), k2 === 'mid' ? 'font-weight:600;' : 'color:' + K.muted)).join('') + '</tr>';
     });
     [['+/− DtD (bps)', 'dtd'], ['+/− MtD (bps)', 'mtd'], ['+/− YtD (bps)', 'ytd']].forEach(([l, k2]) => {
       h += '<tr>' + tdL(l) + yc.map(y => tdR(sgn(y[k2], v => v.toFixed(1)), 'color:' + (y[k2] > 0 ? K.red : y[k2] < 0 ? K.green : K.faint) + ';font-size:12.5px;')).join('') + '</tr>';
@@ -1244,7 +1226,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     const rc = R.repoCurve;
     let r = '<thead><tr>' + th('Kỳ hạn', 1) + rc.map(x => th(x.t)).join('') + '</tr></thead><tbody>';
     [[R.colDates.today, 'today'], [R.colDates.yest, 'yest'], [R.colDates.lm, 'lm']].forEach(([l, k2]) => {
-      r += '<tr>' + tdL(l + ' (%)') + rc.map(x => tdR(x[k2].toFixed(3), k2 === 'today' ? 'font-weight:600;' : 'color:' + K.muted)).join('') + '</tr>';
+      r += '<tr>' + tdL(l + ' (%)') + rc.map(x => tdR(x[k2].toFixed(2), k2 === 'today' ? 'font-weight:600;' : 'color:' + K.muted)).join('') + '</tr>';
     });
     [['+/− DtD (bps)', 'dtd'], ['+/− MtD (bps)', 'mtd']].forEach(([l, k2]) => {
       r += '<tr>' + tdL(l) + rc.map(x => tdR(sgn(x[k2], v => v.toFixed(2)), 'color:' + (x[k2] > 0 ? K.red : x[k2] < 0 ? K.green : K.faint) + ';font-size:12.5px;')).join('') + '</tr>';
@@ -1423,6 +1405,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
   function renderAll() {
     const root = document.querySelector('[data-page]');
     if (root && root.parentElement) root.parentElement.setAttribute('data-rrtt-rendered', '');
+    { const R0 = RPT(); if (R0.dates) R0.colDates = Object.assign({}, R0.colDates, R0.dates); }   /* mọi tiêu đề cột ngày: dd/mm/yyyy */
     const d = $('hdrDate'); if (d) d.textContent = RPT().asOf;
     [['highlight',renderHighlight],['indicator',renderIndicator],['trangthai',renderTrangThai],['donhay',renderDoNhay],['itd',renderItd],
      ['laiLo',renderLaiLo],['von',renderVon],['thoigian',renderThoiGian],['scenario',renderScenario],['market',renderMarket],['fi',renderFI]]
@@ -2194,6 +2177,14 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
         var src = K.ts[s], dst = {}, al = ALIAS[s] || {};
         Object.keys(src).forEach(function (f) { dst[al[f] || f] = src[f]; });
         var raw = src.date.map(function (d) { return xlDate(d); });
+        var dec = 0, prevD = null;
+        raw.forEach(function (d) {
+          var mm = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(d); if (!mm) return;
+          var vv = +mm[3] * 10000 + (+mm[2]) * 100 + (+mm[1]);
+          if (prevD !== null && vv < prevD) dec++;
+          prevD = vv;
+        });
+        if (dec) K.problems.push('Biểu đồ "' + s + '": ngày không tăng dần (' + dec + ' chỗ) — nghi Excel đảo ngày/tháng khi ghi key (ngày ≤ 12). Tạo lại key bằng macro mới (cột ngày ghi dạng chữ).');
         var mon = isMonthly(raw);
         dst.date = raw.map(function (d) {
           var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(d);
@@ -2619,6 +2610,8 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
       items.push(['ok', 'Không chỉ tiêu nào chạm ngưỡng cảnh báo', 'XANH < 80% · VÀNG 80–100% · ĐỎ ≥ 100%']);
     }
 
+    items = items.filter(function (it) { return it[0] !== 'ok'; });
+    if (ck.parentElement) ck.parentElement.style.display = items.length ? '' : 'none';
     ck.innerHTML = '<ul style="list-style:none;font-size:13px;margin:0;padding:0;">' + items.map(function (it) {
       var col = it[0] === 'ok' ? '#276749' : it[0] === 'wn' ? '#a56a1b' : '#9B2C2C';
       var ic = it[0] === 'ok' ? '✓' : it[0] === 'wn' ? '!' : '✕';
