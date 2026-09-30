@@ -95,6 +95,8 @@ table tbody tr:hover td:first-child{box-shadow:inset 2px 0 0 var(--wine)}
 @supports (view-transition-name:none){
   ::view-transition-old(root),::view-transition-new(root){animation-duration:.16s;animation-timing-function:var(--ease)}
 }
+#rrttSpine{position:fixed;left:0;top:0;height:3px;width:100%;background:var(--wine);transform:scaleX(0);transform-origin:0 50%;z-index:60;pointer-events:none;opacity:.85}
+@media print{#rrttSpine{display:none!important}}
 @media (prefers-reduced-motion:reduce){
   .rv{animation:none!important}
   *,*::before,*::after{transition-duration:.001ms!important;animation-duration:.001ms!important;animation-delay:0s!important}
@@ -782,7 +784,7 @@ window.TS = {"tdpv01":{"date":[],"<5Y":[],"5Y":[],"7Y":[],"10Y":[],"15Y":[],">20
     const col = o.state === 'breach' ? K.red : o.state === 'warn' ? K.amber : K.gold7;
     return '<div style="border:1px solid ' + K.grid + ';border-top:2px solid ' + col + ';border-radius:4px;background:' + K.paper + ';padding:14px 16px 16px;min-width:0;">'
       + '<div style="font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:' + K.faint + ';line-height:1.4;">' + esc(o.label) + '</div>'
-      + '<div data-num style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin-top:8px;line-height:1.05;color:' + (o.state === 'breach' ? K.red : K.ink) + ';">' + o.value + '</div>'
+      + '<div data-num data-cu="' + esc(String(o.value)) + '" style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin-top:8px;line-height:1.05;color:' + (o.state === 'breach' ? K.red : K.ink) + ';">' + o.value + '</div>'
       + '<div style="font-size:12px;color:' + K.muted + ';margin-top:7px;line-height:1.5;">' + o.sub + '</div>'
       + (o.limit ? '<div style="margin-top:10px;height:3px;background:rgba(32,31,29,.09);border-radius:2px;overflow:hidden;"><div style="height:100%;width:' + Math.min(100, o.used * 100) + '%;background:' + col + ';"></div></div>'
         + '<div style="display:flex;justify-content:space-between;font-size:11px;color:' + K.faint + ';margin-top:5px;"><span>' + esc(o.limit) + '</span><span data-num style="color:' + col + ';">' + pct1(o.used) + '</span></div>' : '')
@@ -1450,6 +1452,41 @@ window.TS = {"tdpv01":{"date":[],"<5Y":[],"5Y":[],"7Y":[],"10Y":[],"15Y":[],">20
       k.addEventListener('animationend', function f(ev) { if (ev.target !== k) return; k.classList.remove('rv'); k.style.removeProperty('--i'); k.removeEventListener('animationend', f); });
     });
   }
+  /* số chạy nhảy: chỉ 4 thẻ KPI ở Highlight, chỉ lần đầu xem sau khi mở file; luôn kết thúc đúng số gốc */
+  let cuDone = false;
+  function countUpOnce() {
+    if (cuDone || RM.matches) return;
+    const pg = document.querySelector('[data-page="p1"][data-active]'); if (!pg) return;
+    const els = Array.prototype.slice.call(pg.querySelectorAll('[data-cu]')); if (!els.length) return;
+    cuDone = true;
+    const t0 = performance.now(), D = 800;
+    const items = els.map(el => {
+      const txt = el.getAttribute('data-cu'), m = /^(-?)([\d,]+)(\.\d+)?$/.exec(txt.trim());
+      if (!m) return null;
+      return { el: el, txt: txt, neg: m[1] === '-', v: parseFloat(m[2].replace(/,/g, '') + (m[3] || '')), dec: m[3] ? m[3].length - 1 : 0 };
+    }).filter(Boolean);
+    function step(now) {
+      const k = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - k, 3);
+      items.forEach(it => {
+        if (!it.el.isConnected) return;
+        it.el.textContent = k >= 1 ? it.txt : (it.neg ? '-' : '') + (it.v * e).toLocaleString('en-US', { minimumFractionDigits: it.dec, maximumFractionDigits: it.dec });
+      });
+      if (k < 1) requestAnimationFrame(step);
+    }
+    items.forEach(it => { it.el.textContent = (it.neg ? '-' : '') + (0).toFixed(it.dec); });
+    requestAnimationFrame(step);
+  }
+  /* spine: vạch tiến độ cuộn mảnh ở mép trên */
+  function setupSpine() {
+    if (document.getElementById('rrttSpine')) return;
+    const sp = document.createElement('div'); sp.id = 'rrttSpine'; sp.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(sp);
+    let tick = false;
+    const upd = () => { tick = false; const h = document.documentElement.scrollHeight - window.innerHeight; sp.style.transform = 'scaleX(' + (h > 4 ? Math.min(1, window.scrollY / h) : 0) + ')'; };
+    window.addEventListener('scroll', () => { if (!tick) { tick = true; requestAnimationFrame(upd); } }, { passive: true });
+    window.addEventListener('resize', upd);
+    upd();
+  }
   function syncA11y() {
     document.querySelectorAll('[data-nav]').forEach(b => { if (b.hasAttribute('data-active')) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
     document.querySelectorAll('[data-page]').forEach(pg => {
@@ -1500,7 +1537,7 @@ window.TS = {"tdpv01":{"date":[],"<5Y":[],"5Y":[],"7Y":[],"10Y":[],"15Y":[],">20
     syncEmpty();
     syncScopeVisible();
     resizeSoon();
-    syncA11y(); revealActive();
+    syncA11y(); revealActive(); countUpOnce(); setupSpine();
   }
   function syncScopeVisible() {
     const w = document.querySelector('[data-scopewrap]'); if (!w) return;
@@ -2903,6 +2940,8 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
       if (window.RRTT && window.RRTT.goPage) window.RRTT.goPage('p1');
       if (window.RRTT && window.RRTT.expandAll) window.RRTT.expandAll();   /* bản gửi đi luôn mở hết */
       var clone = document.documentElement.cloneNode(true);
+      clone.querySelectorAll('[data-cu]').forEach(function (e) { e.textContent = e.getAttribute('data-cu'); });
+      var sp0 = clone.querySelector('#rrttSpine'); if (sp0) sp0.remove();
       clone.querySelectorAll('head script').forEach(function (s) {
         if (s.hasAttribute('data-rrtt-inject') || String(s.textContent).indexOf('window.RPT = ') === 0) s.remove();
       });

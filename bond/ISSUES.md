@@ -158,3 +158,4 @@ số từ mô hình VaR mục 21 sheet `Trading`. Hệ quả trên mặt báo c�
 Đã áp dụng từ skill html-dashboard-factory (chỉ lớp trình bày, không đổi số liệu): motion tokens `:root`, row hover có vạch wine, reveal-on-enter (lần vào đầu tiên mỗi tab), View Transitions cho chuyển tab + đóng/mở nhóm Indicator (có `@supports`/reduced-motion), tab `role=tab` + phím ←/→/Home/End, `aria-current`, tắt hiệu ứng khi in / reduced-motion.
 Không áp dụng: thanh hạn mức, popover giải nghĩa (Jak bỏ), dark mode, number tweening, localStorage cho dữ liệu, CDN font.
 Đã chạy lại: overflow 4 độ rộng, recon 731 + TS 2428 (0 lệch), empty state, lưu đè/export.
+Bổ sung (30/09): số chạy nhảy chỉ ở 4 thẻ KPI Highlight, một lần sau khi mở file, 0,8s, luôn kết thúc đúng số gốc (`data-cu`), bản export ghi lại số gốc; vạch tiến độ cuộn `#rrttSpine` (ẩn khi in, không nằm trong export).
