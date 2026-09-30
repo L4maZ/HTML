@@ -98,3 +98,23 @@ số từ mô hình VaR mục 21 sheet `Trading`. Hệ quả trên mặt báo c�
 | Banking · VaR99% 1 ngày | −57,56 | **+19,12** |
 
 Ô cuối ra số dương trong cột "lỗ tăng thêm" — cần biết trước khi gửi đi.
+
+## Cập nhật 30/09/2026
+
+### Đã xử lý
+- **Key lệch 1 dòng (nguyên nhân số sai ở Trạng thái, Thời gian nắm giữ, PV01, Lãi/lỗ, Sử dụng vốn).** Từ File 02 ngày 29/09, sheet `Linked` bị chèn thêm 1 dòng. `make_key.py` và `XuatFileKey.bas` đọc theo toạ độ cố định nên nuốt dòng tiêu đề vào dữ liệu và cắt mất dòng Tổng cuối khối (POS Trading, 3.3, 3.4, 3.5, 3.7, 3.8, 7.1). Riêng khối Xếp hạng bị cắt 3 issuer cuối (VCCB, PVFC, OJBV rating D) và dòng Total vì danh sách dài thêm. Cả hai công cụ nay **dò theo tiêu đề bảng** (3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, "Chỉ tiêu" của 7.1, "Issuer"). Đã kiểm hồi quy trên File 02 ngày 17/08: kết quả không đổi. `XuatFileKey.bas` **chưa chạy thử trong Excel** (không có VBA ở đây), cần chạy thử một lần.
+- Sheet POS thêm cột `YtdPnl` (cột AA của Trading) để bảng "PnL theo kỳ hạn" có YtD PnL.
+- HTML nạp key: bỏ dòng tiêu đề bị đọc nhầm, tự cộng Tổng khi key thiếu (POS, Thời gian nắm giữ, Sử dụng vốn) và báo đỏ ở "Kiểm tra trước khi gửi". Tổng PnL và Tổng kịch bản không tự cộng được nên hiện `—`, không dùng số cũ.
+- **Biểu đồ vẽ bằng số cũ nhúng sẵn.** Tên trường trong key (theo tiêu đề cột Excel) khác tên trường biểu đồ đọc, phần thiếu bị điền bằng số 24/07. Đã thêm bảng đổi tên `ALIAS`; trường nào vẫn thiếu thì để trống và báo lỗi, không điền số cũ. Thêm ánh xạ `month` → `primary` (sơ cấp/thứ cấp).
+- Biểu đồ Sử dụng vốn: cột 4 (TT41) = `Vốn yêu cầu − Lỗ tiềm ẩn`. Trong Chart data, "Vốn yêu cầu" đã gồm ItD nên trước đây ItD bị tính hai lần.
+- Biểu đồ QLHS ở tab Lãi/lỗ chỉ còn GovBond; phần FI Bond & CD chuyển sang trang FI Bond & CD.
+
+### Cần Jak quyết (phía Excel, HTML không tự sửa được)
+| # | Nội dung |
+|---|---|
+| E1 | Sheet `Chart data`, cột DE "Realized&NIM lũy kế năm" = **199.9 (hằng số, không đổi theo ngày)**, trong khi bảng 3.8 dòng (1) = **59.2** (= −74.8 + 134.0). Tổng trên biểu đồ (2,733) vì thế khác Tổng trên bảng (2,592.5) đúng 140.7 |
+| E2 | Bảng 3.5: `Total PnL` YtD −1,275.1 không bằng (1)+(2) = −1,214.4; MtD −109.6 không bằng −251.1. Cần xác nhận định nghĩa dòng Total |
+| E3 | Chuỗi `lsttSoCap` (LS sơ cấp) dừng ở 19/08, chuỗi QLHS dừng ở 01/08 |
+
+### Hoãn (đã thống nhất, chưa làm)
+- Chọn ngày so sánh (filter) trên báo cáo. Lý do: chưa có dữ liệu lịch sử trong file, kéo hết lên sẽ nặng.

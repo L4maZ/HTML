@@ -544,13 +544,17 @@ Public Sub XuatFileKey()
     ' ---------------- POS ----------------
     Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
     sh.Name = "POS"
-    sh.Range("A1:O1").Value = Array("KeyID", "Book", "Tenor", "Face", "FaceYest", "FaceLM", _
-        "DtD", "MtD", "PV01", "Itd", "ItdYest", "ItdLM", "ItdMtD", "ItdYtD", "Daily")
-    BufNew 15, 300
+    sh.Range("A1:P1").Value = Array("KeyID", "Book", "Tenor", "Face", "FaceYest", "FaceLM", _
+        "DtD", "MtD", "PV01", "Itd", "ItdYest", "ItdLM", "ItdMtD", "ItdYtD", "Daily", "YtdPnl")
+    BufNew 16, 300
+    Dim a0 As Long, a1 As Long
     gStep = "POS - Trading"
-    DumpGrid "POS.TB.", "TB", 14, 65, 75, 13
+    a0 = 65: a1 = 75: Locate 14, "3.1.", 1, 3, 0, 0, a0, a1
+    DumpGrid "POS.TB.", "TB", 14, a0, a1, 14
     gStep = "POS - Banking"
-    DumpGrid "POS.BB.", "BB", 28, 80, 90, 13
+    a0 = 80: a1 = 90: Locate 28, "3.2.", 1, 3, 0, 0, a0, a1
+    ' Banking (cot AB..AM) khong co Daily/YtdPnl; cot ke ben la bang 6.2 YIELD nen chi doc 12 cot
+    DumpGrid "POS.BB.", "BB", 28, a0, a1, 12
     If mFull Then GoTo Overflow
     BufFlush sh
 
@@ -574,19 +578,27 @@ Public Sub XuatFileKey()
         "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12", "C13", "C14")
     BufNew 18, 2000
     gStep = "GRID - MIX"
-    DumpBlock "MIX", "3.3 Co cau theo to chuc phat hanh", 147, 238, 249, 7
+    a0 = 238: a1 = 249: Locate 147, "3.3.", 1, 3, 0, 1, a0, a1
+    DumpBlock "MIX", "3.3 Co cau theo to chuc phat hanh", 147, a0, a1, 7
     gStep = "GRID - HOLD"
-    DumpBlock "HOLD", "3.4 Co cau theo thoi gian nam giu", 164, 274, 284, 5
+    a0 = 274: a1 = 284: Locate 164, "3.4.", 1, 3, 0, 0, a0, a1
+    DumpBlock "HOLD", "3.4 Co cau theo thoi gian nam giu", 164, a0, a1, 5
     gStep = "GRID - PNL"
-    DumpBlock "PNL", "3.5 Unrealized & Realized PnL", 154, 253, 259, 4
+    a0 = 253: a1 = 259: Locate 154, "3.5.", 1, 2, 0, 0, a0, a1
+    DumpBlock "PNL", "3.5 Unrealized & Realized PnL", 154, a0, a1, 4
     gStep = "GRID - CAPITAL"
-    DumpBlock "CAPITAL", "3.8 Muc do su dung von", 158, 262, 270, 6
+    a0 = 262: a1 = 270: Locate 158, "3.8.", 1, 2, 0, 0, a0, a1
+    DumpBlock "CAPITAL", "3.8 Muc do su dung von", 158, a0, a1, 6
     gStep = "GRID - BS"
-    DumpBlock "BS", "3.6 Ghi nhan PnL theo lop bang can doi", 103, 184, 189, 14
+    a0 = 184: a1 = 189: Locate 103, "3.6.", 1, 3, 6, 0, a0, a1
+    DumpBlock "BS", "3.6 Ghi nhan PnL theo lop bang can doi", 103, a0, a1, 14
     gStep = "GRID - FIONBS"
-    DumpBlock "FIONBS", "7.1 FI Bond tren bang can doi", 169, 288, 294, 5
+    ' Bang 7.1 khong co tieu de so: neo theo dong "Chi tieu" (cot 169, tu dong 270), 7 dong du lieu
+    a0 = 288: a1 = 294: Locate 169, "Ch", 270, 3, 7, 0, a0, a1
+    DumpBlock "FIONBS", "7.1 FI Bond tren bang can doi", 169, a0, a1, 5
     gStep = "GRID - PNLSCEN"
-    DumpBlock "PNLSCEN", "3.7 Phan tich kich ban PnL", 140, 230, 234, 7
+    a0 = 230: a1 = 234: Locate 140, "3.7.", 1, 3, 0, 0, a0, a1
+    DumpBlock "PNLSCEN", "3.7 Phan tich kich ban PnL", 140, a0, a1, 7
     If mFull Then GoTo Overflow
     BufFlush sh
 
@@ -647,8 +659,10 @@ Public Sub XuatFileKey()
         "Pct", "CumPct", "Fitch", "Moody", "SP")
     BufNew 10, 200
     gStep = "RATING"
-    Dim iss As String
-    For r = 203 To 223
+    Dim iss As String, ra As Long, rb As Long
+    ' Danh sach issuer dai/ngan thay doi moi ngay: lay tu dong sau "Issuer" den dong Total
+    ra = 203: rb = 223: Locate 131, "Issuer", 150, 1, 0, 0, ra, rb
+    For r = ra To rb
         iss = OneLine(G(gLK, r, 131))
         If iss <> "" Then
             If Not BufRow() Then GoTo Overflow
@@ -794,6 +808,39 @@ Private Sub RestoreApp(ByVal started As Boolean, ByVal oCalc As Long, _
 End Sub
 
 ' ======================= cac ham do khoi (doc tu mang) =======================
+
+' ---------------------------------------------------------------------
+' Do vi tri khoi theo NHAN (tieu de bang), khong theo toa do co dinh.
+' File 02 hay bi chen/xoa dong trong sheet Linked (29/09 lech 1 dong) ->
+' toa do cu nuot dong tieu de vao du lieu va cat mat dong Tong / issuer cuoi.
+'   fixedN > 0 : lay dung fixedN dong tu dong dau
+'   fixedN = 0 : lay den dong Tong/Total dau tien, cong them extra dong
+' Khong thay tieu de -> giu nguyen r0/r1 truyen vao (toa do cu).
+' ---------------------------------------------------------------------
+Private Function IsTotalLabel(ByVal t As String) As Boolean
+    IsTotalLabel = (Left$(t, 5) = "Total") Or (Left$(t, 4) = "T" & ChrW(7893) & "ng")
+End Function
+
+Private Sub Locate(ByVal c As Long, ByVal prefix As String, ByVal lo As Long, _
+                   ByVal off As Long, ByVal fixedN As Long, ByVal extra As Long, _
+                   ByRef r0 As Long, ByRef r1 As Long)
+    Dim t As Long, r As Long
+    For t = lo To LK_ROWS
+        If Left$(OneLine(G(gLK, t, c)), Len(prefix)) = prefix Then Exit For
+    Next t
+    If t > LK_ROWS Then Exit Sub
+    r0 = t + off
+    If fixedN > 0 Then
+        r1 = r0 + fixedN - 1
+        Exit Sub
+    End If
+    For r = r0 To r0 + 60
+        If IsTotalLabel(OneLine(G(gLK, r, c))) Then
+            r1 = r + extra
+            Exit Sub
+        End If
+    Next r
+End Sub
 
 Private Sub DumpGrid(ByVal pfx As String, ByVal book As String, ByVal c0 As Long, _
                      ByVal r0 As Long, ByVal r1 As Long, ByVal w As Long)

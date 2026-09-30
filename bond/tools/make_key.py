@@ -43,7 +43,9 @@ POS = [
     ("BB", 28, 80, 90),
 ]
 POS_FIELDS = ["Tenor", "Face", "FaceYest", "FaceLM", "DtD", "MtD",
-              "PV01", "Itd", "ItdYest", "ItdLM", "ItdMtD", "ItdYtD", "Daily"]
+              "PV01", "Itd", "ItdYest", "ItdLM", "ItdMtD", "ItdYtD", "Daily", "YtdPnl"]
+# Banking Book (cot AB..AM) khong co Daily / YtdPnl: cot ke ben la bang 6.2 YIELD, khong doc
+POS_WIDTH = {"TB": len(POS_FIELDS), "BB": 12}
 
 CURVES = [
     ("YIELD", 41, 80, 89, ["Tenor", "Bid", "Ask", "Mid", "Spread", "", "DtD", "MtD", "YtD"]),
@@ -212,6 +214,94 @@ def scrub(v, on):
     return v
 
 
+# ---------------------------------------------------------------------------
+# Do vi tri khoi theo NHAN (tieu de bang), khong theo toa do co dinh.
+# File 02 hay bi chen/xoa dong ("Linked" lech 1 dong tu 29/09) -> toa do cu
+# nuot dong tieu de vao du lieu va cat mat dong Tong / issuer cuoi.
+# Moi khoi: (cot nhan, regex tieu de, offset dong dau so voi tieu de, kieu ket thuc)
+#   "total"  : den dong dau tien co nhan ^(Tong|Total) (gom dong do)
+#   "total+1": nhu tren nhung lay them 1 dong ke sau (dong "%")
+#   N (so)   : co dinh N dong
+# ---------------------------------------------------------------------------
+TOTAL_RE = re.compile(r"^\s*(Tổng|Total)", re.I)
+
+
+def _label(ws, r, c):
+    v = ws.cell(r, c).value
+    return re.sub(r"\s+", " ", v).strip() if isinstance(v, str) else v
+
+
+def find_title(ws, col, pattern, lo=1, hi=400):
+    rx = re.compile(pattern, re.I)
+    for r in range(lo, hi + 1):
+        v = _label(ws, r, col)
+        if isinstance(v, str) and rx.search(v):
+            return r
+    return None
+
+
+def resolve_rows(ws, name, col, pattern, off, end, fallback, lo=1, hi=400):
+    """Tra (r0, r1). Khong tim thay neo -> dung toa do cu va canh bao."""
+    t = find_title(ws, col, pattern, lo, hi)
+    if t is None:
+        print("  !! %s: khong tim thay tieu de /%s/ -> dung toa do cu %s" % (name, pattern, fallback))
+        return fallback
+    r0 = t + off
+    if isinstance(end, int):
+        return r0, r0 + end - 1
+    for r in range(r0, r0 + 60):
+        v = _label(ws, r, col)
+        if isinstance(v, str) and TOTAL_RE.search(v):
+            return r0, r + (1 if end == "total+1" else 0)
+    print("  !! %s: khong thay dong Tong -> dung toa do cu %s" % (name, fallback))
+    return fallback
+
+
+ANCHORS_POS = {"TB": (14, r"^3\.1\.", 3, "total"), "BB": (28, r"^3\.2\.", 3, "total")}
+ANCHORS_GRID = {
+    "MIX": (147, r"^3\.3\.", 3, "total+1"),
+    "HOLD": (164, r"^3\.4\.", 3, "total"),
+    "PNL": (154, r"^3\.5\.", 2, "total"),
+    "CAPITAL": (158, r"^3\.8\.", 2, "total"),
+    "BS": (103, r"^3\.6\.", 3, 6),
+    "PNLSCEN": (140, r"^3\.7\.", 3, "total"),
+}
+
+
+def resolve_all(lk):
+    """Tra ve (POS, GRIDS, FIONBS_rows, RATING) da hieu chinh theo neo."""
+    pos = []
+    for book, c0, r0, r1 in POS:
+        col, pat, off, end = ANCHORS_POS[book]
+        a, b = resolve_rows(lk, "POS " + book, col, pat, off, end, (r0, r1))
+        pos.append((book, c0, a, b))
+    grids = []
+    for name, c0, r0, r1, width, title, fields in GRIDS:
+        if name in ANCHORS_GRID:
+            col, pat, off, end = ANCHORS_GRID[name]
+            a, b = resolve_rows(lk, "GRID " + name, col, pat, off, end, (r0, r1))
+        elif name == "FIONBS":   # khong co tieu de so: neo theo dong "Chi tieu" cua bang 7.1
+            h = find_title(lk, c0, r"^Chỉ tiêu", 270, 340)
+            if h is None:
+                print("  !! GRID FIONBS: khong tim thay dong 'Chi tieu' -> dung toa do cu")
+                a, b = r0, r1
+            else:
+                a = h + 3
+                b = a
+                for r in range(a, a + 20):
+                    v = _label(lk, r, c0)
+                    if isinstance(v, str) and re.match(r"^Tổng.*-\s*4", v):
+                        b = r
+                        break
+                else:
+                    b = r1
+        else:
+            a, b = r0, r1
+        grids.append((name, c0, a, b, width, title, fields))
+    rating = resolve_rows(lk, "RATING", RATING[0], r"^Issuer", 1, "total", (RATING[1], RATING[2]), 150, 300)
+    return pos, grids, (RATING[0],) + tuple(rating)
+
+
 def build(src, outdir, sanitize=False):
     wb = openpyxl.load_workbook(src, data_only=True)
     s2, lk, cd, rp, rt = (wb["Linked (1)"], wb["Linked"], wb["Chart data"],
@@ -280,12 +370,14 @@ def build(src, outdir, sanitize=False):
             n += 1
     counts["DATA_S2"] = n
 
+    POS_R, GRIDS_R, RATING_R = resolve_all(lk)
     psh = out.create_sheet("POS")
     psh.append(["KeyID", "Book"] + POS_FIELDS)
     n = 0
-    for book, c0, r0, r1 in POS:
+    for book, c0, r0, r1 in POS_R:
         for r in range(r0, r1 + 1):
-            v = rowvals(lk, r, c0, len(POS_FIELDS))
+            w = POS_WIDTH[book]
+            v = rowvals(lk, r, c0, w) + [None] * (len(POS_FIELDS) - w)
             if v[0] in (None, ""):
                 continue
             psh.append(["POS.%s.%s" % (book, slug(v[0])), book] + v)
@@ -308,7 +400,7 @@ def build(src, outdir, sanitize=False):
     gsh = out.create_sheet("GRID")
     gsh.append(["KeyID", "Block", "BlockName", "Label"] + ["C%d" % i for i in range(1, 15)])
     n = 0
-    for name, c0, r0, r1, width, title, fields in GRIDS:
+    for name, c0, r0, r1, width, title, fields in GRIDS_R:
         for r in range(r0, r1 + 1):
             v = rowvals(lk, r, c0, width)
             if v[0] in (None, ""):
@@ -389,7 +481,7 @@ def build(src, outdir, sanitize=False):
     rsh = out.create_sheet("RATING")
     rsh.append(["KeyID", "Issuer", "Amount", "Rating", "ReviewDate", "Pct", "CumPct",
                 "Fitch", "Moody", "SP"])
-    c0, r0, r1 = RATING
+    c0, r0, r1 = RATING_R
     n = 0
     for r in range(r0, r1 + 1):
         issuer = clean(lk.cell(r, c0).value)

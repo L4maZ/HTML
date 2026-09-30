@@ -60,6 +60,14 @@ table th{font-weight:700!important;letter-spacing:.07em}
 [data-hdr] .hdrmeta{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:7px;font-size:11.5px;line-height:1.4}
 [data-hdr] .hdrmeta span.l{font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.72;margin-right:6px}
 [data-hdr] .hdrmeta b{font-weight:600}
+
+/* ---- v9: khong bang nao phai keo ngang ---- */
+div[style*="overflow-x:auto"]{overflow-x:visible!important}
+table{table-layout:auto;max-width:100%}
+table td,table th{overflow-wrap:break-word}
+@media (max-width:1400px){table td,table th{padding-left:6px!important;padding-right:6px!important}}
+@media (max-width:1320px){table td[style*="min-width:190px"]{min-width:120px!important}table td,table th{padding-left:5px!important;padding-right:5px!important}table th{white-space:normal!important}}
+@media (max-width:1200px){table{font-size:11.5px!important}table td[style*="min-width:190px"]{min-width:90px!important}table td,table th{padding-left:3px!important;padding-right:3px!important}table th{letter-spacing:.02em!important;max-width:none!important}}
 </style>
 </head><body><div id="app" style="min-height:100vh;background:#f3f2f2;"></div>
 <script>
@@ -152,8 +160,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     kpiTrading: 'Trạng thái Trading (mệnh giá)', kpiItd: 'ItD Unrealized PnL · GBond Trading',
     kpiBanking: 'Trạng thái Banking (mệnh giá)', kpiFi: 'Trạng thái FI Bond & CD',
     /* --- Ghi chú --- */
-    scopeNoteMSB: 'Phạm vi nội bộ MSB (đã điều chỉnh AFS/HTM).', scopeNoteSBV: '',
-    legendLight: 'XANH < 80% · HỔ PHÁCH 80–100% · ĐỎ ≥ 100%',
+    legendLight: 'XANH < 80% · VÀNG 80–100% · ĐỎ ≥ 100%',
     /* --- Tham số ngưỡng đèn --- */
     thrWarn: 0.8, thrBreach: 1
   };
@@ -250,7 +257,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
           <button type="button" data-sub="ind" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_ind">Indicator</button>
           <button type="button" data-sub="trangthai" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_trangthai">Trạng thái</button>
           <button type="button" data-sub="donhay" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_donhay">Độ nhạy · PV01</button>
-          <button type="button" data-sub="itd" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_itd">ItD Unrealized</button>
+          <button type="button" data-sub="itd" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_itd">ItD Unrealized PnL</button>
           <button type="button" data-sub="laiLo" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_laiLo">Lãi / lỗ</button>
           <button type="button" data-sub="von" style="appearance:none;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--f-body);font-size:13.5px;padding:8px 2px;margin-right:26px;color:#6b665e;transition:color .18s,border-color .18s;" data-k="tab_von">Sử dụng vốn</button>
         </div>
@@ -262,7 +269,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
                 <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_ind_01">Bảng chỉ tiêu chi tiết · hạn mức &amp; đèn cảnh báo</h2>
                 <div id="scopeNote" style="font-size:12px;color:#8d877c;margin-top:4px;"></div>
               </div>
-              <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">Xanh &lt; 80% · Hổ phách 80–100% · Đỏ ≥ 100%</span>
+              <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">Xanh &lt; 80% · Vàng 80–100% · Đỏ ≥ 100%</span>
             </div>
             <div id="indHost"></div>
           </section>
@@ -291,13 +298,12 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
               <div style="min-width:0;overflow-x:auto;"><div id="tblPosBB"></div></div>
             </section>
           </div>
-          <div style="font-size:12.5px;color:#6b665e;line-height:1.6;padding:0 2px;">Bảng theo kỳ hạn lấy từ mục 3.1/3.2 của báo cáo (chuỗi chi tiết theo kỳ hạn). Cột 23/07 và 30/06 có thể lệch bảng Indicator vì thời điểm gắn nhãn AFS/HTM giữa hai chuỗi khác nhau — cột 24/07 của hai bảng khớp nhau ở 16,370 tỷ (Trading) và 12,001 tỷ (Banking).</div>
           <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
             <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
               <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_trangthai_03">Cấu trúc trạng thái theo lớp ghi nhận</h2>
               <span style="font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#8d877c;">tỷ VND</span>
             </div>
-            <div style="min-width:0;overflow-x:auto;"><div id="tblBS"></div></div>
+            <div style="min-width:0;max-width:860px;"><div id="tblBS"></div></div>
             <div id="bsNote" style="font-size:12.5px;color:#6b665e;line-height:1.6;margin-top:12px;max-width:90ch;"></div>
           </section>
           <div style="min-width:0;display:grid;grid-template-columns:1fr 1fr;gap:20px;">
@@ -647,6 +653,12 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
             <div id="ch_fiGd" style="height:300px;"></div>
           </section>
         </div>
+        <section style="border:1px solid rgba(32,31,29,.12);border-radius:4px;background:#fdfcfa;padding:17px 19px 19px;min-width:0;">
+          <div style="border-bottom:1px solid rgba(32,31,29,.12);padding-bottom:9px;margin-bottom:14px;">
+            <h2 style="font-family:var(--f-head);font-size:16.5px;font-weight:600;margin:0;letter-spacing:-.004em;" data-k="t_fi_qlhs">Lịch sử · PnL theo phương pháp QLHS · FI Bond &amp; CD</h2>
+          </div>
+          <div id="ch_fiQlhs" style="height:300px;"></div>
+        </section>
       </section>
 
     </div>
@@ -667,7 +679,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
   function fmtRow(r, v) { if (v == null || isNaN(v)) return '—'; if (r.pct) return pct2(v); if (Math.abs(v) >= 10000) return n0(v); return n2(v); }
 
   const setHtml = (id, h) => { const el = $(id); if (el) el.innerHTML = h; };
-  const TBL = 'width:100%;min-width:max-content;border-collapse:collapse;font-family:var(--f-body);';
+  const TBL = 'width:100%;border-collapse:collapse;font-family:var(--f-body);';
   function setTbl(id, inner, fs) { const el = $(id); if (el) el.innerHTML = '<table style="' + TBL + 'font-size:' + (fs || 13.5) + 'px;">' + inner + '</table>'; }
   const th = (t, left, w) => {
     const plain = String(t).replace(/<[^>]*>/g, '');
@@ -754,10 +766,14 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     const tb = R.books.MSB[0].rows, bb = R.books.MSB[1].rows;
     const g = (rows, l) => rows.find(r => r.label === l);
     const face = g(tb, 'Face Value'), itd = g(tb, 'ItD Unrealized MtM PnL'), bface = g(bb, 'Face Value'), fi = R.fibond[0];
+    const afsHtm = { afs: null, htm: null };
+    for (let j = tb.indexOf(itd) + 1; j < tb.length && tb[j].sub; j++) {
+      if (/AFS/i.test(tb[j].label)) afsHtm.afs = tb[j].today; else if (/HTM/i.test(tb[j].label)) afsHtm.htm = tb[j].today;
+    }
     setHtml('kpiHi', [
-      kpiCard({ label: kv('kpiTrading'), value: n0(face.today), sub: 'tỷ VND · ' + sgn(face.dtd, n0) + ' so với 23/07', limit: face.limit, used: face.used, state: face.used >= 1 ? 'breach' : face.used >= .8 ? 'warn' : 'ok' }),
-      kpiCard({ label: kv('kpiItd'), value: n0(itd.today), sub: 'tỷ VND · AFS −902 + HTM −689 · đang phê duyệt ngoại lệ', limit: itd.limit, used: itd.used, state: 'breach' }),
-      kpiCard({ label: kv('kpiBanking'), value: n0(bface.today), sub: 'tỷ VND · ' + sgn(bface.dtd, n0) + ' so với 23/07', limit: bface.limit, used: bface.used, state: bface.used >= 1 ? 'breach' : bface.used >= .8 ? 'warn' : 'ok' }),
+      kpiCard({ label: kv('kpiTrading'), value: n0(face.today), sub: 'tỷ VND · ' + sgn(face.dtd, n0) + ' so với ' + R.colDates.yest, limit: face.limit, used: face.used, state: face.used >= 1 ? 'breach' : face.used >= .8 ? 'warn' : 'ok' }),
+      kpiCard({ label: kv('kpiItd'), value: n0(itd.today), sub: 'tỷ VND' + (afsHtm.afs == null && afsHtm.htm == null ? '' : ' · AFS ' + n0(afsHtm.afs) + ' + HTM ' + n0(afsHtm.htm)) + ' · đang phê duyệt ngoại lệ', limit: itd.limit, used: itd.used, state: 'breach' }),
+      kpiCard({ label: kv('kpiBanking'), value: n0(bface.today), sub: 'tỷ VND · ' + sgn(bface.dtd, n0) + ' so với ' + R.colDates.yest, limit: bface.limit, used: bface.used, state: bface.used >= 1 ? 'breach' : bface.used >= .8 ? 'warn' : 'ok' }),
       kpiCard({ label: kv('kpiFi'), value: n0(fi.today), sub: 'tỷ VND · ' + sgn(fi.dtd, n0) + ' trong ngày · sau giảm trừ đối ứng', limit: fi.limit, used: fi.used, state: fi.used >= 1 ? 'breach' : fi.used >= .8 ? 'warn' : 'ok' })
     ].join(''));
 
@@ -783,8 +799,8 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     };
     /* Nhận định đi kèm ngay dưới bảng mà nó nói về, không tách thành thẻ rời.
        hiRiskPrice trùng với ghi chú kịch bản 10 ngày ở tab QTRR nên không lặp lại. */
-    CMT.tb = SCOPE === 'MSB' ? bTb : '';
-    CMT.bb = SCOPE === 'MSB' ? bBb : '';
+    CMT.tb = '';
+    CMT.bb = '';
     setHtml('pnlNote', bRn ? esc(bRn) : '');
     setHtml('cmtFi', grp('grpFi', [['hiFiTitle', bFi, null]], 1));
   }
@@ -829,8 +845,8 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     let h = '';
     books.forEach((b, i) => {
       h += '<div style="' + (i ? 'margin-top:26px;' : '') + '">'
-        + '<h3 style="font-family:var(--f-head);font-size:14.5px;font-weight:600;margin:0 0 10px;">' + esc(b.title) + (/trading/i.test(b.title) ? '' : ' <span style="font-weight:400;font-size:12px;color:' + K.faint + ';">· tổng book (AFS + HTM)</span>') + '</h3>'
-        + '<div style="min-width:0;overflow-x:auto;"><table style="width:100%;min-width:max-content;border-collapse:collapse;font-size:13px;font-family:var(--f-body);">' + indicatorTable(b) + '</table></div>'
+        + '<h3 style="font-family:var(--f-head);font-size:14.5px;font-weight:600;margin:0 0 10px;">' + esc(b.title) + '</h3>'
+        + '<div style="min-width:0;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;font-family:var(--f-body);">' + indicatorTable(b) + '</table></div>'
         + noteUnder(/^2\.1/.test(b.title) ? CMT.tb : /^2\.2/.test(b.title) ? CMT.bb : '') + '</div>';
     });
     setHtml('indHost', h);
@@ -923,8 +939,9 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
   }
   function renderDoNhay() {
     const R = RPT();
-    pv01Table('tblPvTB', R.posTrading, R.posTradingTotal);
-    pv01Table('tblPvBB', R.posBanking, R.posBankingTotal);
+    const stdOf = (i, tot) => { const rw = ((R.books.MSB[i] || {}).rows || []).find(r => r.label === 'PV01'); return Object.assign({}, tot, { stdPv01: rw && rw.today != null ? rw.today : tot.pv01 }); };
+    pv01Table('tblPvTB', R.posTrading, stdOf(0, R.posTradingTotal));
+    pv01Table('tblPvBB', R.posBanking, stdOf(1, R.posBankingTotal));
     pv01Hist('ch_pvTBHist', 'tdpv01');
     pv01Hist('ch_pvBBHist', 'bkpv01');
   }
@@ -965,7 +982,6 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
     setHtml('itdSummary',
       ['<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;background:' + K.grid + ';border:1px solid ' + K.grid + ';border-radius:4px;overflow:hidden;">',
         [['ItD toàn book Trading', tb.today, spNote],
-        ['ItD Trading · riêng Book AFS', sp.afs, ''],
         ['ItD toàn book Banking', R.posBankingTotal.itd, ''],
         ['Tổng GBond', tb.today + R.posBankingTotal.itd, 'Trading + Banking']]
           .map(([l, v, s]) => '<div style="background:' + K.paper + ';padding:12px 14px 13px;"><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:' + K.faint + ';">' + l + '</div>'
@@ -1013,12 +1029,12 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
 
     /* kịch bản lãi/lỗ theo thời gian nắm giữ */
     const s = R.pnlScenario;
-    let q = '<thead><tr>' + th('Cấu phần lãi/lỗ dự kiến', 1) + s.cols.map(c => th(c)).join('') + s.cols2.map(c => th(c)).join('') + '</tr></thead><tbody>';
+    let q = '<thead><tr>' + th('Cấu phần lãi/lỗ dự kiến', 1) + s.cols.map(c => th(c)).join('') + '</tr></thead><tbody>';
     s.rows.forEach(r => {
       q += '<tr>' + tdL((r.sub ? '<span style="color:' + K.muted + ';padding-left:12px;">' : '<span style="font-weight:500;">') + esc(r.k) + '</span>')
-        + r.a.map(v => tdR(n1(v), negCol(v))).join('') + r.b.map(v => tdR(n1(v), 'color:' + K.muted + ';' + negCol(v))).join('') + '</tr>';
+        + r.a.map(v => tdR(n1(v), negCol(v))).join('') + '</tr>';
     });
-    q += '<tr style="' + totalRow + '">' + tdL(s.total.k, totalRow) + s.total.a.map(v => tdR(n1(v), totalRow + negCol(v))).join('') + s.total.b.map(v => tdR(n1(v), totalRow + negCol(v))).join('') + '</tr></tbody>';
+    q += '<tr style="' + totalRow + '">' + tdL(s.total.k, totalRow) + s.total.a.map(v => tdR(n1(v), totalRow + negCol(v))).join('') + '</tr></tbody>';
     setTbl('tblPnlScen', q);
 
     const t = TS().tdpnl, gov = TS().qlhsGov, fi = TS().qlhsFi;
@@ -1031,7 +1047,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
       xAxis: axX(gov.date), yAxis: axY('tỷ VND'),
       series: [{ name: 'GovBond · NIM', type: 'bar', data: gov.NIM, itemStyle: { color: K.gold }, barMaxWidth: 18 },
       { name: 'GovBond · Realized', type: 'bar', data: gov.Realized, itemStyle: { color: 'rgba(182,130,53,.4)' }, barMaxWidth: 18 },
-      { name: 'FIBond&CD · Tổng', type: 'line', data: fi.Total, smooth: true, symbol: 'circle', symbolSize: 5, lineStyle: { width: 2, color: K.blue } }]
+      { name: 'GovBond · Tổng', type: 'line', data: gov.Total, smooth: true, symbol: 'circle', symbolSize: 5, lineStyle: { width: 2, color: K.blue } }]
     }));
   }
 
@@ -1287,6 +1303,13 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
   /* =================== 5. FI BOND & CD =================== */
   function renderFI() {
     const R = RPT(), f = R.fibond;
+    { const q = TS().qlhsFi;
+      if (q) mk('ch_fiQlhs', baseOpt({
+        xAxis: axX(q.date), yAxis: axY('tỷ VND'),
+        series: [{ name: 'FI Bond&CD · NIM', type: 'bar', data: q.NIM, itemStyle: { color: K.gold }, barMaxWidth: 18 },
+        { name: 'FI Bond&CD · Realized', type: 'bar', data: q.Realized, itemStyle: { color: 'rgba(182,130,53,.4)' }, barMaxWidth: 18 },
+        { name: 'FI Bond&CD · Tổng', type: 'line', data: q.Total, smooth: true, symbol: 'circle', symbolSize: 5, lineStyle: { width: 2, color: K.blue } }]
+      })); }
     setTbl('tblFiInd', indicatorTable({ rows: R.other.concat(R.fibond.map(f => Object.assign({ cat: '' }, f))) }), 13);
     /* 1 card gộp: face value + hạn mức */
     const cell = (l, v, s, u) => '<div style="min-width:0;padding:13px 16px 15px;">'
@@ -1410,7 +1433,7 @@ window.TS = {"tdpv01":{"date":["29/05","01/06","02/06","03/06","04/06","05/06","
   function setScope(s) {
     SCOPE = s;
     document.querySelectorAll('[data-scope]').forEach(b => { if (b.dataset.scope === s) b.setAttribute('data-active', ''); else b.removeAttribute('data-active'); });
-    const l = $('scopeNote'); if (l) l.textContent = s === 'MSB' ? kv('scopeNoteMSB') : kv('scopeNoteSBV');
+    const l = $('scopeNote'); if (l) l.textContent = '';
     const st = loadState(); st.scope = s; saveState(st);
     renderHighlight(); renderIndicator(); applyDataKeys(); resizeSoon();
   }
@@ -1692,6 +1715,22 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
     };
   }
 
+  /* Dong tieu de bi doc nham thanh du lieu (key sinh tu macro lech dong) */
+  function isHdrLabel(s) {
+    s = String(s == null ? '' : s).trim();
+    return /^(Tenor|Time holding|Cấu phần|Kịch bản|Bucket|Label|Chỉ tiêu)$/i.test(s) || /^\d{5}$/.test(s);
+  }
+  function addRows(rows, fields) {
+    var o = {};
+    fields.forEach(function (f) {
+      var any = false, s = 0;
+      rows.forEach(function (r) { if (r[f] != null && !isNaN(r[f])) { any = true; s += r[f]; } });
+      o[f] = any ? s : null;
+    });
+    return o;
+  }
+  var LECH_KEY = ' — key sinh từ macro/script cũ bị lệch dòng. Tạo lại key bằng bản make_key.py / XuatFileKey mới.';
+
   function posRows(K, book) {
     return K.pos.filter(function (r) { return String(r.Book || '').trim() === book; })
       .map(function (r) {
@@ -1699,7 +1738,7 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
           t: String(r.Tenor || '').replace('<=', '≤'),
           face: num(r.Face), faceYest: num(r.FaceYest), faceLM: num(r.FaceLM),
           pv01: num(r.PV01), itd: num(r.Itd), itdYest: num(r.ItdYest), itdLM: num(r.ItdLM),
-          itdMtD: num(r.ItdMtD), itdYtD: num(r.ItdYtD), daily: num(r.Daily)
+          itdMtD: num(r.ItdMtD), itdYtD: num(r.ItdYtD), daily: num(r.Daily), ytdPnl: num(r.YtdPnl)
         };
       });
   }
@@ -1814,16 +1853,23 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
     }
 
     var tb = posRows(K, 'TB'), bb = posRows(K, 'BB');
-    if (tb.length) {
-      R.posTrading = tb.filter(function (r) { return !/Tổng|Total/i.test(r.t); });
-      var tt = tb.filter(function (r) { return /Tổng|Total/i.test(r.t); })[0];
-      if (tt) { tt.stdPv01 = tt.pv01; R.posTradingTotal = tt; }
-    }
-    if (bb.length) {
-      R.posBanking = bb.filter(function (r) { return !/Tổng|Total/i.test(r.t); });
-      var bt = bb.filter(function (r) { return /Tổng|Total/i.test(r.t); })[0];
-      if (bt) { bt.stdPv01 = bt.pv01; R.posBankingTotal = bt; }
-    }
+    var POSF = ['face', 'faceYest', 'faceLM', 'pv01', 'itd', 'itdYest', 'itdLM', 'itdMtD', 'itdYtD', 'daily', 'ytdPnl'];
+    [['Trading', tb, 'posTrading', 'posTradingTotal'], ['Banking', bb, 'posBanking', 'posBankingTotal']].forEach(function (a) {
+      var rows = a[1];
+      if (!rows.length) return;
+      if (rows.some(function (r) { return isHdrLabel(r.t); })) {
+        K.problems.push('Position ' + a[0] + ': dòng tiêu đề bị đọc thành số liệu' + LECH_KEY);
+        rows = rows.filter(function (r) { return !isHdrLabel(r.t); });
+      }
+      var body = rows.filter(function (r) { return !/Tổng|Total/i.test(r.t); });
+      var tot = rows.filter(function (r) { return /Tổng|Total/i.test(r.t); })[0];
+      if (!tot) {
+        tot = addRows(body, POSF); tot.t = 'Tổng';
+        K.problems.push('Position ' + a[0] + ': key thiếu dòng Tổng, HTML tự cộng các kỳ hạn' + LECH_KEY);
+      }
+      tot.stdPv01 = tot.pv01;
+      R[a[2]] = body; R[a[3]] = tot;
+    });
 
     var yc = K.curve.filter(function (r) { return String(r.Type || '') === 'YIELD'; });
     if (yc.length) {
@@ -1842,7 +1888,7 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
 
     var mix = grid(K.grid, 'MIX');
     if (mix.length) {
-      var body = mix.filter(function (r) { return !/Tổng|%/.test(String(r.Label)); });
+      var body = mix.filter(function (r) { return !/Tổng|%/.test(String(r.Label)) && !isHdrLabel(r.Label); });
       R.issuerMix = R.issuerMix || {};
       R.issuerMix.tenors = body.map(function (r) { return String(r.Label); });
       R.issuerMix.TB = {
@@ -1877,30 +1923,38 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
 
     var hold = grid(K.grid, 'HOLD');
     if (hold.length) {
-      R.holdTime = hold.filter(function (r) { return !/Tổng/.test(String(r.Label)); })
+      if (hold.some(function (r) { return isHdrLabel(r.Label); })) K.problems.push('Thời gian nắm giữ: dòng tiêu đề bị đọc thành số liệu' + LECH_KEY);
+      R.holdTime = hold.filter(function (r) { return !/Tổng/.test(String(r.Label)) && !isHdrLabel(r.Label); })
         .map(function (r) {
           return { t: String(r.Label), tb: num(r.C1), tbItd: num(r.C2), bb: num(r.C3), bbItd: num(r.C4) };
         });
       var ht = hold.filter(function (r) { return /Tổng/.test(String(r.Label)); })[0];
       if (ht) R.holdTimeTotal = { tb: num(ht.C1), tbItd: num(ht.C2), bb: num(ht.C3), bbItd: num(ht.C4) };
+      else {
+        R.holdTimeTotal = addRows(R.holdTime, ['tb', 'tbItd', 'bb', 'bbItd']);
+        K.problems.push('Thời gian nắm giữ: key thiếu dòng Tổng, HTML tự cộng' + LECH_KEY);
+      }
     }
 
     var pnl = grid(K.grid, 'PNL');
     if (pnl.length) {
       R.pnlBreakdown = R.pnlBreakdown || {};
-      R.pnlBreakdown.rows = pnl.filter(function (r) { return !/^Total/i.test(String(r.Label)); })
+      if (pnl.some(function (r) { return isHdrLabel(r.Label); })) K.problems.push('Unrealized & Realized PnL: dòng tiêu đề bị đọc thành số liệu' + LECH_KEY);
+      R.pnlBreakdown.rows = pnl.filter(function (r) { return !/^Total/i.test(String(r.Label)) && !isHdrLabel(r.Label); })
         .map(function (r) {
           var L = String(r.Label).trim();
           return { k: L, ytd: num(r.C1), mtd: num(r.C2), dtd: num(r.C3), sub: /^\d\.\d/.test(L) };
         });
       var pt = pnl.filter(function (r) { return /^Total/i.test(String(r.Label)); })[0];
       if (pt) R.pnlBreakdown.total = { ytd: num(pt.C1), mtd: num(pt.C2), dtd: num(pt.C3) };
+      else { R.pnlBreakdown.total = { ytd: null, mtd: null, dtd: null }; K.problems.push('Unrealized & Realized PnL: key thiếu dòng Total PnL (không tự cộng được vì Total không phải tổng đơn giản của (1)+(2))' + LECH_KEY); }
     }
 
     var cap = grid(K.grid, 'CAPITAL');
     if (cap.length) {
       R.capital = R.capital || {};
-      R.capital.rows = cap.filter(function (r) { return !/^Tổng/i.test(String(r.Label)); })
+      if (cap.some(function (r) { return isHdrLabel(r.Label); })) K.problems.push('Mức độ sử dụng vốn: dòng tiêu đề bị đọc thành số liệu' + LECH_KEY);
+      R.capital.rows = cap.filter(function (r) { return !/^Tổng/i.test(String(r.Label)) && !isHdrLabel(r.Label); })
         .map(function (r) {
           var L = String(r.Label).trim();
           return { k: L, today: num(r.C1), yest: num(r.C2), dtd: num(r.C3), lm: num(r.C4),
@@ -1909,6 +1963,10 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
       var ct = cap.filter(function (r) { return /^Tổng/i.test(String(r.Label)); })[0];
       if (ct) R.capital.total = { k: String(ct.Label), today: num(ct.C1), yest: num(ct.C2),
         dtd: num(ct.C3), lm: num(ct.C4), mtd: num(ct.C5) };
+      else {
+        R.capital.total = Object.assign({ k: 'Tổng = (1) + (2) + (3) + (4)' }, addRows(R.capital.rows.filter(function (r) { return !r.sub; }), ['today', 'yest', 'dtd', 'lm', 'mtd']));
+        K.problems.push('Mức độ sử dụng vốn: key thiếu dòng Tổng, HTML tự cộng (1)+(2)+(3)+(4)' + LECH_KEY);
+      }
     }
 
     var bs = grid(K.grid, 'BS');
@@ -1943,13 +2001,15 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
         var L = String(r.Label).trim(), o = { k: L, on: num(r.C1), off: num(r.C2), out: num(r.C3), total: num(r.C4) };
         if (/chưa điều chỉnh|Tổng chưa/i.test(L)) R.fiOnBS.gross = o;
         else if (/Giảm trừ/i.test(L)) R.fiOnBS.offset = o;
-        else if (/sau giảm trừ/i.test(L)) R.fiOnBS.net = o;
+        else if (/sau giảm trừ|^Tổng \(=\s*1\s*\+\s*2\s*\+\s*3\s*-\s*4/i.test(L)) R.fiOnBS.net = o;
       });
+      if (!R.fiOnBS.net) K.problems.push('FI Bond trên bảng cân đối: key thiếu dòng Tổng sau giảm trừ đối ứng' + LECH_KEY);
     }
 
     var ps = grid(K.grid, 'PNLSCEN');
     if (ps.length && R.pnlScenario) {
-      R.pnlScenario.rows = ps.filter(function (r) { return !/^Tổng/i.test(String(r.Label)); })
+      if (ps.some(function (r) { return isHdrLabel(r.Label); })) K.problems.push('Kịch bản PnL: dòng tiêu đề bị đọc thành số liệu' + LECH_KEY);
+      R.pnlScenario.rows = ps.filter(function (r) { return !/^Tổng/i.test(String(r.Label)) && !isHdrLabel(r.Label); })
         .map(function (r) {
           var L = String(r.Label).trim();
           return { k: L, a: [num(r.C1), num(r.C2), num(r.C3)], b: [num(r.C4), num(r.C5), num(r.C6)],
@@ -1958,6 +2018,7 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
       var pst = ps.filter(function (r) { return /^Tổng/i.test(String(r.Label)); })[0];
       if (pst) R.pnlScenario.total = { k: String(pst.Label), a: [num(pst.C1), num(pst.C2), num(pst.C3)],
         b: [num(pst.C4), num(pst.C5), num(pst.C6)] };
+      else { R.pnlScenario.total = { k: 'Tổng Lãi/Lỗ dự kiến', a: [null, null, null], b: [null, null, null] }; K.problems.push('Kịch bản PnL: key thiếu dòng Tổng Lãi/Lỗ dự kiến' + LECH_KEY); }
     }
 
     ['TB', 'BB'].forEach(function (bk) {
@@ -2050,6 +2111,8 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
       };
     }
 
+    if (K.rating.length && !K.rating.some(function (r) { return /^Total$/i.test(String(r.Issuer)); }))
+      K.problems.push('Xếp hạng FI Bond: key không có dòng Total — danh sách issuer có thể bị cắt' + LECH_KEY);
     if (K.rating.length) {
       var body2 = K.rating.filter(function (r) { return !/Total/i.test(String(r.Issuer)); });
       R.fiRating = body2.map(function (r) {
@@ -2108,13 +2171,28 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
         bidAskSpread: 'spreadTs', tuongQuanLs10y: 'corr', gdTpdn: 'gdTPDN',
         posiFibondCd: 'fiPos', couponBqFibondCd: 'fiCoupon', yieldFiBond: 'fiYield',
         mucDoSuDungVon: 'vonSD', qlhsFibondCd: 'qlhsFi', qlhsGovbond: 'qlhsGov',
-        tuongQuanYtmVsRepo: 'ytmRepo'
+        tuongQuanYtmVsRepo: 'ytmRepo', month: 'primary'
+      };
+      /* Ten truong trong file key (theo tieu de cot Excel) -> ten truong ma bieu do doc */
+      var ALIAS = {
+        tdPnl: { 'ItD PnL': 'ItD', 'YtD PnL 2026': 'YtD' },
+        bkPnl: { 'ItD PnL': 'ItD', 'YtD PnL 2026': 'YtD' },
+        tuongQuanLs10y: { 'LS sơ cấp': 'SoCap' },
+        gdTpdn: { 'FI Bond': 'FIBond' },
+        posiFibondCd: { 'FI Bond': 'FIBond', 'Hạn mức': 'Limit' },
+        couponBqFibondCd: { 'FI Bond': 'FIBond' },
+        mucDoSuDungVon: { 'Realized&NIM lũy kế năm': 'RealizedNIM', 'Realized&NIM chưa ghi nhận': 'RealizedChua',
+          'Lỗ tiềm ẩn': 'LoTiemAn', 'Vốn yêu cầu': 'VonYeuCau', 'Tổng': 'Tong' },
+        qlhsFibondCd: { 'Realized PnL': 'Realized' },
+        qlhsGovbond: { 'Realized PnL': 'Realized' },
+        month: { 'GTTT sơ cấp': 'SoCap', 'GTGD thứ cấp': 'ThuCap' },
+        tuongQuanYtmVsRepo: { 'YTM GovBond': 'gov', 'YTM FIBond': 'fi', 'RepoRate': 'repo' }
       };
       Object.keys(K.ts).forEach(function (s) {
         var target = MAP[s];
         if (!target || !TS[target]) return;
-        var src = K.ts[s], dst = {};
-        Object.keys(src).forEach(function (f) { dst[f] = src[f]; });
+        var src = K.ts[s], dst = {}, al = ALIAS[s] || {};
+        Object.keys(src).forEach(function (f) { dst[al[f] || f] = src[f]; });
         var raw = src.date.map(function (d) { return xlDate(d); });
         var mon = isMonthly(raw);
         dst.date = raw.map(function (d) {
@@ -2122,8 +2200,18 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
           if (!m) return String(d).slice(0, 8);
           return mon ? (m[2] + '/' + m[3].slice(2)) : (m[1] + '/' + m[2]);
         });
+        if (target === 'ytmRepo') dst.tenor = src.date.map(String);
+        /* Excel (sheet Chart data): "Vốn yêu cầu" = tổng vốn yêu cầu, ĐÃ GỒM lỗ tiềm ẩn ItD; Tổng = RealizedNIM + Chưa ghi nhận + Vốn yêu cầu.
+           Biểu đồ xếp chồng 4 phần nên phần thứ 4 (TT41) = Vốn yêu cầu − Lỗ tiềm ẩn, nếu không ItD bị tính hai lần. */
+        if (s === 'mucDoSuDungVon' && dst.VonYeuCau && dst.LoTiemAn) {
+          dst.VonYeuCau = dst.VonYeuCau.map(function (x, i) { return (x == null || dst.LoTiemAn[i] == null) ? null : x - dst.LoTiemAn[i]; });
+        }
+        /* Truong bieu do can ma key khong co: KHONG lap bang so cu nhung, de trong va bao loi */
         Object.keys(TS[target]).forEach(function (f) {
-          if (dst[f] === undefined) dst[f] = TS[target][f];
+          if (dst[f] === undefined) {
+            dst[f] = dst.date.map(function () { return null; });
+            K.problems.push('Biểu đồ "' + s + '": key không có trường "' + f + '" — để trống, không dùng số cũ');
+          }
         });
         TS[target] = dst;
       });
@@ -2528,7 +2616,7 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
           x[0] + ' · ' + (x[2] * 100).toFixed(1) + '%']);
       });
     } else {
-      items.push(['ok', 'Không chỉ tiêu nào chạm ngưỡng cảnh báo', 'XANH < 80% · HỔ PHÁCH 80–100% · ĐỎ ≥ 100%']);
+      items.push(['ok', 'Không chỉ tiêu nào chạm ngưỡng cảnh báo', 'XANH < 80% · VÀNG 80–100% · ĐỎ ≥ 100%']);
     }
 
     ck.innerHTML = '<ul style="list-style:none;font-size:13px;margin:0;padding:0;">' + items.map(function (it) {
