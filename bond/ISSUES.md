@@ -159,3 +159,8 @@ số từ mô hình VaR mục 21 sheet `Trading`. Hệ quả trên mặt báo c�
 Không áp dụng: thanh hạn mức, popover giải nghĩa (Jak bỏ), dark mode, number tweening, localStorage cho dữ liệu, CDN font.
 Đã chạy lại: overflow 4 độ rộng, recon 731 + TS 2428 (0 lệch), empty state, lưu đè/export.
 Bổ sung (30/09): số chạy nhảy chỉ ở 4 thẻ KPI Highlight, một lần sau khi mở file, 0,8s, luôn kết thúc đúng số gốc (`data-cu`), bản export ghi lại số gốc; vạch tiến độ cuộn `#rrttSpine` (ẩn khi in, không nằm trong export).
+
+## v12 — áp dụng bản demo effect của Jak (01/10)
+Đã ghép: vạch active trượt (sidebar + sub-tab), chuyển tab theo hướng, header bảng dính khi cuộn, thẻ KPI bấm được → nhảy tới dòng chi tiết + nháy dòng, tìm nhanh Ctrl+K / "/" , nối crosshair các chart cùng tab (chỉ khi trục X giống hệt nhau).
+Không ghép: thanh hạn mức chuyển động (KPI/cột % sử dụng), tooltip giải nghĩa chỉ số (Jak đã bỏ trước đó), dữ liệu MOCK của bản demo, vạch scroll đỏ (đã gỡ). Số chạy nhảy 4 thẻ KPI vẫn giữ (bản demo tắt đi).
+Đã chạy lại: recon 731 + TS 2,428 (0 lệch), overflow 4 độ rộng, lưu đè/export, empty state.
