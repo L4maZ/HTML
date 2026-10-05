@@ -76,6 +76,16 @@ Hai lỗi phải sửa trước khi giao:
 Phần làm đúng, giữ lại: 27 bank trong `BANK_ORDER`, pills multi-select All/Clear/Top10,
 export `outerHTML` (dòng 593) — cơ chế save duy nhất đang thực sự có trong 6 file.
 
+## FIBond_Rating_Dashboard — OK, VBA đã dựng lại
+
+`Rating_Dashboard_v0.10.html` (offline, JSZip + parser xlsx tự viết) đọc file `Rating_Key_YYYYMMDD.xlsx`
+(schema `rating.key.v1`, 7 sheet: META, KPI, EVENTS, RATING_STRUCTURE, TENOR, PORTFOLIO, TEXT).
+
+Macro sinh file Key: [`vba/XuatRatingKey.bas`](../vba/XuatRatingKey.bas) — dựng lại từ dữ liệu mà lần xuất
+trước nhúng trong HTML (khớp 100% events / rating / tenor / 54 dòng portfolio, kể cả KeyID và chuỗi `Source`).
+Macro dừng khi HTML chắc chắn từ chối file; chỉ cảnh báo khi HTML chỉ hiện vàng.
+Cách dùng và các điểm cần biết: [`vba/README.md`](../vba/README.md).
+
 ## cfa_l1_console — sản phẩm khác loại
 
 Không phải dashboard tài chính. Xem [`content-console.md`](content-console.md).
