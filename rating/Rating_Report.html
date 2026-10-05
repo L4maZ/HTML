@@ -383,15 +383,27 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     let nChecks = 12;
     const asOfD = meta.asOf ? new Date(meta.asOf) : null;
     nChecks++; {
+      /* Cột "Sau" của bảng cơ cấu phải bằng cộng bond-level (bond-level đã mang rating mới). */
       const byR = {}; for (const r of data.portfolio) byR[r.Rating] = (byR[r.Rating] || 0) + (Number(r.Amount) || 0);
+      const issAmt = {}; for (const r of data.portfolio) issAmt[r.Issuer] = (issAmt[r.Issuer] || 0) + (Number(r.Amount) || 0);
+      const diff = {}; for (const r of data.ratingStructure) diff[r.Rating] = (Number(r.OutstandingAfter) || 0) - (byR[r.Rating] || 0);
+      for (const ev of data.events.filter(e => e.EventType === 'RATING_CHANGE')) {
+        const a = issAmt[ev.Issuer] || 0, o = ev.OldRating, n = ev.NewRating;
+        if (a > 1 && o in diff && n in diff && Math.abs(diff[o] - a) <= 1 && Math.abs(diff[n] + a) <= 1) {
+          warnings.push(`Cột "Sau điều chỉnh" của bảng cơ cấu chưa phản ánh ${ev.Issuer} ${o}→${n} (${n0(a)} tỷ VND): vẫn tính ở ${o}.`);
+          diff[o] = 0; diff[n] = 0;
+        }
+      }
       for (const r of data.ratingStructure) {
-        const d = (Number(r.OutstandingAfter) || 0) - (byR[r.Rating] || 0);
+        const d = diff[r.Rating];
         if (Math.abs(d) > 1) warnings.push(`Rating ${r.Rating}: bảng cơ cấu ${n0(r.OutstandingAfter)} khác tổng bond-level ${n0(byR[r.Rating] || 0)} (lệch ${n0(Math.abs(d))} tỷ VND).`);
       }
     }
     nChecks++; {
-      const neg = data.portfolio.filter(r => Number(r.AmountAfterCpty) < -0.01);
-      if (neg.length) warnings.push(`${neg.length} dòng có Amount sau đối ứng âm: ${neg.slice(0, 3).map(r => r.BondCode).join(', ')}${neg.length > 3 ? '…' : ''}.`);
+      /* Đối ứng có thể lớn hơn vị thế của MỘT trái phiếu; chỉ cảnh báo khi âm tính theo issuer. */
+      const m = {}; for (const r of data.portfolio) m[r.Issuer] = (m[r.Issuer] || 0) + (Number(r.AmountAfterCpty) || 0);
+      const neg = Object.keys(m).filter(k => m[k] < -0.01);
+      if (neg.length) warnings.push(`Issuer có Amount sau đối ứng âm: ${neg.slice(0, 4).join(', ')}.`);
     }
     nChecks++; {
       const neg = data.portfolio.filter(r => Number(r.Amount) < 0);
