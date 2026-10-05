@@ -60,6 +60,9 @@ body{-webkit-font-smoothing:antialiased}
 .rating-chart{padding-top:30px!important}
 .chart-legend{display:flex;gap:16px;font-size:11px;color:var(--muted);margin:2px 8px 0}.chart-legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 .kpi .note{font-size:11px;color:var(--muted);margin-top:5px;font-weight:600}.kpi.primary .note{color:#e3cbd1}
+/* hàng BBB bôi vàng (ngưỡng đầu tư) */
+.table-scroll tbody tr.hl-bbb td{background:#f7e4ae!important;color:#3a2a05;font-weight:800;border-top:1px solid #c89a45;border-bottom:1px solid #c89a45}
+.table-scroll tbody tr.hl-bbb td:first-child{box-shadow:inset 4px 0 0 var(--gold)}
 /* điều hướng, khóa */
 .nav button{transition:background-color var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
 .nav button:focus-visible,.btn:focus-visible,.tools input:focus-visible,.tools select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -255,10 +258,13 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   }
 
   function renderKPIs() {
+    const bbbRow = activeData.ratingStructure.find(r => String(r.Rating).toUpperCase() === 'BBB');
     const k = mapByKey(activeData.kpi);
+    const bbbAfter = bbbRow && bbbRow.CumulativeAfter != null ? bbbRow.CumulativeAfter : k['kpi.bbbPlus'];
+    const bbbBefore = bbbRow && bbbRow.CumulativeBefore != null ? bbbRow.CumulativeBefore : k['kpi.bbbPlus'];
     const items = [
       ['Bond Outstanding', n0(k['kpi.totalOutstanding']), 'tỷ VND', true],
-      ['Từ BBB trở lên', pct0(k['kpi.bbbPlus']), '', false, k['kpi.bbbPlusAfterCpty'] != null ? `Sau đối ứng ${pct0(k['kpi.bbbPlusAfterCpty'])}` : ''],
+      ['Từ BBB trở lên (sau điều chỉnh rating)', pct0(bbbAfter), '', false, `Trước điều chỉnh rating ${pct0(bbbBefore)}`],
       ['Thay đổi Rating', n0(k['kpi.ratingChangeCount']), 'dòng', false],
       ['Rating mới / xóa', n0(k['kpi.newRatingCount']), 'issuer', false],
       ['Đổi ngày Review', n0(k['kpi.reviewChangeCount']), 'issuer', false]
@@ -296,7 +302,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   }
 
   function renderStructure() {
-    $('#rating-structure-body').innerHTML = activeData.ratingStructure.map(row => `<tr><td>${text(row.Rating)}</td><td class="num">${n0(row.OutstandingBefore)}</td><td class="num">${pct0(row.CumulativeBefore)}</td><td class="num">${n0(row.OutstandingAfter)}</td><td class="num">${pct0(row.CumulativeAfter)}</td><td class="num">${pct0(row.CumulativeAfterCpty)}</td></tr>`).join('');
+    $('#rating-structure-body').innerHTML = activeData.ratingStructure.map(row => `<tr${String(row.Rating).toUpperCase() === 'BBB' ? ' class="hl-bbb"' : ''}><td>${text(row.Rating)}</td><td class="num">${n0(row.OutstandingBefore)}</td><td class="num">${pct0(row.CumulativeBefore)}</td><td class="num">${n0(row.OutstandingAfter)}</td><td class="num">${pct0(row.CumulativeAfter)}</td><td class="num">${pct0(row.CumulativeAfterCpty)}</td></tr>`).join('');
   }
 
   function renderTenor() {
@@ -429,7 +435,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     }
     nChecks++; {
       const k = mapByKey(data.kpi), bbb = data.ratingStructure.find(r => String(r.Rating).toUpperCase() === 'BBB');
-      if (bbb && k['kpi.bbbPlus'] != null && Math.abs(Number(k['kpi.bbbPlus']) - Number(bbb.CumulativeBefore)) > 0.005) warnings.push(`KPI "Từ BBB trở lên" ${pct0(k['kpi.bbbPlus'])} khác lũy kế tại BBB ${pct0(bbb.CumulativeBefore)}.`);
+      if (bbb && k['kpi.bbbPlus'] != null && Math.abs(Number(k['kpi.bbbPlus']) - Number(bbb.CumulativeAfter)) > 0.005) warnings.push(`KPI "Từ BBB trở lên" ${pct0(k['kpi.bbbPlus'])} khác lũy kế sau tại BBB ${pct0(bbb.CumulativeAfter)}.`);
       if (k['kpi.totalOutstanding'] != null && !nearly(k['kpi.totalOutstanding'], meta.totalRating, 0.5)) warnings.push('KPI Bond Outstanding khác tổng bảng Rating.');
     }
     nChecks++; {
