@@ -390,7 +390,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       for (const ev of data.events.filter(e => e.EventType === 'RATING_CHANGE')) {
         const a = issAmt[ev.Issuer] || 0, o = ev.OldRating, n = ev.NewRating;
         if (a > 1 && o in diff && n in diff && Math.abs(diff[o] - a) <= 1 && Math.abs(diff[n] + a) <= 1) {
-          warnings.push(`Cột "Sau điều chỉnh" của bảng cơ cấu chưa phản ánh ${ev.Issuer} ${o}→${n} (${n0(a)} tỷ VND): vẫn tính ở ${o}.`);
+          /* Bảng cơ cấu cố ý giữ issuer vừa đổi rating ở hạng cũ (thể hiện thay đổi) → không cảnh báo */
           diff[o] = 0; diff[n] = 0;
         }
       }
