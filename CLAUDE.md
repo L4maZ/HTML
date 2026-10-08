@@ -32,6 +32,10 @@ file HTML nào.
 7. **Font là stack, không phải một font.** Dashboard:
    `'DM Sans','Segoe UI',sans-serif`. Content console dùng font hệ thống. Số liệu luôn
    `font-variant-numeric: tabular-nums`.
+8. **Định dạng số kiểu Anh, không dùng chuẩn Việt.** Dấu thập phân là chấm, phân cách hàng
+   nghìn là phẩy: `3.44%`, `246.5 nghìn tỷ`, `6,497 nghìn tỷ`. Không bao giờ `3,44%` hay `6.497`.
+   Áp dụng cho mọi nơi: HTML, chart label, tooltip, docs, chat. JS dùng `toLocaleString('en-US')`,
+   không dùng `'vi-VN'`. (Jak chốt 8/10/2026.)
 
 ## Lưu ý
 

@@ -199,3 +199,9 @@ report cần in:
   .hl-mark{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 ```
+
+## Định dạng số
+
+Chuẩn Anh: thập phân là dấu chấm, hàng nghìn là dấu phẩy (`3.44%`, `246.5 nghìn tỷ`,
+`6,497 nghìn tỷ`). Không dùng chuẩn Việt (`3,44%`, `6.497`). Áp dụng cho text, chart label,
+tooltip, bảng. Trong JS dùng `toFixed()` hoặc `toLocaleString('en-US')`, không dùng `'vi-VN'`.

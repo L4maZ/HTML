@@ -90,9 +90,10 @@ Không phải dashboard tài chính. Xem [`content-console.md`](content-console.
 
 - FiinRatings DCM Spotlight, 7 tab, 23 chart. Nguồn tiếng Anh, 42 trang, ngày 1/10/2026. File: `fiin/`.
 - **Log — nhãn đường cong Fig 11 sai/thiếu ghi chú (Jak đã tự verify với bảng HNX, ngày thanh toán 15/9/2026):**
-  7 mốc của Fiin (3M 3,82; 1Y 3,87; 3Y 4,00; 5Y 4,12; 10Y 4,37; 15Y 4,54; 20Y 4,65) trùng cột *Spot rate liên tục* của HNX.
-  Fiin gọi 10Y 4,37% là "par yield"; HNX 10Y: spot liên tục 4,3670 · par yield 4,4267 · spot theo năm 4,4638.
-  Số giữ nguyên như báo cáo; chỉ thêm ghi chú đối chiếu vào chú thích Fig 11 (đã làm). KPI "Lợi suất par TPCP 10Y 4,37%" giữ nhãn của Fiin.
+  7 mốc của Fiin (3M 3.82; 1Y 3.87; 3Y 4.00; 5Y 4.12; 10Y 4.37; 15Y 4.54; 20Y 4.65) trùng cột *Spot rate liên tục* của HNX.
+  Fiin gọi 10Y 4.37% là "par yield"; HNX 10Y: spot liên tục 4.3670 · par yield 4.4267 · spot theo năm 4.4638.
+  Số giữ nguyên như báo cáo; chỉ thêm ghi chú đối chiếu vào chú thích Fig 11 (đã làm). KPI "Lợi suất par TPCP 10Y 4.37%" giữ nhãn của Fiin.
 - Không vẽ vì không có nhãn: Fig 17 (giá trị), 18 (2022–2025), 25–27, 30 (giá trị theo công cụ), 32, mốc 9/2025 của Fig 11.
-- Giữ nguyên số nguồn dù lệch: US1tn (Fig 06), 120–150 bps, 48,8% kế hoạch năm, SMLR 38,6% vs trần 30% (Fig 04).
+- Giữ nguyên số nguồn dù lệch: US1tn (Fig 06), 120–150 bps, 48.8% kế hoạch năm, SMLR 38.6% vs trần 30% (Fig 04).
 - Tab 8 "Tác động rủi ro thị trường" (p7): 5 khối (lãi suất/TPCP, thanh khoản, tỷ giá, TPDN, sự kiện), mỗi khối bảng số liệu Fiin kèm số trang + 1 dòng "Nhận định". Khối 1 theo ý Jak; 4 khối còn lại do Claude đề xuất, chờ Jak duyệt.
+- Số liệu trong HTML đã đổi sang chuẩn Anh (3.44%, 6,497) theo yêu cầu của Jak 8/10/2026.
