@@ -97,3 +97,4 @@ Không phải dashboard tài chính. Xem [`content-console.md`](content-console.
 - Giữ nguyên số nguồn dù lệch: US1tn (Fig 06), 120–150 bps, 48.8% kế hoạch năm, SMLR 38.6% vs trần 30% (Fig 04).
 - Tab 8 "Tác động rủi ro thị trường" (p7): 5 khối (lãi suất/TPCP, thanh khoản, tỷ giá, TPDN, sự kiện), mỗi khối bảng số liệu Fiin kèm số trang + 1 dòng "Nhận định". Khối 1 theo ý Jak; 4 khối còn lại do Claude đề xuất, chờ Jak duyệt.
 - Số liệu trong HTML đã đổi sang chuẩn Anh (3.44%, 6,497) theo yêu cầu của Jak 8/10/2026.
+- **Log — nhận định Jak (8/10/2026) về trần lợi suất KBNN:** Kho bạc Nhà nước giữ trần lợi suất đấu thầu (Fiin TR.15–16, không phải NHNN), trong khi ~48.8% kế hoạch năm còn lại dồn về 2H; Fiin nói hấp thụ cần lợi suất cao hơn. Lợi suất trúng thầu có thể chưa phản ánh mặt bằng thị trường, rủi ro biến động yield lớn nếu KBNN bỏ trần. Đã đưa vào khối 1 tab 8 (nhãn "Nhận định").
