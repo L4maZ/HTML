@@ -353,10 +353,14 @@ def build(src, outdir, sanitize=False):
 
     seen = {}
     n = 0
+    hidden_skipped = 0
     for key, code, title, r0, r1 in blocks:
         for r in range(r0, r1 + 1):
             label = clean(s2.cell(r, S2COL["label"]).value)
             if not label:
+                continue
+            if s2.row_dimensions[r].hidden:      # dong AN trong Excel (vd a) Book AFS / b) Book HTM) -> khong dua vao key
+                hidden_skipped += 1
                 continue
             base = slug(label)
             seen[key + base] = seen.get(key + base, 0) + 1
@@ -369,6 +373,8 @@ def build(src, outdir, sanitize=False):
                           for f in ("today", "dtd", "yest", "lm", "lq", "ly", "limit", "used", "light")])
             n += 1
     counts["DATA_S2"] = n
+    if hidden_skipped:
+        print("  (bo qua %d dong an trong Linked (1))" % hidden_skipped)
 
     POS_R, GRIDS_R, RATING_R = resolve_all(lk)
     psh = out.create_sheet("POS")

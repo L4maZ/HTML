@@ -164,3 +164,10 @@ Bổ sung (30/09): số chạy nhảy chỉ ở 4 thẻ KPI Highlight, một l�
 Đã ghép: vạch active trượt (sidebar + sub-tab), chuyển tab theo hướng, header bảng dính khi cuộn, thẻ KPI bấm được → nhảy tới dòng chi tiết + nháy dòng, tìm nhanh Ctrl+K / "/" , nối crosshair các chart cùng tab (chỉ khi trục X giống hệt nhau).
 Không ghép: thanh hạn mức chuyển động (KPI/cột % sử dụng), tooltip giải nghĩa chỉ số (Jak đã bỏ trước đó), dữ liệu MOCK của bản demo, vạch scroll đỏ (đã gỡ). Số chạy nhảy 4 thẻ KPI vẫn giữ (bản demo tắt đi).
 Đã chạy lại: recon 731 + TS 2,428 (0 lệch), overflow 4 độ rộng, lưu đè/export, empty state.
+
+## v13 — bỏ AFS / HTM (20/10)
+File 02 ngày 19/10: Jak ẩn 2 dòng `a) Book AFS` / `b) Book HTM` (Face Value) trong `Linked (1)` (dòng 6–7); báo cáo không dùng AFS/HTM nữa.
+- **HTML** (`BaoCao_RRTT_Bond_v13.html`, nền là bản 16/10 của Jak): dòng con AFS/HTM bị lọc ở loader và ở đầu `renderAll` (kể cả dữ liệu nhúng cũ); bỏ chữ "AFS x + HTM y" ở thẻ KPI, thẻ tổng tab ItD, ghi chú dòng điều chỉnh; bỏ kiểm tra "Face = AFS + HTM".
+- **VBA** (`tools/XuatFileKey.bas`, nền là bản v2 Jak gửi): (1) bỏ qua dòng ẩn trong `Linked (1)`, báo số dòng bỏ ở cuối; (2) **khôi phục cột `YtdPnl`** ở POS Trading (bản gửi thiếu, nên cột YtD PnL theo kỳ hạn trống); Banking đọc 12 cột như cũ.
+- `make_key.py` cũng bỏ dòng ẩn.
+- Lưu ý: dòng `a)/b)` của ItD Unrealized MtM PnL (dòng 14–15) chưa ẩn trong Excel; HTML vẫn bỏ chúng.

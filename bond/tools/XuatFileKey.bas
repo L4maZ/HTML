@@ -9,6 +9,12 @@ Option Explicit
 '  khong dat lai (de Excel tu doi vung khi o nhan dinh dich len xuong).
 '  Muon dat lai: xoa name HTML_* trong Formulas > Name Manager roi chay lai.
 '
+'  v2: cac bang trong sheet Linked duoc TU TIM theo tieu de/nhan (khong con so dong co dinh);
+'      khong tim thay hoac tong lech -> hien canh bao cuoi macro.
+'
+'  v3: dong AN trong sheet Linked (1) (vd a) Book AFS / b) Book HTM) bi BO QUA, khong dua vao key.
+'      Bang POS Trading doc du 14 cot gom YtdPnl (cot P cua sheet POS).
+'
 '  Nguyen tac toc do: moi vung nguon doc MOT lan vao mang, moi sheet dich
 '  ghi MOT lan bang mang. Khong doc/ghi tung o qua COM.
 ' ============================================================================
@@ -39,6 +45,7 @@ Private mFull As Boolean
 ' --- nguon da doc san ---
 Private gS2 As Variant
 Private gLK As Variant
+Private gWarn As String
 
 ' Doc dinh dang chu: dem so lan hoi Excel, co tran an toan
 Private gStep As String
@@ -219,12 +226,18 @@ Private Sub BufSet(ByVal c As Long, v As Variant)
 End Sub
 
 Private Sub BufFlush(sh As Worksheet)
-    Dim o() As Variant, r As Long, c As Long
+    ' SUA LOI DAO NGAY/THANG: chuoi dang dd/mm/yyyy (kem dau ' o dau) de Excel luu thanh CHU.
+    ' Neu khong, Excel theo locale My se tu doan "12/10/2026" thanh ngay 10/12/2026 (dao ngay-thang).
+    Dim o() As Variant, r As Long, c As Long, v As Variant
     If mN = 0 Then Exit Sub
     ReDim o(1 To mN, 1 To mW)
     For r = 1 To mN
         For c = 1 To mW
-            o(r, c) = mB(r, c)
+            v = mB(r, c)
+            If VarType(v) = vbString Then
+                If CStr(v) Like "##/##/####*" Then v = "'" & CStr(v)
+            End If
+            o(r, c) = v
         Next c
     Next r
     sh.Range("A2").Resize(mN, mW).Value = o
@@ -417,8 +430,10 @@ Public Sub XuatFileKey()
     Dim dest As String, t0 As Single, tRead As Single, tBody As Single, tText As Single
     Dim oCalc As Long, oEvt As Boolean, oUpd As Boolean, oAlert As Boolean
     Dim started As Boolean, msgLog As String, missLab As String
+    Dim lc As Long, ra As Long, rb As Long, rh As Long, nHid As Long
 
     t0 = Timer
+    gWarn = ""
     On Error GoTo Fail
 
     gStep = "mo cac sheet nguon"
@@ -458,8 +473,6 @@ Public Sub XuatFileKey()
     gStep = "sheet META"
     Set sh = wb.Sheets(1)
     sh.Name = "META"
-    ' Ngay ghi dang chu dd/mm/yyyy: neu de dinh dang chung, Excel doc theo locale va DAO ngay-thang khi ngay <= 12
-    sh.Columns("B").NumberFormat = "@"
     sh.Range("A1:C1").Value = Array("Key", "Value", "Ghi chu")
     Dim mk As Variant, mv As Variant
     mk = Array("schema", "asOf", "dateYest", "dateLastMonth", "dateLastQuarter", _
@@ -515,6 +528,10 @@ Public Sub XuatFileKey()
     BufNew 17, 600
     For i = 0 To 5
         For r = starts(i) + 1 To ends(i)
+            If s2.Rows(r).Hidden Then
+                If OneLine(G(gS2, r, 3)) <> "" Then nHid = nHid + 1
+                GoTo NextS2Row
+            End If
             lab = OneLine(G(gS2, r, 3))
             If lab <> "" Then
                 base = Slug(lab)
@@ -538,6 +555,7 @@ Public Sub XuatFileKey()
                     BufSet 5 + c, G(gS2, r, c)
                 Next c
             End If
+NextS2Row:
         Next r
     Next i
     If mFull Then GoTo Overflow
@@ -549,14 +567,20 @@ Public Sub XuatFileKey()
     sh.Range("A1:P1").Value = Array("KeyID", "Book", "Tenor", "Face", "FaceYest", "FaceLM", _
         "DtD", "MtD", "PV01", "Itd", "ItdYest", "ItdLM", "ItdMtD", "ItdYtD", "Daily", "YtdPnl")
     BufNew 16, 300
-    Dim a0 As Long, a1 As Long
     gStep = "POS - Trading"
-    a0 = 65: a1 = 75: Locate 14, "3.1.", 1, 3, 0, 0, a0, a1
-    DumpGrid "POS.TB.", "TB", 14, a0, a1, 14
+    If LocBlock("3.1.*", lc, ra, rb) Then
+        DumpGrid "POS.TB.", "TB", lc, ra, rb, 14
+        ChkSum "Position Trading (3.1)", lc, ra, rb, lc + 1
+    Else
+        AddWarn "Khong tim thay bang 3.1 (Position Trading) trong sheet Linked"
+    End If
     gStep = "POS - Banking"
-    a0 = 80: a1 = 90: Locate 28, "3.2.", 1, 3, 0, 0, a0, a1
-    ' Banking (cot AB..AM) khong co Daily/YtdPnl; cot ke ben la bang 6.2 YIELD nen chi doc 12 cot
-    DumpGrid "POS.BB.", "BB", 28, a0, a1, 12
+    If LocBlock("3.2.*", lc, ra, rb) Then
+        DumpGrid "POS.BB.", "BB", lc, ra, rb, 12   ' Banking khong co Daily/YtdPnl; cot ke ben la bang yield
+        ChkSum "Position Banking (3.2)", lc, ra, rb, lc + 1
+    Else
+        AddWarn "Khong tim thay bang 3.2 (Position Banking) trong sheet Linked"
+    End If
     If mFull Then GoTo Overflow
     BufFlush sh
 
@@ -567,9 +591,17 @@ Public Sub XuatFileKey()
         "DtD", "MtD", "YtD")
     BufNew 10, 300
     gStep = "CURVE - yield"
-    DumpCurve "YIELD", 41, 80, 89
+    If LocCurve("6.2.*", lc, ra, rb) Then
+        DumpCurve "YIELD", lc, ra, rb
+    Else
+        AddWarn "Khong tim thay bang 6.2 (Yield) trong sheet Linked"
+    End If
     gStep = "CURVE - repo"
-    DumpCurve "REPO", 95, 171, 178
+    If LocCurve("6.3.*", lc, ra, rb) Then
+        DumpCurve "REPO", lc, ra, rb
+    Else
+        AddWarn "Khong tim thay bang 6.3 (Repo) trong sheet Linked"
+    End If
     If mFull Then GoTo Overflow
     BufFlush sh
 
@@ -580,27 +612,49 @@ Public Sub XuatFileKey()
         "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12", "C13", "C14")
     BufNew 18, 2000
     gStep = "GRID - MIX"
-    a0 = 238: a1 = 249: Locate 147, "3.3.", 1, 3, 0, 1, a0, a1
-    DumpBlock "MIX", "3.3 Co cau theo to chuc phat hanh", 147, a0, a1, 7
+    If LocBlock("3.3.*", lc, ra, rb) Then
+        DumpBlock "MIX", "3.3 Co cau theo to chuc phat hanh", lc, ra, rb, 7
+        ChkSum "3.3 (Co cau phat hanh)", lc, ra, rb, lc + 1
+    Else
+        AddWarn "Khong tim thay bang 3.3 (Co cau phat hanh) trong sheet Linked"
+    End If
     gStep = "GRID - HOLD"
-    a0 = 274: a1 = 284: Locate 164, "3.4.", 1, 3, 0, 0, a0, a1
-    DumpBlock "HOLD", "3.4 Co cau theo thoi gian nam giu", 164, a0, a1, 5
+    If LocBlock("3.4.*", lc, ra, rb) Then
+        DumpBlock "HOLD", "3.4 Co cau theo thoi gian nam giu", lc, ra, rb, 5
+        ChkSum "3.4 (Thoi gian nam giu)", lc, ra, rb, lc + 1
+    Else
+        AddWarn "Khong tim thay bang 3.4 (Thoi gian nam giu) trong sheet Linked"
+    End If
     gStep = "GRID - PNL"
-    a0 = 253: a1 = 259: Locate 154, "3.5.", 1, 2, 0, 0, a0, a1
-    DumpBlock "PNL", "3.5 Unrealized & Realized PnL", 154, a0, a1, 4
+    If LocBlock("3.5.*", lc, ra, rb) Then
+        DumpBlock "PNL", "3.5 Unrealized & Realized PnL", lc, ra, rb, 4
+    Else
+        AddWarn "Khong tim thay bang 3.5 (Unrealized & Realized PnL) trong sheet Linked"
+    End If
     gStep = "GRID - CAPITAL"
-    a0 = 262: a1 = 270: Locate 158, "3.8.", 1, 2, 0, 0, a0, a1
-    DumpBlock "CAPITAL", "3.8 Muc do su dung von", 158, a0, a1, 6
+    If LocBlock("3.8.*", lc, ra, rb) Then
+        DumpBlock "CAPITAL", "3.8 Muc do su dung von", lc, ra, rb, 6
+    Else
+        AddWarn "Khong tim thay bang 3.8 (Muc do su dung von) trong sheet Linked"
+    End If
     gStep = "GRID - BS"
-    a0 = 184: a1 = 189: Locate 103, "3.6.", 1, 3, 6, 0, a0, a1
-    DumpBlock "BS", "3.6 Ghi nhan PnL theo lop bang can doi", 103, a0, a1, 14
+    If LocBlock("3.6.*", lc, ra, rb) Then
+        DumpBlock "BS", "3.6 Ghi nhan PnL theo lop bang can doi", lc, ra, rb, 14
+    Else
+        AddWarn "Khong tim thay bang 3.6 (Ghi nhan PnL) trong sheet Linked"
+    End If
     gStep = "GRID - FIONBS"
-    ' Bang 7.1 khong co tieu de so: neo theo dong "Chi tieu" (cot 169, tu dong 270), 7 dong du lieu
-    a0 = 288: a1 = 294: Locate 169, "Ch", 270, 3, 7, 0, a0, a1
-    DumpBlock "FIONBS", "7.1 FI Bond tren bang can doi", 169, a0, a1, 5
+    If LocFirst("1. fi bond*", lc, ra, rb) Then
+        DumpBlock "FIONBS", "7.1 FI Bond tren bang can doi", lc, ra, rb, 5
+    Else
+        AddWarn "Khong tim thay bang 7.1 (FI Bond tren bang can doi) trong sheet Linked"
+    End If
     gStep = "GRID - PNLSCEN"
-    a0 = 230: a1 = 234: Locate 140, "3.7.", 1, 3, 0, 0, a0, a1
-    DumpBlock "PNLSCEN", "3.7 Phan tich kich ban PnL", 140, a0, a1, 7
+    If LocBlock("3.7.*", lc, ra, rb) Then
+        DumpBlock "PNLSCEN", "3.7 Phan tich kich ban PnL", lc, ra, rb, 7
+    Else
+        AddWarn "Khong tim thay bang 3.7 (Phan tich kich ban PnL) trong sheet Linked"
+    End If
     If mFull Then GoTo Overflow
     BufFlush sh
 
@@ -611,20 +665,35 @@ Public Sub XuatFileKey()
         "PV01", "Itd", "YieldBps", "ItdChange")
     BufNew 10, 1200
     gStep = "SCEN - TB recent"
-    DumpScen "TB", "recent", 51, 95, 105, 92
+    If LocScen("trading book*gan day*", lc, ra, rb, rh) Then
+        DumpScen "TB", "recent", lc, ra, rb, rh
+    Else
+        AddWarn "Khong tim thay khoi kich ban TB - KB gan day trong sheet Linked"
+    End If
     gStep = "SCEN - TB var"
-    DumpScen "TB", "var", 51, 110, 120, 107
+    If LocScen("trading book*kb var*", lc, ra, rb, rh) Then
+        DumpScen "TB", "var", lc, ra, rb, rh
+    Else
+        AddWarn "Khong tim thay khoi kich ban TB - KB VaR trong sheet Linked"
+    End If
     gStep = "SCEN - BB recent"
-    DumpScen "BB", "recent", 51, 140, 150, 137
+    If LocScen("banking book*gan day*", lc, ra, rb, rh) Then
+        DumpScen "BB", "recent", lc, ra, rb, rh
+    Else
+        AddWarn "Khong tim thay khoi kich ban BB - KB gan day trong sheet Linked"
+    End If
     gStep = "SCEN - BB var"
-    DumpScen "BB", "var", 51, 125, 135, 122
+    If LocScen("banking book*kb var*", lc, ra, rb, rh) Then
+        DumpScen "BB", "var", lc, ra, rb, rh
+    Else
+        AddWarn "Khong tim thay khoi kich ban BB - KB VaR trong sheet Linked"
+    End If
     If mFull Then GoTo Overflow
     BufFlush sh
 
     ' ---------------- VIRA4 ----------------
     Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
     sh.Name = "VIRA4"
-    sh.Columns("A").NumberFormat = "@"
     sh.Range("A1:F1").Value = Array("Month", "VIRA", "Big4", "MarketMaker", "Top3", "Actual")
     Dim av As Variant
     gStep = "VIRA4 - doc VIRA scenarios"
@@ -658,29 +727,33 @@ Public Sub XuatFileKey()
     ' ---------------- RATING ----------------
     Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
     sh.Name = "RATING"
-    sh.Columns("E").NumberFormat = "@"
     sh.Range("A1:J1").Value = Array("KeyID", "Issuer", "Amount", "Rating", "ReviewDate", _
         "Pct", "CumPct", "Fitch", "Moody", "SP")
     BufNew 10, 200
     gStep = "RATING"
-    Dim iss As String, ra As Long, rb As Long
-    ' Danh sach issuer dai/ngan thay doi moi ngay: lay tu dong sau "Issuer" den dong Total
-    ra = 203: rb = 223: Locate 131, "Issuer", 150, 1, 0, 0, ra, rb
-    For r = ra To rb
-        iss = OneLine(G(gLK, r, 131))
-        If iss <> "" Then
-            If Not BufRow() Then GoTo Overflow
-            BufSet 1, "RATING." & Slug(iss)
-            BufSet 2, iss
-            For c = 1 To 8
-                If c = 3 Then
-                    BufSet 2 + c, VnSerial(G(gLK, r, 131 + c))
-                Else
-                    BufSet 2 + c, G(gLK, r, 131 + c)
-                End If
-            Next c
-        End If
-    Next r
+    Dim iss As String, rc0 As Long, rl As Long
+    If FindLbl("issuer", rh, rc0) Then
+        For r = rh + 1 To rh + 80
+            iss = OneLine(G(gLK, r, rc0))
+            If iss <> "" Then
+                If Not BufRow() Then GoTo Overflow
+                BufSet 1, "RATING." & Slug(iss)
+                BufSet 2, iss
+                For c = 1 To 8
+                    If c = 3 Then
+                        BufSet 2 + c, VnSerial(G(gLK, r, rc0 + c))
+                    Else
+                        BufSet 2 + c, G(gLK, r, rc0 + c)
+                    End If
+                Next c
+                rl = r
+                If LCase$(iss) = "total" Then Exit For
+            End If
+        Next r
+        ChkSum "Xep hang FI Bond", rc0, rh + 1, rl, rc0 + 1
+    Else
+        AddWarn "Khong tim thay bang Issuer (Xep hang FI Bond) trong sheet Linked"
+    End If
     If mFull Then GoTo Overflow
     BufFlush sh
     tBody = Timer - t0
@@ -747,7 +820,6 @@ Public Sub XuatFileKey()
     Application.StatusBar = "File key 5/6 - chuoi bieu do..."
     Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
     sh.Name = "TS"
-    sh.Columns("C").NumberFormat = "@"
     sh.Range("A1:D1").Value = Array("Series", "Field", "Date", "Value")
     gStep = "TS - chuoi bieu do"
     DumpTS cd
@@ -766,10 +838,15 @@ Public Sub XuatFileKey()
     msgLog = "Doc nguon " & Format$(tRead, "0.0") & "s" & _
           "  |  bang so " & Format$(tBody - tRead, "0.0") & "s" & _
           "  |  nhan dinh " & Format$(tText, "0.0") & "s (" & mFmtCalls & " luot doc dinh dang)" & _
-          "  |  tong " & Format$(Timer - t0, "0.0") & "s"
+          "  |  tong " & Format$(Timer - t0, "0.0") & "s" & _
+          IIf(nHid > 0, vbCrLf & "Da bo qua " & nHid & " dong an trong " & SH_S2 & " (khong dua vao key).", "")
 
     RestoreApp started, oCalc, oEvt, oUpd, oAlert
     MsgBox "Da xuat file key:" & vbCrLf & dest & vbCrLf & vbCrLf & msgLog, vbInformation
+    If gWarn <> "" Then
+        MsgBox "CANH BAO khi doc sheet Linked. File key van duoc xuat nhung can kiem tra:" & vbCrLf & vbCrLf & gWarn & vbCrLf & vbCrLf & _
+               "Bang thieu / lech se hien trong muc 'Cau truc file' cua HTML.", vbExclamation
+    End If
     Exit Sub
 
 Overflow:
@@ -812,40 +889,172 @@ Private Sub RestoreApp(ByVal started As Boolean, ByVal oCalc As Long, _
     On Error GoTo 0
 End Sub
 
-' ======================= cac ham do khoi (doc tu mang) =======================
+' ================= TU DINH VI BANG THEO TIEU DE (khong dung so dong co dinh) =================
+' Moi bang trong sheet Linked duoc tim theo tieu de (vd "3.1.") hoac theo nhan; vung du lieu suy ra tu do.
+' Bang bi day xuong, them dong, danh sach dai them thi macro van doc dung.
+' Khong tim thay bang, hoac tong cac dong khac dong Tong -> hien CANH BAO o cuoi macro (khong xuat am tham).
 
-' ---------------------------------------------------------------------
-' Do vi tri khoi theo NHAN (tieu de bang), khong theo toa do co dinh.
-' File 02 hay bi chen/xoa dong trong sheet Linked (29/09 lech 1 dong) ->
-' toa do cu nuot dong tieu de vao du lieu va cat mat dong Tong / issuer cuoi.
-'   fixedN > 0 : lay dung fixedN dong tu dong dau
-'   fixedN = 0 : lay den dong Tong/Total dau tien, cong them extra dong
-' Khong thay tieu de -> giu nguyen r0/r1 truyen vao (toa do cu).
-' ---------------------------------------------------------------------
-Private Function IsTotalLabel(ByVal t As String) As Boolean
-    IsTotalLabel = (Left$(t, 5) = "Total") Or (Left$(t, 4) = "T" & ChrW(7893) & "ng")
+Private Sub AddWarn(ByVal s As String)
+    If gWarn <> "" Then gWarn = gWarn & vbCrLf
+    gWarn = gWarn & "- " & s
+End Sub
+
+' Nhan o (Linked) da bo dau, chu thuong
+Private Function Lbl(ByVal r As Long, ByVal c As Long) As String
+    Lbl = Fold(OneLine(G(gLK, r, c)))
 End Function
 
-Private Sub Locate(ByVal c As Long, ByVal prefix As String, ByVal lo As Long, _
-                   ByVal off As Long, ByVal fixedN As Long, ByVal extra As Long, _
-                   ByRef r0 As Long, ByRef r1 As Long)
-    Dim t As Long, r As Long
-    For t = lo To LK_ROWS
-        If Left$(OneLine(G(gLK, t, c)), Len(prefix)) = prefix Then Exit For
-    Next t
-    If t > LK_ROWS Then Exit Sub
-    r0 = t + off
-    If fixedN > 0 Then
-        r1 = r0 + fixedN - 1
-        Exit Sub
+' Tim o dau tien (quet theo hang) co nhan khop mau pat (toan tu Like, da bo dau + chu thuong)
+Private Function FindLbl(ByVal pat As String, ByRef fr As Long, ByRef fc As Long) As Boolean
+    Dim r As Long, c As Long, f1 As String
+    f1 = Left$(pat, 1)
+    For r = 1 To LK_ROWS
+        For c = 1 To LK_COLS
+            If VarType(gLK(r, c)) = vbString Then
+                If LCase$(Left$(gLK(r, c), 1)) = f1 Then
+                    If Fold(OneLine(gLK(r, c))) Like pat Then
+                        fr = r
+                        fc = c
+                        FindLbl = True
+                        Exit Function
+                    End If
+                End If
+            End If
+        Next c
+    Next r
+End Function
+
+' Dong tieu de / dong trong / o ngay (so serial) ngay duoi tieu de bang
+Private Function IsHdrRow(ByVal r As Long, ByVal c As Long) As Boolean
+    Dim v As Variant, t As String
+    v = G(gLK, r, c)
+    If VarType(v) = vbDouble Then
+        If v > 20000 And v < 80000 Then
+            IsHdrRow = True
+            Exit Function
+        End If
     End If
-    For r = r0 To r0 + 60
-        If IsTotalLabel(OneLine(G(gLK, r, c))) Then
-            r1 = r + extra
-            Exit Sub
+    t = Lbl(r, c)
+    If t = "" Then
+        IsHdrRow = True
+    ElseIf t = "tenor" Or t = "time holding" Or t = "label" Then
+        IsHdrRow = True
+    ElseIf Left$(t, 8) = "cau phan" Or Left$(t, 8) = "kich ban" Or Left$(t, 8) = "chi tieu" Then
+        IsHdrRow = True
+    End If
+End Function
+
+' Dong cuoi cua bang: dung truoc 2 dong trong lien tiep trong cot nhan
+Private Function BlockEnd(ByVal r0 As Long, ByVal c0 As Long) As Long
+    Dim r As Long, blanks As Long, last As Long
+    last = r0
+    For r = r0 To LK_ROWS
+        If Lbl(r, c0) = "" Then
+            blanks = blanks + 1
+            If blanks >= 2 Then Exit For
+        Else
+            blanks = 0
+            last = r
         End If
     Next r
+    BlockEnd = last
+End Function
+
+' Bang co tieu de: c0 = cot nhan, r0..r1 = vung du lieu (da bo qua tieu de, gom ca dong Tong)
+Private Function LocBlock(ByVal titlePat As String, ByRef c0 As Long, ByRef r0 As Long, ByRef r1 As Long) As Boolean
+    Dim tr As Long, r As Long
+    If Not FindLbl(titlePat, tr, c0) Then Exit Function
+    r = tr + 1
+    Do While r <= tr + 12
+        If Not IsHdrRow(r, c0) Then Exit Do
+        r = r + 1
+    Loop
+    r0 = r
+    r1 = BlockEnd(r0, c0)
+    LocBlock = (r1 >= r0)
+End Function
+
+' Bang bat dau bang mot nhan du lieu (khong co tieu de so), vd "1. FI Bond"
+Private Function LocFirst(ByVal pat As String, ByRef c0 As Long, ByRef r0 As Long, ByRef r1 As Long) As Boolean
+    If Not FindLbl(pat, r0, c0) Then Exit Function
+    r1 = BlockEnd(r0, c0)
+    LocFirst = True
+End Function
+
+Private Function IsTenor(ByVal t As String) As Boolean
+    Dim s As String
+    s = t
+    If Left$(s, 2) = "<=" Then s = Mid$(s, 3)
+    If Len(s) < 2 Then Exit Function
+    If InStr("wmy", Right$(s, 1)) = 0 Then Exit Function
+    IsTenor = IsNumeric(Left$(s, Len(s) - 1))
+End Function
+
+' Duong cong (yield / repo): cac dong ky han lien tiep sau tieu de
+Private Function LocCurve(ByVal titlePat As String, ByRef c0 As Long, ByRef r0 As Long, ByRef r1 As Long) As Boolean
+    Dim tr As Long, r As Long
+    If Not FindLbl(titlePat, tr, c0) Then Exit Function
+    r0 = 0
+    For r = tr + 1 To tr + 10
+        If IsTenor(Lbl(r, c0)) Then
+            r0 = r
+            Exit For
+        End If
+    Next r
+    If r0 = 0 Then Exit Function
+    r1 = r0
+    Do While IsTenor(Lbl(r1 + 1, c0))
+        r1 = r1 + 1
+    Loop
+    LocCurve = True
+End Function
+
+' Khoi kich ban (VaR / ngay gan day): hdr = dong tieu de, r0 = dong "1Y", r1 = dong "Total"
+Private Function LocScen(ByVal titlePat As String, ByRef c0 As Long, ByRef r0 As Long, ByRef r1 As Long, ByRef hdr As Long) As Boolean
+    Dim r As Long
+    If Not FindLbl(titlePat, hdr, c0) Then Exit Function
+    r0 = 0
+    r1 = 0
+    For r = hdr + 1 To hdr + 8
+        If Lbl(r, c0) = "1y" Then
+            r0 = r
+            Exit For
+        End If
+    Next r
+    If r0 = 0 Then Exit Function
+    For r = r0 To r0 + 14
+        If Lbl(r, c0) = "total" Then
+            r1 = r
+            Exit For
+        End If
+    Next r
+    LocScen = (r1 > 0)
+End Function
+
+' Doi chieu: tong cac dong ky han phai bang dong Tong (neu lech -> nghi doc sai vung)
+Private Sub ChkSum(ByVal nm As String, ByVal c0 As Long, ByVal r0 As Long, ByVal r1 As Long, ByVal vc As Long)
+    Dim r As Long, s As Double, tot As Double, hasT As Boolean, t As String, v As Variant
+    For r = r0 To r1
+        t = Lbl(r, c0)
+        v = G(gLK, r, vc)
+        If Left$(t, 4) = "tong" Or t = "total" Then
+            If VarType(v) = vbDouble Then
+                tot = v
+                hasT = True
+            End If
+            Exit For
+        ElseIf VarType(v) = vbDouble Then
+            s = s + v
+        End If
+    Next r
+    If Not hasT Then
+        AddWarn nm & ": khong co dong Tong/Total"
+    ElseIf Abs(s - tot) > 0.5 Then
+        AddWarn nm & ": tong cac dong (" & Format$(s, "#,##0.00") & ") khac dong Tong (" & Format$(tot, "#,##0.00") & ")"
+    End If
 End Sub
+
+' ======================= cac ham do khoi (doc tu mang) =======================
 
 Private Sub DumpGrid(ByVal pfx As String, ByVal book As String, ByVal c0 As Long, _
                      ByVal r0 As Long, ByVal r1 As Long, ByVal w As Long)
@@ -1015,3 +1224,4 @@ Private Sub DumpTS(cd As Worksheet)
         End If
     Next c
 End Sub
+
