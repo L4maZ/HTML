@@ -171,3 +171,7 @@ File 02 ngày 19/10: Jak ẩn 2 dòng `a) Book AFS` / `b) Book HTM` (Face Value)
 - **VBA** (`tools/XuatFileKey.bas`, nền là bản v2 Jak gửi): (1) bỏ qua dòng ẩn trong `Linked (1)`, báo số dòng bỏ ở cuối; (2) **khôi phục cột `YtdPnl`** ở POS Trading (bản gửi thiếu, nên cột YtD PnL theo kỳ hạn trống); Banking đọc 12 cột như cũ.
 - `make_key.py` cũng bỏ dòng ẩn.
 - Lưu ý: dòng `a)/b)` của ItD Unrealized MtM PnL (dòng 14–15) chưa ẩn trong Excel; HTML vẫn bỏ chúng.
+
+## Việc chờ làm (Jak yêu cầu log lại, chưa thực hiện) — 22/10
+1. **Thêm rules cảnh báo khi upload key nếu thiếu hoặc sai dữ liệu** (mục "Kiểm tra trước khi gửi"). Gợi ý đã đề xuất: cảnh báo khi cả một cột trống 100% (vd `YtdPnl` trống toàn bộ như lần 21/10), key sinh từ macro cũ (thiếu cột so với schema), tổng các dòng khác dòng Tổng, ngày trục không đơn điệu.
+2. **Đổi phần "Trạng thái các tenor · lợi suất danh mục FI Bond & CD" thành line chart theo thời gian (overtime).**
