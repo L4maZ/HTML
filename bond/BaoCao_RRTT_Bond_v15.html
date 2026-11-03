@@ -1947,12 +1947,12 @@ window.TS = {"tdpv01":{"date":[],"<5Y":[],"5Y":[],"7Y":[],"10Y":[],"15Y":[],">20
     let h = '<thead><tr>' + th('Chỉ tiêu', 1) + th('A. Nội bảng<br>đã thanh toán') + th('B. Ngoại bảng<br>đã valid, chưa TT') + th('C. Ngoài BS<br>chưa valid') + th('Tổng (A+B+C)') + '</tr></thead><tbody>';
     o.rows.forEach(r => { h += '<tr>' + tdL(r.k) + tdR(n0(r.on)) + tdR(r.off ? n0(r.off) : '—', r.off ? '' : 'color:' + K.faint) + tdR(r.out ? n0(r.out) : '—', r.out ? '' : 'color:' + K.faint) + tdR(n0(r.total), 'font-weight:500;') + '</tr>'; });
     [[o.gross, ''], [o.offset, 'color:' + K.red + ';'], [o.net, totalRow]].forEach(([r, st]) => {
-      h += '<tr style="' + (st === totalRow ? totalRow : 'border-top:1px solid ' + K.grid + ';') + '">' + tdL('<span style="font-weight:600;' + st + '">' + esc(r.k) + '</span>')
+      h += '<tr style="' + (st === totalRow ? totalRow : 'border-top:1px solid ' + K.grid + ';') + '">' + tdL('<span style="font-weight:600;' + st + '">' + esc(r === o.net ? 'Tổng FI Bond & CD (=1 + 2 + 3 - 4)' : r.k) + '</span>')
         + tdR(n0(r.on), st) + tdR(r.off ? n0(r.off) : '—', st) + tdR(r.out ? n0(r.out) : '—', st) + tdR(n0(r.total), 'font-weight:600;' + st) + '</tr>';
     });
     if (o.kgs) {   /* v15: KGS Bond tính riêng, nằm ngoài breakdown và ngoài các dòng tổng ở trên */
       const k = o.kgs;
-      h += '<tr style="border-top:2px solid ' + K.grid + ';">' + tdL('<span style="font-weight:600;">KGS Bond</span><div style="font-size:11.5px;color:' + K.muted + ';margin-top:2px;">Tính riêng, không nằm trong breakdown trên</div>')
+      h += '<tr style="border-top:2px solid ' + K.grid + ';">' + tdL('<span style="font-weight:600;">KGS Bond</span>')
         + tdR(n0(k.on), 'font-weight:600;') + tdR(k.off ? n0(k.off) : '—', k.off ? '' : 'color:' + K.faint) + tdR(k.out ? n0(k.out) : '—', k.out ? '' : 'color:' + K.faint) + tdR(n0(k.total), 'font-weight:600;') + '</tr>';
     }
     setTbl('tblFiOnBS', h + '</tbody>');
