@@ -175,3 +175,8 @@ File 02 ngày 19/10: Jak ẩn 2 dòng `a) Book AFS` / `b) Book HTM` (Face Value)
 ## Việc chờ làm (Jak yêu cầu log lại, chưa thực hiện) — 22/10
 1. **Thêm rules cảnh báo khi upload key nếu thiếu hoặc sai dữ liệu** (mục "Kiểm tra trước khi gửi"). Gợi ý đã đề xuất: cảnh báo khi cả một cột trống 100% (vd `YtdPnl` trống toàn bộ như lần 21/10), key sinh từ macro cũ (thiếu cột so với schema), tổng các dòng khác dòng Tổng, ngày trục không đơn điệu.
 2. **Đổi phần "Trạng thái các tenor · lợi suất danh mục FI Bond & CD" thành line chart theo thời gian (overtime).**
+
+## v15 — FI Bond & CD: tách KGS Bond (03/11)
+- Thẻ KPI "Face Value · FI Bond + CD + KGS Bond": số tổng bên trái (Face Value S2), bên phải tách FI Bond & CD (= Tổng sau giảm trừ đối ứng) và KGS Bond.
+- Bảng "Trạng thái trên bảng cân đối & điều chỉnh đối ứng": dòng KGS Bond (trước là ITB) không còn nằm trong breakdown, thành 1 dòng riêng cuối bảng. Loader nhận cả nhãn `KGS` lẫn `ITB` (key cũ).
+- Key 02/11: `Cơ cấu đầu tư FIBond` ngày hiện tại = 0 (hôm trước 80.1%) → thẻ "Cơ cấu rating ≥ BBB" hiện 0.0%, 250% hạn mức. Nghi file Rating chưa cập nhật trong File 02, cần kiểm tra bên Excel.
