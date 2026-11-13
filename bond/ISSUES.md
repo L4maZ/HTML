@@ -184,6 +184,6 @@ File 02 ngày 19/10: Jak ẩn 2 dòng `a) Book AFS` / `b) Book HTM` (Face Value)
 ## v16 — tinh gọn tab Quản trị dữ liệu (13/11)
 Chỉ sửa tab Quản trị dữ liệu (nền: file Jak gửi 13/11).
 - Bố cục 50 | 50: trái = Nạp dữ liệu, Xuất bản, Kiểm tra trước khi gửi, Trạng thái dữ liệu; phải = Ảnh nhận định, Cách làm ảnh nhận định (3 bước + Copy prompt + Copy ảnh mẫu + ảnh mẫu), Ghi chú chỉ tiêu.
-- Bỏ nút "Lưu đè". Hai nút: "Xuất bản gửi ĐVKD" (tên file `Báo cáo rủi ro thị trường Desk trái phiếu ddmmyyyy.html` theo ngày báo cáo) và "Xuất bản gửi đi (nội bộ)"; cả hai tự lưu bản nội bộ vào file đang mở (lần đầu trong phiên hỏi chọn file).
+- Hai nút: "Xuất bản gửi ĐVKD" (chỉ tải bản gửi, tên `Báo cáo rủi ro thị trường Desk trái phiếu ddmmyyyy.html`) và "Lưu đè file trong tool" (ghi bản nội bộ vào chính file đang mở, không tải thêm).
 - Bỏ Nhật ký nạp file, Môi trường (ẩn, code vẫn chạy). Prompt viết lại theo ảnh mẫu.
 - File lưu từ bản cũ tự dựng lại bố cục mới (dấu hiệu `#rrttV2`).

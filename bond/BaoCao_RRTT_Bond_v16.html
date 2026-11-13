@@ -3282,14 +3282,13 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
       '<div style="' + CARD + '"><div style="' + HEAD + '">3 · Xuất bản</div><div style="' + BODY + '">' +
         '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
           '<button type="button" id="rrttSendDV" style="' + BTNP + '">Xuất bản gửi ĐVKD</button>' +
-          '<button type="button" id="rrttExport" style="' + BTN + '">Xuất bản gửi đi (nội bộ)</button>' +
+          '<button type="button" id="rrttExport" style="' + BTN + '">Lưu đè file trong tool</button>' +
           '<button type="button" id="rrttEditBtn" style="font-family:inherit;font-size:13px;font-weight:600;border:1px solid #7B2D3B;background:#fdfcfa;color:#7B2D3B;border-radius:9px;padding:10px 18px;cursor:pointer;">Sửa báo cáo</button>' +
         '</div>' +
         editBarHTML() +
         '<div style="font-size:12.5px;color:#6b665e;margin-top:10px;line-height:1.65;">' +
           '<b>Gửi ĐVKD</b>: bỏ tab Quản trị, tên file <i>Báo cáo rủi ro thị trường Desk trái phiếu ddmmyyyy</i> theo ngày báo cáo.<br>' +
-          '<b>Nội bộ</b>: giữ tab Quản trị để kỳ sau dùng tiếp.<br>' +
-          'Mỗi lần xuất, file đang mở được <b>tự lưu</b> lại (lần đầu trình duyệt hỏi: chọn đúng file đang mở).</div>' +
+          '<b>Lưu đè file trong tool</b>: ghi dữ liệu, ảnh, ghi chú vào chính file đang mở để kỳ sau dùng tiếp (lần đầu trình duyệt hỏi: chọn đúng file đang mở).</div>' +
       '</div></div>' +
       '<div style="' + CARD + '"><div style="' + HEAD + '">Kiểm tra trước khi gửi</div>' +
         '<div style="' + BODY + '" id="rrttChecks"></div></div>' +
@@ -3599,12 +3598,16 @@ window.addEventListener('resize',()=>window.RRTT&&window.RRTT.resizeAll());</scr
     }
     function doExport(recipient) {
       if (!hasData()) { setStatus('err', 'Chưa có dữ liệu để xuất bản', 'Nạp file key trước.'); return; }
-      var inner = buildExport();
-      var out = recipient ? buildExport('recipient') : inner;
-      downloadExport(out);
+      if (recipient) {   /* gửi ĐVKD: chỉ tải bản gửi, không ghi đè file đang mở */
+        var dv = buildExport('recipient'); downloadExport(dv);
+        setStatus('ok', 'Đã tải ' + dv.name, 'Bản gửi ĐVKD · ngày báo cáo ' + String(window.RPT.asOf));
+        return;
+      }
+      var inner = buildExport();   /* "Lưu đè file trong tool": ghi bản nội bộ vào chính file đang mở */
       autoSave(inner).then(function (r) {
-        setStatus(r.ok ? 'ok' : 'warn', 'Đã tải ' + out.name,
-          r.ok ? 'Đã tự lưu vào ' + r.name + ' · ' + new Date().toLocaleTimeString('en-GB') : r.why + ' — file đang mở chưa được cập nhật.');
+        if (r.ok) { setStatus('ok', 'Đã lưu đè vào ' + r.name, 'Ngày báo cáo ' + String(window.RPT.asOf) + ' · ' + new Date().toLocaleTimeString('en-GB')); return; }
+        if (!window.showSaveFilePicker) { downloadExport(inner); setStatus('warn', 'Trình duyệt không hỗ trợ lưu đè', 'Đã tải bản mới về: ' + inner.name + '. Dùng bản đó thay file cũ.'); return; }
+        setStatus('warn', 'Chưa lưu đè', r.why);
       });
     }
     $('#rrttExport').addEventListener('click', function () { doExport(false); });
