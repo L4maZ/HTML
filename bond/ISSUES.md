@@ -187,3 +187,9 @@ Chỉ sửa tab Quản trị dữ liệu (nền: file Jak gửi 13/11).
 - Hai nút: "Xuất bản gửi ĐVKD" (chỉ tải bản gửi, tên `Báo cáo rủi ro thị trường Desk trái phiếu ddmmyyyy.html`) và "Lưu đè file trong tool" (ghi bản nội bộ vào chính file đang mở, không tải thêm).
 - Bỏ Nhật ký nạp file, Môi trường (ẩn, code vẫn chạy). Prompt viết lại theo ảnh mẫu.
 - File lưu từ bản cũ tự dựng lại bố cục mới (dấu hiệu `#rrttV2`).
+
+## v17 — bảng Issuer × Tenor ở trang FI Bond & CD (23/11)
+- Chart data có thêm 2 bảng: "Face value theo Issuer, Rating x Tenor" (EG:EV) và "Yield bình quân theo Issuer, Rating × Tenor" (EX:FJ).
+- **VBA v4** (`tools/XuatFileKey.bas`) + `make_key.py`: sheet key mới `ISSTENOR` (KeyID, Table FV|YIELD, Rating, Issuer, Tenor, Value; dòng tổng = Issuer `TOTAL`). Sửa lỗi: chuỗi TS "QLHS GOVBOND" trước đây nuốt luôn cột của 2 bảng mới (Rating, Issuer, 3M… và Total bị nhân đôi) → giờ dừng trước tiêu đề bảng ma trận.
+- **HTML** (`BaoCao_RRTT_Bond_v17.html`, nền file Jak 20/11): bỏ chart rating bên phải bảng "Cơ cấu theo tổ chức phát hành & xếp hạng nội bộ", thay bằng 2 bảng xếp chồng; chỉ hiện các kỳ hạn có số; ô 0 hiện "—". Key cũ chưa có ISSTENOR thì vẫn vẽ chart rating như trước.
+- Dữ liệu 20/11: ô Yield HDBV · 3M trong Excel là chữ "s" → HTML để trống và báo trong mục Kiểm tra.

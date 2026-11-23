@@ -15,6 +15,9 @@ Option Explicit
 '  v3: dong AN trong sheet Linked (1) (vd a) Book AFS / b) Book HTM) bi BO QUA, khong dua vao key.
 '      Bang POS Trading doc du 14 cot gom YtdPnl (cot P cua sheet POS).
 '
+'  v4: them sheet ISSTENOR tu 2 bang Issuer x Tenor trong Chart data (Face value / Yield binh quan);
+'      chuoi TS dung lai truoc 2 bang nay (truoc day chuoi QLHS GOVBOND nuot nham cot cua chung).
+'
 '  Nguyen tac toc do: moi vung nguon doc MOT lan vao mang, moi sheet dich
 '  ghi MOT lan bang mang. Khong doc/ghi tung o qua COM.
 ' ============================================================================
@@ -826,6 +829,16 @@ NextS2Row:
     If mFull Then GoTo Overflow
     BufFlush sh
 
+    ' ---------------- ISSTENOR (Issuer x Tenor) ----------------
+    Set sh = wb.Sheets.Add(After:=wb.Sheets(wb.Sheets.Count))
+    sh.Name = "ISSTENOR"
+    sh.Range("A1:F1").Value = Array("KeyID", "Table", "Rating", "Issuer", "Tenor", "Value")
+    gStep = "ISSTENOR - bang Issuer x Tenor"
+    BufNew 6, 5000
+    DumpIssTenor cd
+    If mFull Then GoTo Overflow
+    BufFlush sh
+
     ' ---------------- luu ----------------
     Application.StatusBar = "File key 6/6 - dang luu..."
     dest = ThisWorkbook.Path & Application.PathSeparator & _
@@ -1201,7 +1214,7 @@ Private Sub DumpTS(cd As Worksheet)
             axisCol = c + 1
             endCol = maxc
             For i = c + 2 To maxc - 1
-                If heads(i) <> "" And isAxis(i + 1) Then
+                If heads(i) <> "" And (isAxis(i + 1) Or MatKind(heads(i)) <> "") Then
                     endCol = i - 1
                     Exit For
                 End If
@@ -1225,3 +1238,54 @@ Private Sub DumpTS(cd As Worksheet)
     Next c
 End Sub
 
+' Bang ma tran trong Chart data: o hang 1 la tieu de ("Face value theo Issuer..." / "Yield binh quan theo Issuer..."),
+' cot ke ben la Rating, Issuer, roi cac ky han den het tieu de. Dong cuoi (khong co Rating/Issuer) la dong tong -> "TOTAL".
+Private Function MatKind(ByVal h As String) As String
+    Dim f As String
+    f = Fold(OneLine(h))
+    If f Like "face value theo issuer*" Then
+        MatKind = "FV"
+    ElseIf f Like "yield binh quan theo issuer*" Then
+        MatKind = "YIELD"
+    Else
+        MatKind = ""
+    End If
+End Function
+
+Private Sub DumpIssTenor(cd As Worksheet)
+    Dim maxc As Long, maxr As Long, src As Variant, c As Long, k As String
+    Dim c1 As Long, cc As Long, r As Long, rat As String, iss As String
+    maxc = cd.Cells(1, cd.Columns.Count).End(xlToLeft).Column
+    maxr = cd.UsedRange.Row + cd.UsedRange.Rows.Count - 1
+    If maxc < 4 Or maxr < 2 Then Exit Sub
+    src = cd.Range(cd.Cells(1, 1), cd.Cells(maxr, maxc)).Value2
+    For c = 1 To maxc - 3
+        k = MatKind(Txt(src(1, c)))
+        If k <> "" Then
+            c1 = c + 3
+            Do While c1 <= maxc
+                If OneLine(src(1, c1)) = "" Then Exit Do
+                c1 = c1 + 1
+            Loop
+            c1 = c1 - 1
+            For r = 2 To maxr
+                rat = OneLine(src(r, c + 1))
+                iss = OneLine(src(r, c + 2))
+                If rat = "" And iss = "" Then
+                    If Txt(src(r, c + 3)) = "" Then Exit For
+                    iss = "TOTAL"
+                End If
+                For cc = c + 3 To c1
+                    If Not BufRow() Then Exit Sub
+                    BufSet 1, "ISS." & k & "." & Slug(iss) & "." & Slug(OneLine(src(1, cc)))
+                    BufSet 2, k
+                    BufSet 3, rat
+                    BufSet 4, iss
+                    BufSet 5, OneLine(src(1, cc))
+                    BufSet 6, src(r, cc)
+                Next cc
+                If iss = "TOTAL" Then Exit For
+            Next r
+        End If
+    Next c
+End Sub

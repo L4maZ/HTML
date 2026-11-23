@@ -117,6 +117,12 @@ def slug(text):
     return parts[0].lower() + "".join(p.capitalize() for p in parts[1:])
 
 
+def fold(text):
+    s = unicodedata.normalize("NFD", str(text)).replace("đ", "d").replace("Đ", "D")
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    return re.sub(r"\s+", " ", s).strip().lower()
+
+
 def vndate(v):
     return v.strftime("%d/%m/%Y") if isinstance(v, (date, datetime)) else v
 
@@ -522,6 +528,9 @@ def build(src, outdir, sanitize=False):
     xsh = out.create_sheet("TS")
     xsh.append(["Series", "Field", "Date", "Value"])
     counts["TS"] = dump_ts(cd, xsh)
+    ish = out.create_sheet("ISSTENOR")
+    ish.append(["KeyID", "Table", "Rating", "Issuer", "Tenor", "Value"])
+    counts["ISSTENOR"] = dump_isstenor(cd, ish)
 
     style(meta, [18, 46, 40], 2)
     style(dsh, [30, 10, 7, 24, 6, 18, 32, 5] + [13] * 9)
@@ -557,6 +566,52 @@ def build(src, outdir, sanitize=False):
 AXIS = ("Date", "Ngày", "Tháng", "Kỳ hạn", "STT")
 
 
+MAT_TITLES = (("face value theo issuer", "FV"), ("yield binh quan theo issuer", "YIELD"))
+
+
+def is_mat_title(h):
+    return mat_kind(h) is not None
+
+
+def mat_kind(h):
+    f = fold(h or "")
+    for pre, kind in MAT_TITLES:
+        if f.startswith(pre):
+            return kind
+    return None
+
+
+def dump_isstenor(cd, sh):
+    """Bang Issuer x Tenor trong Chart data (FV va Yield binh quan) -> dang dai: Table, Rating, Issuer, Tenor, Value."""
+    maxc = cd.max_column
+    heads = [clean(cd.cell(1, c).value) for c in range(1, maxc + 1)]
+    n = 0
+    for i, h in enumerate(heads):
+        kind = mat_kind(h)
+        if not kind:
+            continue
+        c_rat, c_iss = i + 2, i + 3                    # cot 1-based
+        tenors = []
+        c = i + 4
+        while c <= maxc and heads[c - 1]:
+            tenors.append((c, heads[c - 1]))
+            c += 1
+        r = 2
+        while r <= cd.max_row:
+            rat, iss = clean(cd.cell(r, c_rat).value), clean(cd.cell(r, c_iss).value)
+            if not rat and not iss:
+                if cd.cell(r, tenors[0][0]).value in (None, "") if tenors else True:
+                    break
+                iss = "TOTAL"
+            for cc, tn in tenors:
+                sh.append(["ISS.%s.%s.%s" % (kind, slug(iss), slug(tn)), kind, rat, iss, tn, cd.cell(r, cc).value])
+                n += 1
+            if iss == "TOTAL":
+                break
+            r += 1
+    return n
+
+
 def dump_ts(cd, sh):
     maxc = cd.max_column
     heads = [clean(cd.cell(1, c).value) for c in range(1, maxc + 1)]
@@ -565,10 +620,12 @@ def dump_ts(cd, sh):
     for i, h in enumerate(heads):
         if h and i + 1 < len(heads) and heads[i + 1] in AXIS:
             starts.append(i)
+    # bang ma tran (Issuer x Tenor) khong phai chuoi thoi gian: lam ranh gioi de chuoi truoc khong nuot cot cua no
+    stops = sorted(set(starts) | {i for i, h in enumerate(heads) if is_mat_title(h)})
 
     n = 0
     for k, i in enumerate(starts):
-        end = starts[k + 1] if k + 1 < len(starts) else len(heads)
+        end = min([s for s in stops if s > i] + [len(heads)])
         title, axis_col = heads[i], i + 2
         fields = [(c + 1, heads[c]) for c in range(i + 2, end) if heads[c]]
         series = slug(title)
